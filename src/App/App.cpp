@@ -28,8 +28,6 @@ void App::Initialize(HWND window, int width, int height)
 {
     FLog::Get().Log("Initializing...");
 
-    InitParticles();
-
     m_deviceResources->SetWindow(window, width, height);
 
     m_deviceResources->CreateDeviceResources();
@@ -54,6 +52,20 @@ void App::InitParticles()
         m_particles[i].Position.y = static_cast<float>(dist(generator));
         m_particles[i].Position.z = static_cast<float>(dist(generator));
     }
+
+    m_particleBuffer.Reset();
+
+    D3D11_BUFFER_DESC buffer;
+    buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    buffer.Usage = D3D11_USAGE_DEFAULT;
+    buffer.ByteWidth = m_numParticles * sizeof(Particle);
+    buffer.CPUAccessFlags = 0;
+    buffer.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA init;
+    init.pSysMem = &m_particles[0];
+
+    DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
 }
 
 #pragma region Frame Update
@@ -79,6 +91,12 @@ void App::Update(DX::StepTimer const& timer)
     for(auto& particle : m_particles)
     {
         particle.Position.z -= 40.0f * dt;
+    }
+
+    if(m_ui->GetNumParticles() != m_numParticles)
+    {
+        m_numParticles = m_ui->GetNumParticles();
+        InitParticles();
     }
 
     auto context = m_deviceResources->GetD3DDeviceContext();
@@ -227,17 +245,7 @@ void App::CreateDeviceDependentResources()
     m_gsBuffer = std::make_unique<ConstantBuffer<Buffers::GS>>(device);
     m_psBuffer = std::make_unique<ConstantBuffer<Buffers::PS>>(device);
 
-    D3D11_BUFFER_DESC buffer;
-    buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    buffer.Usage = D3D11_USAGE_DEFAULT;
-    buffer.ByteWidth = m_numParticles * sizeof(Particle);
-    buffer.CPUAccessFlags = 0;
-    buffer.MiscFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA init;
-    init.pSysMem = &m_particles[0];
-
-    DX::ThrowIfFailed(device->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
+    InitParticles();
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.

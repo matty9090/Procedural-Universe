@@ -46,7 +46,7 @@ void UI::Render()
 
     ImGui::Text("FPS: %i", (int)FPS);
     ImGui::Separator();
-    ImGui::SliderInt("Particles", &Particles, 0, 10000);
+    ImGui::SliderInt("Particles", &Particles, 1, 80000);
 
     ImGui::End();
 

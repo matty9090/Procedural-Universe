@@ -13,6 +13,8 @@ public:
     void Update(float dt);
     void Reset();
 
+    int GetNumParticles() const { return Particles; }
+
 private:
     int Frames = 0;
     float FPSUpdate = 0.5f;
