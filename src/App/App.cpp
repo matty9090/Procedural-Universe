@@ -5,9 +5,14 @@
 #include "App/AppCore.hpp"
 #include "App/App.hpp"
 
+#include "Core/Except.hpp"
+
+#include "Render/Shader.hpp"
 #include "Services/Log.hpp"
 
 #include "SimpleMath.h"
+
+#include <random>
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -23,6 +28,8 @@ void App::Initialize(HWND window, int width, int height)
 {
     FLog::Get().Log("Initializing...");
 
+    InitParticles();
+
     m_deviceResources->SetWindow(window, width, height);
 
     m_deviceResources->CreateDeviceResources();
@@ -32,6 +39,21 @@ void App::Initialize(HWND window, int width, int height)
     CreateWindowSizeDependentResources();
 
     FLog::Get().Log("Initialized");
+}
+
+void App::InitParticles()
+{
+    std::default_random_engine generator;
+    std::uniform_real_distribution<double> dist(-500.0f, 500.0);
+
+    m_particles.resize(m_numParticles);
+
+    for(unsigned int i = 0; i < m_numParticles; ++i)
+    {
+        m_particles[i].Position.x = static_cast<float>(dist(generator));
+        m_particles[i].Position.y = static_cast<float>(dist(generator));
+        m_particles[i].Position.z = static_cast<float>(dist(generator));
+    }
 }
 
 #pragma region Frame Update
@@ -49,9 +71,18 @@ void App::Tick()
 // Updates the world.
 void App::Update(DX::StepTimer const& timer)
 {
-    float elapsedTime = float(timer.GetElapsedSeconds());
+    float dt = float(timer.GetElapsedSeconds());
 
-    m_ui->Update(elapsedTime);
+    m_camera.Update(dt);
+    m_ui->Update(dt);
+
+    for(auto& particle : m_particles)
+    {
+        particle.Position.z -= 40.0f * dt;
+    }
+
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    context->UpdateSubresource(m_particleBuffer.Get(), 0, NULL, &m_particles[0], 0, 0);
 }
 #pragma endregion
 
@@ -67,7 +98,27 @@ void App::Render()
 
     Clear();
 
+    auto context = m_deviceResources->GetD3DDeviceContext();
+
     m_deviceResources->PIXBeginEvent(L"Render");
+
+    unsigned int offset = 0;
+    unsigned int stride = sizeof(Particle);
+
+    context->IASetInputLayout(m_inputLayout.Get());
+    context->IASetVertexBuffers(0, 1, m_particleBuffer.GetAddressOf(), &stride, &offset);
+    context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+    
+    DirectX::SimpleMath::Matrix view = m_camera.GetViewMatrix();
+    DirectX::SimpleMath::Matrix proj = m_camera.GetProjectionMatrix();
+
+    m_gsBuffer->SetData(context, Buffers::GS { view * proj, view.Invert() });
+    m_psBuffer->SetData(context, Buffers::PS { DirectX::Colors::White });
+
+    context->GSSetConstantBuffers(0, 1, m_gsBuffer->GetBuffer());
+    context->PSSetConstantBuffers(0, 1, m_psBuffer->GetBuffer());
+
+    context->Draw(m_numParticles, 0);
 
     m_ui->Render();
 
@@ -153,12 +204,49 @@ void App::CreateDeviceDependentResources()
     auto context = m_deviceResources->GetD3DDeviceContext();
 
     m_ui = std::make_unique<UI>(context, m_deviceResources->GetWindow());
+
+    ID3DBlob* VertexCode;
+
+    bool bVertex = LoadVertexShader(device, L"shaders/PassThruGS.vsh", m_vertexShader.ReleaseAndGetAddressOf(), &VertexCode);
+    bool bGeometry = LoadGeometryShader(device, L"shaders/DrawParticle.gsh", m_geometryShader.ReleaseAndGetAddressOf());
+    bool bPixel = LoadPixelShader(device, L"shaders/PlainColour.psh", m_pixelShader.ReleaseAndGetAddressOf());
+
+    if(!(bVertex && bGeometry && bPixel))
+        throw std::exception("Failed to load shader(s)");
+
+    D3D11_INPUT_ELEMENT_DESC Layout = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+    
+    DX::ThrowIfFailed(
+        device->CreateInputLayout(&Layout, 1, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf())
+    );
+
+    context->VSSetShader(m_vertexShader.Get(), 0, 0);
+    context->GSSetShader(m_geometryShader.Get(), 0, 0);
+    context->PSSetShader(m_pixelShader.Get(), 0, 0);
+
+    m_gsBuffer = std::make_unique<ConstantBuffer<Buffers::GS>>(device);
+    m_psBuffer = std::make_unique<ConstantBuffer<Buffers::PS>>(device);
+
+    D3D11_BUFFER_DESC buffer;
+    buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    buffer.Usage = D3D11_USAGE_DEFAULT;
+    buffer.ByteWidth = m_numParticles * sizeof(Particle);
+    buffer.CPUAccessFlags = 0;
+    buffer.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA init;
+    init.pSysMem = &m_particles[0];
+
+    DX::ThrowIfFailed(device->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
 void App::CreateWindowSizeDependentResources()
 {
-    
+    int width, height;
+    GetDefaultSize(width, height);
+
+    m_camera = Camera(width, height);
 }
 
 void App::OnDeviceLost()

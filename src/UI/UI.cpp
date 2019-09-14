@@ -62,8 +62,7 @@ void UI::Update(float dt)
     if(FPSTimer < 0.0f)
     {
         FPS = static_cast<float>(Frames) / FPSUpdate;
-        Frames = 0;
-        FPSTimer = FPSUpdate;
+        Frames = 0, FPSTimer = FPSUpdate;
     }
 }
 

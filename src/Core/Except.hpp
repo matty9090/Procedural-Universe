@@ -1,21 +1,10 @@
+#pragma once
+
 #include <exception>
 #include <stdexcept>
 #include <string>
 #include <stdio.h>
-
-class file_not_found : public std::exception
-{
-public:
-    file_not_found(std::string f) : file(f) {}
-
-    virtual const char* what() const override
-    {
-        return (std::string("File not found: ") + file).c_str();
-    }
-
-private:
-    std::string file;
-};
+#include <winerror.h>
 
 namespace DX
 {

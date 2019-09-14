@@ -1,0 +1,20 @@
+cbuffer cb0
+{
+    float4 Colour;
+};
+
+struct PS_Input
+{
+	float4 Position : SV_Position;
+};
+
+struct PS_Output
+{
+	float4 Colour : SV_Target;
+};
+
+void main(in PS_Input i, out PS_Output o) 
+{
+	o.Colour.rgb = Colour;
+	o.Colour.a = 1.0f;
+}
