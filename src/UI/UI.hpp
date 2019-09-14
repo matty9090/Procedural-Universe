@@ -14,5 +14,9 @@ public:
     void Reset();
 
 private:
-    
+    int Frames = 0;
+    float FPSUpdate = 0.5f;
+    float FPS = 0.0f, FPSTimer = FPSUpdate;
+
+    int Particles = 1000;
 };

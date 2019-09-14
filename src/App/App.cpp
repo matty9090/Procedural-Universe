@@ -9,8 +9,6 @@
 
 #include "SimpleMath.h"
 
-extern void ExitGame();
-
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 

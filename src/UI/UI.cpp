@@ -13,6 +13,10 @@ UI::UI(ID3D11DeviceContext* context, HWND hwnd)
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
+
+    io.IniFilename = nullptr;
+    io.LogFilename = nullptr;
+
     ImGui::StyleColorsDark();
 
     ImGui_ImplWin32_Init(hwnd);
@@ -35,26 +39,14 @@ void UI::Render()
     ImGuiIO& io = ImGui::GetIO();
 
     ImGui::SetNextWindowPos(ImVec2(0, 0));
-    ImGui::SetNextWindowSize(io.DisplaySize);
+    ImGui::SetNextWindowSize(ImVec2(260, io.DisplaySize.y));
 
-    ImGui::Begin("Content", nullptr,
-        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove |
-        ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoSavedSettings |
-        ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_MenuBar);
+    ImGui::Begin("Tools", nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+                                   ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
 
-    if (ImGui::BeginMenuBar())
-    {
-        if (ImGui::BeginMenu("File"))
-        {
-            if (ImGui::MenuItem("Open..")) { /* Do stuff */ }
-            if (ImGui::MenuItem("Save")) { /* Do stuff */ }
-            if (ImGui::MenuItem("Close")) { PostQuitMessage(0); }
-
-            ImGui::EndMenu();
-        }
-
-        ImGui::EndMenuBar();
-    }
+    ImGui::Text("FPS: %i", (int)FPS);
+    ImGui::Separator();
+    ImGui::SliderInt("Particles", &Particles, 0, 10000);
 
     ImGui::End();
 
@@ -64,7 +56,15 @@ void UI::Render()
 
 void UI::Update(float dt)
 {
+    ++Frames;
+    FPSTimer -= dt;
 
+    if(FPSTimer < 0.0f)
+    {
+        FPS = static_cast<float>(Frames) / FPSUpdate;
+        Frames = 0;
+        FPSTimer = FPSUpdate;
+    }
 }
 
 void UI::Reset()
