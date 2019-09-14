@@ -1,2 +1,2 @@
 # NBody Simulator
- N-Body Simulator
+N-Body Simulator

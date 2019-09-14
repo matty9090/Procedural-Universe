@@ -1,0 +1,23 @@
+version: 0.0.{build}
+image: Visual Studio 2019
+
+branches:
+   only:
+     - master
+
+environment:
+  matrix:
+    - GENERATOR: "Visual Studio 16 2019"
+      CONFIG: Debug
+
+    - GENERATOR: "Visual Studio 16 2019"
+      CONFIG: Release
+
+build_script:
+  - cmd: git submodule update --init --recursive
+  - cmd: cmake -G "%GENERATOR%" %FLAGS% -BBuild -DINSTALL_GTEST=0 -DBUILD_GMOCK=0 -DENABLE_TESTING=1 -Dgtest_force_shared_crt=1 .
+  - cmd: cmake --build build --config "%CONFIG%"
+
+test_script:
+  - cmd: cd Build
+  - ctest -VV -C "%CONFIG%"
