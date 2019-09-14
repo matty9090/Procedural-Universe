@@ -49,5 +49,5 @@ if (ENABLE_TESTING)
 
     target_link_libraries(nbody_tests gtest gtest_main nbody_lib)
 
-    add_test(nbody_tests UnitTests)
+    add_test(UnitTests nbody_tests)
 endif ()
