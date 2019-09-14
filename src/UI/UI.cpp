@@ -48,6 +48,17 @@ void UI::Render()
     ImGui::Separator();
     ImGui::SliderInt("Particles", &Particles, 1, 80000);
 
+    if(ImGui::Button("Brute Force"))
+        SimType = ENBodySim::BruteForce;
+
+    ImGui::SameLine();
+
+    if(ImGui::Button("Barnes-Hut"))
+        SimType = ENBodySim::BarnesHut;
+
+    if(ImGui::Button(Paused ? "Play" : "Pause"))
+        Paused = !Paused;
+
     ImGui::End();
 
     ImGui::Render();

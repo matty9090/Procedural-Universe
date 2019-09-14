@@ -28,6 +28,8 @@ void App::Initialize(HWND window, int width, int height)
 {
     FLog::Get().Log("Initializing...");
 
+    m_sim = CreateNBodySim(m_particles, m_simType);
+
     m_deviceResources->SetWindow(window, width, height);
 
     m_deviceResources->CreateDeviceResources();
@@ -88,16 +90,24 @@ void App::Update(DX::StepTimer const& timer)
     m_camera.Update(dt);
     m_ui->Update(dt);
 
-    for(auto& particle : m_particles)
-    {
-        particle.Position.z -= 40.0f * dt;
-    }
+    if(!m_isPaused)
+        m_sim->Update(dt);
 
     if(m_ui->GetNumParticles() != m_numParticles)
     {
         m_numParticles = m_ui->GetNumParticles();
         InitParticles();
     }
+
+    if(m_ui->GetSimType() != m_simType)
+    {
+        m_simType = m_ui->GetSimType();
+        m_sim.reset();
+        m_sim = CreateNBodySim(m_particles, m_simType);
+    }
+
+    if(m_ui->IsPaused() != m_isPaused)
+        m_isPaused = m_ui->IsPaused();
 
     auto context = m_deviceResources->GetD3DDeviceContext();
     context->UpdateSubresource(m_particleBuffer.Get(), 0, NULL, &m_particles[0], 0, 0);

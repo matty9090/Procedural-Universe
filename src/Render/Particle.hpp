@@ -6,8 +6,8 @@
 struct Particle
 {
     DirectX::SimpleMath::Vector3 Position;
-    // DirectX::SimpleMath::Vector3 Velocity;
-    // DirectX::SimpleMath::Vector3 Acceleration;
+    DirectX::SimpleMath::Vector3 Velocity;
+    DirectX::SimpleMath::Vector3 Acceleration;
     
-    // double Mass;
+    double Mass;
 };

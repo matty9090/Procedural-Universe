@@ -8,6 +8,7 @@
 #include "App/StepTimer.hpp"
 
 #include "UI/UI.hpp"
+#include "Sim/INBodySim.hpp"
 
 #include "Render/Camera.hpp"
 #include "Render/Particle.hpp"
@@ -15,7 +16,6 @@
 
 #include <d3d11.h>
 #include <SimpleMath.h>
-
 
 class UI;
 
@@ -88,4 +88,8 @@ private:
 
     std::vector<Particle>                           m_particles;
     unsigned int                                    m_numParticles = 10000;
+
+    std::unique_ptr<INBodySim>                      m_sim;
+    ENBodySim                                       m_simType = ENBodySim::BruteForce;
+    bool                                            m_isPaused = false;
 };
