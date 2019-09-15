@@ -74,6 +74,7 @@ private:
     Camera                                          m_camera;
 
     std::unique_ptr<DX::DeviceResources>            m_deviceResources;
+    std::unique_ptr<DirectX::Mouse>                 m_mouse;
     DX::StepTimer                                   m_timer;
     std::unique_ptr<UI>                             m_ui;
 

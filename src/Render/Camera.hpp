@@ -103,6 +103,8 @@ class Camera
     private:
         size_t m_width, m_height;
         float m_pitch, m_yaw;
+        float m_initialLength = 1000.0f;
+        float m_length = m_initialLength;
 
         DirectX::SimpleMath::Matrix m_view, m_proj;
         DirectX::SimpleMath::Vector3 m_cameraPos;

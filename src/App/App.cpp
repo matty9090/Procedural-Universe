@@ -30,6 +30,9 @@ void App::Initialize(HWND window, int width, int height)
 
     m_sim = CreateNBodySim(m_particles, m_simType);
 
+    m_mouse = std::make_unique<DirectX::Mouse>();
+    m_mouse->SetWindow(window);
+
     m_deviceResources->SetWindow(window, width, height);
 
     m_deviceResources->CreateDeviceResources();
@@ -91,6 +94,9 @@ void App::Update(DX::StepTimer const& timer)
 {
     float dt = float(timer.GetElapsedSeconds());
 
+    auto mouse_state = m_mouse->GetState();
+
+    m_camera.Events(m_mouse.get(), mouse_state, dt);
     m_camera.Update(dt);
     m_ui->Update(dt);
 
