@@ -46,7 +46,8 @@ void UI::Render()
 
     ImGui::Text("FPS: %i", (int)FPS);
     ImGui::Separator();
-    ImGui::SliderInt("Particles", &Particles, 1, 80000);
+    ImGui::SliderInt("Particles", &Particles, 1, 600);
+    ImGui::SliderFloat("Sim Speed", &SimSpeed, 0.1f, 20.0f);
 
     if(ImGui::Button("Brute Force"))
         SimType = ENBodySim::BruteForce;

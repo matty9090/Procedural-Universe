@@ -16,6 +16,7 @@ public:
     void Reset();
 
     bool IsPaused() const { return Paused; }
+    float GetSimSpeed() const { return SimSpeed; }
     int GetNumParticles() const { return Particles; }
     ENBodySim GetSimType() const { return SimType; }
 
@@ -25,6 +26,7 @@ private:
     float FPS = 0.0f, FPSTimer = FPSUpdate;
 
     bool Paused = false;
-    int Particles = 1000;
+    float SimSpeed = 1.0f;
+    int Particles = 100;
     ENBodySim SimType = ENBodySim::BruteForce;
 };

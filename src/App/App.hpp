@@ -87,9 +87,10 @@ private:
     std::unique_ptr<ConstantBuffer<Buffers::PS>>    m_psBuffer;
 
     std::vector<Particle>                           m_particles;
-    unsigned int                                    m_numParticles = 10000;
+    unsigned int                                    m_numParticles = 100;
 
     std::unique_ptr<INBodySim>                      m_sim;
     ENBodySim                                       m_simType = ENBodySim::BruteForce;
     bool                                            m_isPaused = false;
+    float                                           m_simSpeed = 1.0f;
 };

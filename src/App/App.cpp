@@ -45,6 +45,7 @@ void App::InitParticles()
 {
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist(-500.0f, 500.0);
+    std::uniform_real_distribution<double> dist_mass(0.1f, 10.0f);
 
     m_particles.resize(m_numParticles);
 
@@ -53,6 +54,9 @@ void App::InitParticles()
         m_particles[i].Position.x = static_cast<float>(dist(generator));
         m_particles[i].Position.y = static_cast<float>(dist(generator));
         m_particles[i].Position.z = static_cast<float>(dist(generator));
+        m_particles[i].Mass = dist_mass(generator);
+        m_particles[i].Velocity = Vec3d();
+        m_particles[i].Forces = Vec3d();
     }
 
     m_particleBuffer.Reset();
@@ -91,7 +95,7 @@ void App::Update(DX::StepTimer const& timer)
     m_ui->Update(dt);
 
     if(!m_isPaused)
-        m_sim->Update(dt);
+        m_sim->Update(dt * m_simSpeed);
 
     if(m_ui->GetNumParticles() != m_numParticles)
     {
@@ -108,6 +112,9 @@ void App::Update(DX::StepTimer const& timer)
 
     if(m_ui->IsPaused() != m_isPaused)
         m_isPaused = m_ui->IsPaused();
+
+    if(m_ui->GetSimSpeed() != m_simSpeed)
+        m_simSpeed = m_ui->GetSimSpeed();
 
     auto context = m_deviceResources->GetD3DDeviceContext();
     context->UpdateSubresource(m_particleBuffer.Get(), 0, NULL, &m_particles[0], 0, 0);

@@ -3,11 +3,13 @@
 #include <d3d11.h>
 #include <SimpleMath.h>
 
+#include "Core/Vec3.hpp"
+
 struct Particle
 {
     DirectX::SimpleMath::Vector3 Position;
-    DirectX::SimpleMath::Vector3 Velocity;
-    DirectX::SimpleMath::Vector3 Acceleration;
+    Vec3d Velocity;
+    Vec3d Forces;
     
     double Mass;
 };
