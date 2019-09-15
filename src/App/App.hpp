@@ -65,6 +65,7 @@ private:
 
     void Update(DX::StepTimer const& timer);
     void Render();
+    void CheckParticleSelected(DirectX::Mouse::State& ms);
 
     void Clear();
 
@@ -89,6 +90,7 @@ private:
 
     std::vector<Particle>                           m_particles;
     unsigned int                                    m_numParticles = 100;
+    Particle*                                       m_selectedParticle = nullptr;
 
     std::unique_ptr<INBodySim>                      m_sim;
     ENBodySim                                       m_simType = ENBodySim::BruteForce;

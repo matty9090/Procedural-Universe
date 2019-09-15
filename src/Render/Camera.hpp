@@ -45,20 +45,6 @@ class Camera
         void Move(DirectX::SimpleMath::Vector3 v) { m_cameraPos += v; }
 
         /**
-         * @brief Rotate the camera
-         * 
-         * @param r 
-         */
-        void Rotate(DirectX::SimpleMath::Vector3 r) { m_yaw += r.y; m_pitch += r.z; }
-
-        /**
-         * @brief Set the rotation of the camera
-         * 
-         * @param r 
-         */
-        void SetRotation(DirectX::SimpleMath::Vector3 r) { m_yaw = r.y; m_pitch = r.z; }
-
-        /**
          * @brief Set the position of the camera
          * 
          * @param p 
@@ -87,11 +73,18 @@ class Camera
         DirectX::SimpleMath::Vector3 GetPosition() const { return m_cameraPos; }
 
         /**
-         * @brief Get the rotation as a quaternion
+         * @brief Get the x and y pixel coordinates for the given world point
          * 
-         * @return DirectX::SimpleMath::Quaternion 
+         * @return bool 
          */
-        DirectX::SimpleMath::Quaternion GetQuaternion() const;
+        bool PixelFromWorldPoint(DirectX::SimpleMath::Vector3 worldPt, int& x, int& y);
+
+        /**
+         * @brief Get the world coordinates of a point on the near clip plane from a screen position
+         * 
+         * @return DirectX::SimpleMath::Vector3 
+         */
+        DirectX::SimpleMath::Vector3 WorldPointFromPixel(int x, int y);
 
         /**
          * @brief Return camera position as a string
@@ -102,9 +95,9 @@ class Camera
 
     private:
         size_t m_width, m_height;
-        float m_pitch, m_yaw;
         float m_initialLength = 1000.0f;
         float m_length = m_initialLength;
+        float m_near = 1.0f, m_far = 10000.0f;
 
         DirectX::SimpleMath::Matrix m_view, m_proj;
         DirectX::SimpleMath::Vector3 m_cameraPos;

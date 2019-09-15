@@ -7,11 +7,13 @@ cbuffer cb0
 struct GS_VertIn
 {
 	float3 Position : POSITION;
+    float4 Colour : COLOR;
 };
 
 struct GS_VertOut
 {
 	float4 ViewportPosition : SV_Position;
+    float4 Colour : COLOR;
 };
 
 [maxvertexcount(4)]  
@@ -38,6 +40,7 @@ void main
         float3 worldPosition = inParticle[0].Position + mul( corner, (float3x3)InvViewMatrix );
         
 		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
+        outVert.Colour = inParticle[0].Colour;
 		outStrip.Append( outVert );
 	}
     

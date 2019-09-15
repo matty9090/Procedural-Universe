@@ -1,11 +1,7 @@
-cbuffer cb0
-{
-    float4 Colour;
-};
-
 struct PS_Input
 {
 	float4 Position : SV_Position;
+    float4 Colour : COLOR;
 };
 
 struct PS_Output
@@ -15,6 +11,6 @@ struct PS_Output
 
 void main(in PS_Input i, out PS_Output o) 
 {
-	o.Colour.rgb = Colour;
+	o.Colour.rgb = i.Colour;
 	o.Colour.a = 1.0f;
 }

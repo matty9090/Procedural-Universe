@@ -60,6 +60,13 @@ void UI::Render()
     if(ImGui::Button(Paused ? "Play" : "Pause"))
         Paused = !Paused;
 
+    if(SelectedParticle)
+    {
+        ImGui::Separator();
+        ImGui::Text("Position: (%.0f, %.0f, %.0f)", SelectedParticle->Position.x, SelectedParticle->Position.y, SelectedParticle->Position.z);
+        ImGui::Text("Velocity: (%.2f, %.2f, %.2f)", SelectedParticle->Velocity.x, SelectedParticle->Velocity.y, SelectedParticle->Velocity.z);
+    }
+
     ImGui::End();
 
     ImGui::Render();
@@ -81,4 +88,9 @@ void UI::Update(float dt)
 void UI::Reset()
 {
 
+}
+
+void UI::SetSelectedParticle(Particle* particle)
+{
+    SelectedParticle = particle;
 }

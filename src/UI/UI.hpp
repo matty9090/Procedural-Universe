@@ -19,6 +19,7 @@ public:
     float GetSimSpeed() const { return SimSpeed; }
     int GetNumParticles() const { return Particles; }
     ENBodySim GetSimType() const { return SimType; }
+    void SetSelectedParticle(Particle* particle);
 
 private:
     int Frames = 0;
@@ -28,5 +29,7 @@ private:
     bool Paused = false;
     float SimSpeed = 1.0f;
     int Particles = 100;
+
+    Particle* SelectedParticle = nullptr;
     ENBodySim SimType = ENBodySim::BruteForce;
 };

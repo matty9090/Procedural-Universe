@@ -8,6 +8,8 @@
 struct Particle
 {
     DirectX::SimpleMath::Vector3 Position;
+    DirectX::SimpleMath::Color Colour;
+
     Vec3d Velocity;
     Vec3d Forces;
     

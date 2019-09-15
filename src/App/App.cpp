@@ -50,6 +50,7 @@ void App::InitParticles()
     std::uniform_real_distribution<double> dist(-500.0f, 500.0);
     std::uniform_real_distribution<double> dist_mass(0.1f, 10.0f);
 
+    m_ui->SetSelectedParticle(nullptr);
     m_particles.resize(m_numParticles);
 
     for(unsigned int i = 0; i < m_numParticles; ++i)
@@ -60,6 +61,7 @@ void App::InitParticles()
         m_particles[i].Mass = dist_mass(generator);
         m_particles[i].Velocity = Vec3d();
         m_particles[i].Forces = Vec3d();
+        m_particles[i].Colour = DirectX::Colors::White;
     }
 
     m_particleBuffer.Reset();
@@ -94,7 +96,10 @@ void App::Update(DX::StepTimer const& timer)
 {
     float dt = float(timer.GetElapsedSeconds());
 
+
     auto mouse_state = m_mouse->GetState();
+
+    CheckParticleSelected(mouse_state);
 
     m_camera.Events(m_mouse.get(), mouse_state, dt);
     m_camera.Update(dt);
@@ -189,6 +194,40 @@ void App::Clear()
 
     m_deviceResources->PIXEndEvent();
 }
+
+void App::CheckParticleSelected(DirectX::Mouse::State& ms)
+{
+    DirectX::SimpleMath::Vector2 mouse(static_cast<float>(ms.x),
+                                       static_cast<float>(ms.y));
+
+    bool found = false;
+
+    for(auto& particle : m_particles)
+    {
+        int x, y;
+
+        if(m_camera.PixelFromWorldPoint(particle.Position, x, y))
+        {
+            DirectX::SimpleMath::Vector2 screenPos(static_cast<float>(x), static_cast<float>(y));
+
+            if(!found && DirectX::SimpleMath::Vector2::DistanceSquared(mouse, screenPos) < 100.0f)
+            {
+                particle.Colour = DirectX::Colors::Aqua;
+                found = true;
+                
+                if(ms.leftButton)
+                {
+                    m_selectedParticle = &particle;
+                    m_ui->SetSelectedParticle(m_selectedParticle);
+                }
+            }
+            else
+            {
+                particle.Colour = DirectX::Colors::White;
+            }
+        }
+    }
+}
 #pragma endregion
 
 #pragma region Message Handlers
@@ -255,10 +294,13 @@ void App::CreateDeviceDependentResources()
     if(!(bVertex && bGeometry && bPixel))
         throw std::exception("Failed to load shader(s)");
 
-    D3D11_INPUT_ELEMENT_DESC Layout = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 };
+    D3D11_INPUT_ELEMENT_DESC Layout[] = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
     
     DX::ThrowIfFailed(
-        device->CreateInputLayout(&Layout, 1, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf())
+        device->CreateInputLayout(Layout, 2, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf())
     );
 
     context->VSSetShader(m_vertexShader.Get(), 0, 0);

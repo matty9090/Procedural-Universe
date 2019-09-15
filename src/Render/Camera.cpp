@@ -10,11 +10,9 @@ using namespace DirectX::SimpleMath;
 Camera::Camera(size_t width, size_t height)
     : m_width(width),
       m_height(height),
-      m_cameraPos(0.0f, 0.0f, -1000.0f),
-      m_yaw(0.0f),
-      m_pitch(0.0f)
+      m_cameraPos(0.0f, 0.0f, -1000.0f)
 {
-    m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f, float(width) / float(height), 1.0f, 10000.f);
+    m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f, float(width) / float(height), m_near, m_far);
 }
 
 void Camera::Update(float dt)
@@ -43,14 +41,46 @@ void Camera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, float dt)
     mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
 }
 
-DirectX::SimpleMath::Quaternion Camera::GetQuaternion() const
-{
-    return Quaternion::CreateFromYawPitchRoll(m_yaw, -m_pitch, 0.0f);
-}
-
 std::string Camera::to_string()
 {
     std::ostringstream ss;
     ss << "(" << m_cameraPos.x << ", " << m_cameraPos.y << ", " << m_cameraPos.z << ")";
     return ss.str();
+}
+
+bool Camera::PixelFromWorldPoint(Vector3 worldPt, int& x, int& y)
+{
+    Matrix viewProj = m_view * m_proj;
+    Vector3 viewportPt = Vector3::Transform(worldPt, viewProj);
+
+    if(viewportPt.z < 0)
+        return false;
+
+    viewportPt.x /= viewportPt.z;
+    viewportPt.y /= viewportPt.z;
+
+    x = static_cast<int>((viewportPt.x + 1.0f) * m_width  * 0.5f);
+    y = static_cast<int>((1.0f - viewportPt.y) * m_height * 0.5f);
+
+    return true;
+}
+
+Vector3 Camera::WorldPointFromPixel(int x, int y)
+{
+    Matrix viewProj = m_view * m_proj;
+    Vector4 Q;
+
+    Q.x = x / (m_width / 2) - 1;
+    Q.y = 1 - y / (m_height / 2);
+    Q.z = 0;
+    Q.w = m_near;
+
+    Q.x *= Q.w;
+    Q.y *= Q.w;
+    Q.z *= Q.w;
+
+    Matrix invViewProj = viewProj.Invert();
+
+    Q = Vector4::Transform(Q, invViewProj);
+    return Vector3(Q);
 }
