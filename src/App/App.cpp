@@ -136,17 +136,39 @@ void App::Update(DX::StepTimer const& timer)
 // Draws the scene.
 void App::Render()
 {
-    // Don't try to render anything before the first Update.
     if (m_timer.GetFrameCount() == 0)
-    {
         return;
-    }
+
+    m_deviceResources->PIXBeginEvent(L"Render");
 
     Clear();
 
     auto context = m_deviceResources->GetD3DDeviceContext();
+    auto sceneTarget = m_deviceResources->GetSceneRenderTargetView();
+    auto renderTarget = m_deviceResources->GetRenderTargetView();
+    auto dsv = m_deviceResources->GetDepthStencilView();
 
-    m_deviceResources->PIXBeginEvent(L"Render");
+    context->OMSetRenderTargets(1, &sceneTarget, dsv);
+    
+    RenderParticles();
+    context->GSSetShader(nullptr, 0, 0);
+
+    m_postProcess->Render(renderTarget, dsv, m_deviceResources->GetSceneShaderResourceView());
+    m_ui->Render();
+
+    m_deviceResources->PIXEndEvent();
+
+    // Show the new frame.
+    m_deviceResources->Present();
+}
+
+void App::RenderParticles()
+{
+    auto context = m_deviceResources->GetD3DDeviceContext();
+
+    context->VSSetShader(m_vertexShader.Get(), 0, 0);
+    context->GSSetShader(m_geometryShader.Get(), 0, 0);
+    context->PSSetShader(m_pixelShader.Get(), 0, 0);
 
     unsigned int offset = 0;
     unsigned int stride = sizeof(Particle);
@@ -159,19 +181,10 @@ void App::Render()
     DirectX::SimpleMath::Matrix proj = m_camera.GetProjectionMatrix();
 
     m_gsBuffer->SetData(context, Buffers::GS { view * proj, view.Invert() });
-    m_psBuffer->SetData(context, Buffers::PS { DirectX::Colors::White });
 
     context->GSSetConstantBuffers(0, 1, m_gsBuffer->GetBuffer());
-    context->PSSetConstantBuffers(0, 1, m_psBuffer->GetBuffer());
 
     context->Draw(m_numParticles, 0);
-
-    m_ui->Render();
-
-    m_deviceResources->PIXEndEvent();
-
-    // Show the new frame.
-    m_deviceResources->Present();
 }
 
 // Helper method to clear the back buffers.
@@ -181,12 +194,12 @@ void App::Clear()
 
     // Clear the views.
     auto context = m_deviceResources->GetD3DDeviceContext();
-    auto renderTarget = m_deviceResources->GetRenderTargetView();
+
     auto depthStencil = m_deviceResources->GetDepthStencilView();
+    auto renderTarget = m_deviceResources->GetSceneRenderTargetView();
 
     context->ClearRenderTargetView(renderTarget, Colors::Black);
     context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-    context->OMSetRenderTargets(1, &renderTarget, depthStencil);
 
     // Set the viewport.
     auto viewport = m_deviceResources->GetScreenViewport();
@@ -303,12 +316,7 @@ void App::CreateDeviceDependentResources()
         device->CreateInputLayout(Layout, 2, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf())
     );
 
-    context->VSSetShader(m_vertexShader.Get(), 0, 0);
-    context->GSSetShader(m_geometryShader.Get(), 0, 0);
-    context->PSSetShader(m_pixelShader.Get(), 0, 0);
-
     m_gsBuffer = std::make_unique<ConstantBuffer<Buffers::GS>>(device);
-    m_psBuffer = std::make_unique<ConstantBuffer<Buffers::PS>>(device);
 
     InitParticles();
 }
@@ -320,6 +328,10 @@ void App::CreateWindowSizeDependentResources()
     GetDefaultSize(width, height);
 
     m_camera = Camera(width, height);
+
+    m_postProcess = std::make_unique<PostProcess>(m_deviceResources->GetD3DDevice(),
+                                                  m_deviceResources->GetD3DDeviceContext(),
+                                                  width, height);
 }
 
 void App::OnDeviceLost()

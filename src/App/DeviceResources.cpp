@@ -375,6 +375,21 @@ void DeviceResources::CreateWindowSizeDependentResources()
         static_cast<float>(backBufferWidth),
         static_cast<float>(backBufferHeight)
         );
+    
+    CreatePostProcessTargets();
+}
+
+void DeviceResources::CreatePostProcessTargets()
+{
+    UINT width = std::max<UINT>(static_cast<UINT>(m_outputSize.right - m_outputSize.left), 1u);
+    UINT height = std::max<UINT>(static_cast<UINT>(m_outputSize.bottom - m_outputSize.top), 1u);
+
+    CD3D11_TEXTURE2D_DESC desc(DXGI_FORMAT_R16G16B16A16_FLOAT, width, height,
+                          1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+    
+    ThrowIfFailed(m_d3dDevice->CreateTexture2D(&desc, nullptr, m_sceneTex.GetAddressOf()));
+    ThrowIfFailed(m_d3dDevice->CreateShaderResourceView(m_sceneTex.Get(), nullptr, m_sceneSrv.ReleaseAndGetAddressOf()));
+    ThrowIfFailed(m_d3dDevice->CreateRenderTargetView(m_sceneTex.Get(), nullptr, m_sceneRtv.ReleaseAndGetAddressOf()));
 }
 
 // This method is called when the Win32 window is created (or re-created).

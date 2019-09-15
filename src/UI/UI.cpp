@@ -46,7 +46,7 @@ void UI::Render()
 
     ImGui::Text("FPS: %i", (int)FPS);
     ImGui::Separator();
-    ImGui::SliderInt("Particles", &Particles, 1, 600);
+    ImGui::SliderInt("Particles", &Particles, 1, 2000);
     ImGui::SliderFloat("Sim Speed", &SimSpeed, 0.1f, 20.0f);
 
     if(ImGui::Button("Brute Force"))
@@ -65,6 +65,8 @@ void UI::Render()
         ImGui::Separator();
         ImGui::Text("Position: (%.0f, %.0f, %.0f)", SelectedParticle->Position.x, SelectedParticle->Position.y, SelectedParticle->Position.z);
         ImGui::Text("Velocity: (%.2f, %.2f, %.2f)", SelectedParticle->Velocity.x, SelectedParticle->Velocity.y, SelectedParticle->Velocity.z);
+        ImGui::Text("Force: (%.2f, %.2f, %.2f) N", SelectedParticle->Forces.x, SelectedParticle->Forces.y, SelectedParticle->Forces.z);
+        ImGui::Text("Mass: %f kg", SelectedParticle->Mass);
     }
 
     ImGui::End();

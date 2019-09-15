@@ -12,6 +12,7 @@
 
 #include "Render/Camera.hpp"
 #include "Render/Particle.hpp"
+#include "Render/PostProcess.hpp"
 #include "Render/ConstantBuffer.hpp"
 
 #include <d3d11.h>
@@ -25,11 +26,6 @@ namespace Buffers
     {
         DirectX::SimpleMath::Matrix ViewProj;
         DirectX::SimpleMath::Matrix InvView;
-    };
-
-    struct PS
-    {
-        DirectX::SimpleMath::Color Colour;
     };
 }
 
@@ -65,6 +61,7 @@ private:
 
     void Update(DX::StepTimer const& timer);
     void Render();
+    void RenderParticles();
     void CheckParticleSelected(DirectX::Mouse::State& ms);
 
     void Clear();
@@ -78,6 +75,7 @@ private:
     std::unique_ptr<DirectX::Mouse>                 m_mouse;
     DX::StepTimer                                   m_timer;
     std::unique_ptr<UI>                             m_ui;
+    std::unique_ptr<PostProcess>                    m_postProcess;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader>      m_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>    m_geometryShader;
@@ -86,8 +84,6 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer>            m_particleBuffer;
 
     std::unique_ptr<ConstantBuffer<Buffers::GS>>    m_gsBuffer;
-    std::unique_ptr<ConstantBuffer<Buffers::PS>>    m_psBuffer;
-
     std::vector<Particle>                           m_particles;
     unsigned int                                    m_numParticles = 100;
     Particle*                                       m_selectedParticle = nullptr;
