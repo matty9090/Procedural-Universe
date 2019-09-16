@@ -6,7 +6,6 @@
 #include "App/App.hpp"
 
 #include "Core/Event.hpp"
-#include "Core/Events.hpp"
 #include "Core/Except.hpp"
 
 #include "Render/Shader.hpp"
@@ -30,7 +29,7 @@ void App::Initialize(HWND window, int width, int height)
 {
     FLog::Get().Log("Initializing...");
 
-    m_sim = CreateNBodySim(m_particles, m_simType);
+    m_sim = CreateNBodySim(m_particles, ENBodySim::BruteForce);
 
     m_mouse = std::make_unique<DirectX::Mouse>();
     m_mouse->SetWindow(window);
@@ -50,8 +49,22 @@ void App::Initialize(HWND window, int width, int height)
 
 void App::RegisterEvents()
 {
-    EventStream::Register(EEvent::UpdateSimSpeed, [this](const EventData& data) {
+    EventStream::Register(EEvent::SimSpeedChanged, [this](const EventData& data) {
         m_simSpeed = static_cast<const FloatEventData&>(data).Value;
+    });
+
+    EventStream::Register(EEvent::NumParticlesChanged, [this](const EventData& data) {
+        m_numParticles = static_cast<const IntEventData&>(data).Value;
+        InitParticles();
+    });
+
+    EventStream::Register(EEvent::SimTypeChanged, [this](const EventData& data) {
+        m_sim.reset();
+        m_sim = CreateNBodySim(m_particles, static_cast<const SimTypeEventData&>(data).Value);
+    });
+
+    EventStream::Register(EEvent::IsPausedChanged, [this](const EventData& data) {
+        m_isPaused = static_cast<const BoolEventData&>(data).Value;
     });
 }
 
@@ -117,22 +130,6 @@ void App::Update(DX::StepTimer const& timer)
 
     if(!m_isPaused)
         m_sim->Update(dt * m_simSpeed);
-
-    if(m_ui->GetNumParticles() != m_numParticles)
-    {
-        m_numParticles = m_ui->GetNumParticles();
-        InitParticles();
-    }
-
-    if(m_ui->GetSimType() != m_simType)
-    {
-        m_simType = m_ui->GetSimType();
-        m_sim.reset();
-        m_sim = CreateNBodySim(m_particles, m_simType);
-    }
-
-    if(m_ui->IsPaused() != m_isPaused)
-        m_isPaused = m_ui->IsPaused();
 
     auto context = m_deviceResources->GetD3DDeviceContext();
     context->UpdateSubresource(m_particleBuffer.Get(), 0, NULL, &m_particles[0], 0, 0);

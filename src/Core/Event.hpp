@@ -4,10 +4,14 @@
 #include <functional>
 #include <unordered_map>
 
-struct EventData {};
+#include "Events.hpp"
 
-enum class EEvent {
-    UpdateSimSpeed
+enum class EEvent
+{
+    SimSpeedChanged,
+    NumParticlesChanged,
+    IsPausedChanged,
+    SimTypeChanged
 };
 
 typedef std::function<void(const EventData&)> EventCallback;

@@ -38,7 +38,11 @@ void Camera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, float dt)
     m_cameraPos.Normalize();
     m_cameraPos *= m_length;
 
-    mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
+    if((ms.positionMode == Mouse::MODE_ABSOLUTE && ms.x > 260)
+        || ms.positionMode == Mouse::MODE_RELATIVE)
+    {
+        mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
+    }
 }
 
 std::string Camera::to_string()
@@ -70,9 +74,9 @@ Vector3 Camera::WorldPointFromPixel(int x, int y)
     Matrix viewProj = m_view * m_proj;
     Vector4 Q;
 
-    Q.x = x / (m_width / 2) - 1;
-    Q.y = 1 - y / (m_height / 2);
-    Q.z = 0;
+    Q.x = static_cast<float>(x) / (static_cast<float>(m_width) / 2.0f) - 1.0f;
+    Q.y = 1 - static_cast<float>(y) / (static_cast<float>(m_height) / 2.0f);
+    Q.z = 0.0f;
     Q.w = m_near;
 
     Q.x *= Q.w;

@@ -15,10 +15,6 @@ public:
     void Update(float dt);
     void Reset();
 
-    bool IsPaused() const { return Paused; }
-    float GetSimSpeed() const { return SimSpeed; }
-    int GetNumParticles() const { return Particles; }
-    ENBodySim GetSimType() const { return SimType; }
     void SetSelectedParticle(Particle* particle);
 
 private:

@@ -9,6 +9,7 @@ PostProcess::PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int
     DualPostProcess  = std::make_unique<DirectX::DualPostProcess>(device);
     BasicPostProcess = std::make_unique<DirectX::BasicPostProcess>(device);
 
+    Targets[Blur]         = CreateTarget(Width, Height);
     Targets[BloomExtract] = CreateTarget(Width, Height);
     Targets[BloomTarget0] = CreateTarget(Width / 2, Height / 2);
     Targets[BloomTarget1] = CreateTarget(Width / 2, Height / 2);
@@ -19,9 +20,16 @@ PostProcess::PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int
 
 void PostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex)
 {
+    RenderPP(Targets[Blur], [&]() {
+        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::GaussianBlur_5x5);
+        BasicPostProcess->SetGaussianParameter(8.0f);
+        BasicPostProcess->SetSourceTexture(sceneTex);
+        BasicPostProcess->Process(Context);
+    });
+
     RenderPP(Targets[BloomExtract], [&]() {
         BasicPostProcess->SetEffect(DirectX::BasicPostProcess::BloomExtract);
-        BasicPostProcess->SetSourceTexture(sceneTex);
+        BasicPostProcess->SetSourceTexture(Targets[Blur].Srv.Get());
         BasicPostProcess->Process(Context);
     });
 

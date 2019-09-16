@@ -89,7 +89,6 @@ private:
     Particle*                                       m_selectedParticle = nullptr;
 
     std::unique_ptr<INBodySim>                      m_sim;
-    ENBodySim                                       m_simType = ENBodySim::BruteForce;
     bool                                            m_isPaused = false;
     float                                           m_simSpeed = 1.0f;
 };

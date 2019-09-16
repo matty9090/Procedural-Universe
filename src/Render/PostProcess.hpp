@@ -46,6 +46,7 @@ private:
 
     enum ETargets
     {
+        Blur,
         BloomExtract,
         BloomTarget0,
         BloomTarget1,

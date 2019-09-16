@@ -3,7 +3,6 @@
 #include "Services/Log.hpp"
 
 #include "Core/Event.hpp"
-#include "Core/Events.hpp"
 
 #include <imgui.h>
 #include "ImGuiDx11.h"
@@ -35,6 +34,10 @@ UI::~UI()
 
 void UI::Render()
 {
+    float newSimSpeed = SimSpeed;
+    int newParticles = Particles;
+    bool isSliderBeingChanged = false;
+
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
@@ -49,24 +52,28 @@ void UI::Render()
 
     ImGui::Text("FPS: %i", (int)FPS);
     ImGui::Separator();
-    ImGui::SliderInt("Particles", &Particles, 1, 2000);
-    ImGui::SliderFloat("Sim Speed", &SimSpeed, 0.1f, 20.0f);
-
-    FloatEventData data;
-    data.Value = SimSpeed;
-
-    EventStream::Report(EEvent::UpdateSimSpeed, data);
+    ImGui::SliderInt("Particles", &newParticles, 1, 2000);
+    ImGui::SliderFloat("Sim Speed", &newSimSpeed, 0.1f, 20.0f);
 
     if(ImGui::Button("Brute Force"))
+    {
         SimType = ENBodySim::BruteForce;
+        EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
+    }
 
     ImGui::SameLine();
 
     if(ImGui::Button("Barnes-Hut"))
+    {
         SimType = ENBodySim::BarnesHut;
+        EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
+    }
 
     if(ImGui::Button(Paused ? "Play" : "Pause"))
+    {
         Paused = !Paused;
+        EventStream::Report(EEvent::IsPausedChanged, BoolEventData(Paused));
+    }
 
     if(SelectedParticle)
     {
@@ -81,6 +88,18 @@ void UI::Render()
 
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+    if(newParticles != Particles)
+    {
+        Particles = newParticles, isSliderBeingChanged = true;
+        EventStream::Report(EEvent::NumParticlesChanged, IntEventData(Particles));
+    }
+
+    if(newSimSpeed != SimSpeed)
+    {
+        SimSpeed = newSimSpeed, isSliderBeingChanged = true;
+        EventStream::Report(EEvent::SimSpeedChanged, FloatEventData(SimSpeed));
+    }
 }
 
 void UI::Update(float dt)
