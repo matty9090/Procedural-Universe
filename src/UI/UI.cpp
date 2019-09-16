@@ -2,6 +2,9 @@
 
 #include "Services/Log.hpp"
 
+#include "Core/Event.hpp"
+#include "Core/Events.hpp"
+
 #include <imgui.h>
 #include "ImGuiDx11.h"
 #include "ImGuiWin32.h"
@@ -48,6 +51,11 @@ void UI::Render()
     ImGui::Separator();
     ImGui::SliderInt("Particles", &Particles, 1, 2000);
     ImGui::SliderFloat("Sim Speed", &SimSpeed, 0.1f, 20.0f);
+
+    FloatEventData data;
+    data.Value = SimSpeed;
+
+    EventStream::Report(EEvent::UpdateSimSpeed, data);
 
     if(ImGui::Button("Brute Force"))
         SimType = ENBodySim::BruteForce;

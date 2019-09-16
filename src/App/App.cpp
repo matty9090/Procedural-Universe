@@ -5,6 +5,8 @@
 #include "App/AppCore.hpp"
 #include "App/App.hpp"
 
+#include "Core/Event.hpp"
+#include "Core/Events.hpp"
 #include "Core/Except.hpp"
 
 #include "Render/Shader.hpp"
@@ -41,7 +43,16 @@ void App::Initialize(HWND window, int width, int height)
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
+    RegisterEvents();
+
     FLog::Get().Log("Initialized");
+}
+
+void App::RegisterEvents()
+{
+    EventStream::Register(EEvent::UpdateSimSpeed, [this](const EventData& data) {
+        m_simSpeed = static_cast<const FloatEventData&>(data).Value;
+    });
 }
 
 void App::InitParticles()
@@ -96,7 +107,6 @@ void App::Update(DX::StepTimer const& timer)
 {
     float dt = float(timer.GetElapsedSeconds());
 
-
     auto mouse_state = m_mouse->GetState();
 
     CheckParticleSelected(mouse_state);
@@ -123,9 +133,6 @@ void App::Update(DX::StepTimer const& timer)
 
     if(m_ui->IsPaused() != m_isPaused)
         m_isPaused = m_ui->IsPaused();
-
-    if(m_ui->GetSimSpeed() != m_simSpeed)
-        m_simSpeed = m_ui->GetSimSpeed();
 
     auto context = m_deviceResources->GetD3DDeviceContext();
     context->UpdateSubresource(m_particleBuffer.Get(), 0, NULL, &m_particles[0], 0, 0);

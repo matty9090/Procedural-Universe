@@ -58,12 +58,12 @@ public:
 
 private:
     void InitParticles();
+    void RegisterEvents();
 
     void Update(DX::StepTimer const& timer);
     void Render();
     void RenderParticles();
     void CheckParticleSelected(DirectX::Mouse::State& ms);
-
     void Clear();
 
     void CreateDeviceDependentResources();
