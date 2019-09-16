@@ -1,5 +1,6 @@
 #include "Render/PostProcess.hpp"
 #include "Core/Except.hpp"
+#include "Core/Event.hpp"
 
 #include <DirectXColors.h>
 
@@ -16,13 +17,25 @@ PostProcess::PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int
     Targets[BloomTarget2] = CreateTarget(Width / 2, Height / 4);
     Targets[BloomTarget3] = CreateTarget(Width, Height);
     Targets[BloomCombine] = CreateTarget(Width, Height);
+
+    EventStream::Register(EEvent::GaussianBlurChanged, [this](const EventData& data) {
+        GaussianBlur = static_cast<const FloatEventData&>(data).Value;
+    });
+
+    EventStream::Register(EEvent::BloomBaseChanged, [this](const EventData& data) {
+        BloomBase = static_cast<const FloatEventData&>(data).Value;
+    });
+
+    EventStream::Register(EEvent::BloomAmountChanged, [this](const EventData& data) {
+        BloomAmount = static_cast<const FloatEventData&>(data).Value;
+    });
 }
 
 void PostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex)
 {
     RenderPP(Targets[Blur], [&]() {
         BasicPostProcess->SetEffect(DirectX::BasicPostProcess::GaussianBlur_5x5);
-        BasicPostProcess->SetGaussianParameter(8.0f);
+        BasicPostProcess->SetGaussianParameter(GaussianBlur);
         BasicPostProcess->SetSourceTexture(sceneTex);
         BasicPostProcess->Process(Context);
     });
@@ -55,7 +68,7 @@ void PostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* ds
         DualPostProcess->SetEffect(DirectX::DualPostProcess::BloomCombine);
         DualPostProcess->SetSourceTexture(Targets[BloomTarget2].Srv.Get());
         DualPostProcess->SetSourceTexture2(sceneTex);
-        DualPostProcess->SetBloomCombineParameters(1.0f, 1.4f, 1.0f, 1.0f);
+        DualPostProcess->SetBloomCombineParameters(BloomAmount, BloomBase, 1.0f, 1.0f);
         DualPostProcess->Process(Context);
     });
 

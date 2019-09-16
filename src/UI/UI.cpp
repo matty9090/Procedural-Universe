@@ -36,7 +36,9 @@ void UI::Render()
 {
     float newSimSpeed = SimSpeed;
     int newParticles = Particles;
-    bool isSliderBeingChanged = false;
+    float newBloomBase = BloomBase;
+    float newBloomAmount = BloomAmount;
+    float newGaussianBlur = GaussianBlur;
 
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -75,6 +77,11 @@ void UI::Render()
         EventStream::Report(EEvent::IsPausedChanged, BoolEventData(Paused));
     }
 
+    ImGui::Separator();
+    ImGui::SliderFloat("Blur", &newGaussianBlur, 0.1f, 12.0f);
+    ImGui::SliderFloat("Bloom Base", &newBloomBase, 0.1f, 3.0f);
+    ImGui::SliderFloat("Bloom Amount", &newBloomAmount, 0.1f, 6.0f);
+
     if(SelectedParticle)
     {
         ImGui::Separator();
@@ -91,14 +98,32 @@ void UI::Render()
 
     if(newParticles != Particles)
     {
-        Particles = newParticles, isSliderBeingChanged = true;
+        Particles = newParticles;
         EventStream::Report(EEvent::NumParticlesChanged, IntEventData(Particles));
     }
 
     if(newSimSpeed != SimSpeed)
     {
-        SimSpeed = newSimSpeed, isSliderBeingChanged = true;
+        SimSpeed = newSimSpeed;
         EventStream::Report(EEvent::SimSpeedChanged, FloatEventData(SimSpeed));
+    }
+
+    if(newGaussianBlur != GaussianBlur)
+    {
+        GaussianBlur = newGaussianBlur;
+        EventStream::Report(EEvent::GaussianBlurChanged, FloatEventData(GaussianBlur));
+    }
+
+    if(newBloomBase != BloomBase)
+    {
+        BloomBase = newBloomBase;
+        EventStream::Report(EEvent::BloomBaseChanged, FloatEventData(BloomBase));
+    }
+
+    if(newBloomAmount != BloomAmount)
+    {
+        BloomAmount = newBloomAmount;
+        EventStream::Report(EEvent::BloomAmountChanged, FloatEventData(BloomAmount));
     }
 }
 

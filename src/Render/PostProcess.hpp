@@ -56,4 +56,7 @@ private:
     };
 
     std::map<int, Target> Targets;
+
+    float GaussianBlur = 2.0f;
+    float BloomAmount = 1.0f, BloomBase = 1.4f;
 };

@@ -22,6 +22,9 @@ private:
     float FPSUpdate = 0.5f;
     float FPS = 0.0f, FPSTimer = FPSUpdate;
 
+    float GaussianBlur = 2.0f;
+    float BloomAmount = 1.0f, BloomBase = 1.4f;
+
     bool Paused = false;
     float SimSpeed = 1.0f;
     int Particles = 100;
