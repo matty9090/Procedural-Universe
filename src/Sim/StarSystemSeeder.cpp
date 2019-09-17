@@ -36,7 +36,7 @@ void StarSystemSeeder::Seed()
         Particles[i].Position.z = static_cast<float>(dist_rad(generator) / Phys::StarSystemScale);
 
         Particles[i].Velocity.x = dist_vel(generator);
-        Particles[i].Velocity.y = 0;
+        Particles[i].Velocity.y = dist_vel(generator) / 20.0;
         Particles[i].Velocity.z = 0;
 
         Particles[i].Colour = DirectX::Colors::White;
