@@ -71,7 +71,7 @@ void UI::Render()
         EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
     }
 
-    if(ImGui::Button(Paused ? "Play" : "Pause"))
+    if(ImGui::Button(Paused ? "Play simulation" : "Pause simulation"))
     {
         Paused = !Paused;
         EventStream::Report(EEvent::IsPausedChanged, BoolEventData(Paused));
