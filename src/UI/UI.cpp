@@ -56,12 +56,17 @@ void UI::Render()
     ImGui::Separator();
     ImGui::SliderInt("Particles", &newParticles, 1, 2000);
     ImGui::SliderFloat("Sim Speed", &newSimSpeed, 0.1f, 20.0f);
+    
+    if(ImGui::Combo("Seeder", &SelectedSeeder, "Random\0Galaxy\0StarSystem\0"))
+    {
+        EventStream::Report(EEvent::SeederChanged, SeederTypeEventData(static_cast<EParticleSeeder>(SelectedSeeder)));
+    }
 
     if(ImGui::Button("Brute Force"))
     {
         SimType = ENBodySim::BruteForce;
         EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
-    }
+    }    
 
     ImGui::SameLine();
 

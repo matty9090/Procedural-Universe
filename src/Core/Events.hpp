@@ -1,7 +1,9 @@
 #pragma once
 
 #include "Event.hpp"
+
 #include "Sim/INBodySim.hpp"
+#include "Sim/IParticleSeeder.hpp"
 
 struct EventData {};
 
@@ -31,4 +33,11 @@ struct SimTypeEventData : public EventData
     ENBodySim Value;
 
     SimTypeEventData(ENBodySim value) : Value(value) {}
+};
+
+struct SeederTypeEventData : public EventData
+{
+    EParticleSeeder Value;
+
+    SeederTypeEventData(EParticleSeeder value) : Value(value) {}
 };

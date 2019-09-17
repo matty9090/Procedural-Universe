@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "Sim/INBodySim.hpp"
+#include "Sim/IParticleSeeder.hpp"
 
 class UI
 {
@@ -28,7 +29,9 @@ private:
     bool Paused = false;
     float SimSpeed = 1.0f;
     int Particles = 100;
+    int SelectedSeeder = 0;
 
     Particle* SelectedParticle = nullptr;
     ENBodySim SimType = ENBodySim::BruteForce;
+    EParticleSeeder SeederType = EParticleSeeder::Random;
 };

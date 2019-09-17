@@ -9,6 +9,7 @@
 
 #include "UI/UI.hpp"
 #include "Sim/INBodySim.hpp"
+#include "Sim/IParticleSeeder.hpp"
 
 #include "Render/Camera.hpp"
 #include "Render/Particle.hpp"
@@ -89,6 +90,7 @@ private:
     Particle*                                       m_selectedParticle = nullptr;
 
     std::unique_ptr<INBodySim>                      m_sim;
+    std::unique_ptr<IParticleSeeder>                m_seeder;
     bool                                            m_isPaused = false;
     float                                           m_simSpeed = 1.0f;
 };
