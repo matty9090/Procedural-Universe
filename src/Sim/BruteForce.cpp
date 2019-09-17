@@ -25,7 +25,7 @@ void BruteForce::Update(float dt)
                          static_cast<double>(diff.y),
                          static_cast<double>(diff.z));
 
-            double f = Phys::Gravity(a, b);
+            double f = -Phys::Gravity(a, b);
 
             b.Forces += Vec3d(f / diff.x, f / diff.y, f / diff.z);
         }
