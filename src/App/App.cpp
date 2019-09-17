@@ -215,7 +215,7 @@ void App::CheckParticleSelected(DirectX::Mouse::State& ms)
         if(m_camera.PixelFromWorldPoint(particle.Position, x, y))
         {
             DirectX::SimpleMath::Vector2 screenPos(static_cast<float>(x), static_cast<float>(y));
-
+            
             if(!found && DirectX::SimpleMath::Vector2::DistanceSquared(mouse, screenPos) < 100.0f)
             {
                 particle.Colour = DirectX::Colors::Aqua;
@@ -229,7 +229,7 @@ void App::CheckParticleSelected(DirectX::Mouse::State& ms)
             }
             else
             {
-                particle.Colour = DirectX::Colors::White;
+                particle.Colour = particle.OriginalColour;
             }
         }
     }

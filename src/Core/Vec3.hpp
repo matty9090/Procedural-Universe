@@ -20,6 +20,14 @@ template <class T = float> struct Vec3 {
 		return sqrtf(dx + dy + dz);
 	}
 
+    inline float distanceSqr(Vec3 v) {
+		T dx = (v.x - x) * (v.x - x);
+		T dy = (v.y - y) * (v.y - y);
+		T dz = (v.z - z) * (v.z - z);
+
+		return dx + dy + dz;
+	}
+
 	inline float length() {
 		return sqrtf(x * x + y * y + z * z);
 	}
@@ -51,6 +59,22 @@ template <class T = float> struct Vec3 {
 
 	inline Vec3 operator*(T v) {
 		return Vec3(x * v, y * v, z * v);
+	}
+
+    inline Vec3 operator/(T v) {
+		return Vec3(x / v, y / v, z / v);
+	}
+
+    inline void operator*=(T v) {
+		x *= v;
+        y *= v;
+        z *= v;
+	}
+
+    inline void operator/=(T v) {
+		x /= v;
+        y /= v;
+        z /= v;
 	}
 
 	std::string toString() {

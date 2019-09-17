@@ -19,24 +19,20 @@ void BruteForce::Update(float dt)
             auto& b = Particles[j];
 
             auto diff = (b.Position - a.Position);
-            diff /= diff.Length();
+            auto len = diff.Length();
 
-            Vec3d diff_d(static_cast<double>(diff.x),
-                         static_cast<double>(diff.y),
-                         static_cast<double>(diff.z));
+            double f = Phys::Gravity(a, b);
 
-            double f = -Phys::Gravity(a, b);
-
-            b.Forces += Vec3d(f / diff.x, f / diff.y, f / diff.z);
+            b.Forces += Vec3d(f * diff.x / len, f * diff.y / len, f * diff.z / len);
         }
     }
 
     for(auto& particle : Particles)
     {
-        auto a = particle.Forces * particle.Mass;
+        auto a = particle.Forces / particle.Mass;
         particle.Velocity += a * dt;
 
-        auto vel = particle.Velocity * dt;
+        auto vel = (particle.Velocity * dt) / Phys::StarSystemScale;
 
         particle.Position += Vector3(static_cast<float>(vel.x),
                                      static_cast<float>(vel.y),
