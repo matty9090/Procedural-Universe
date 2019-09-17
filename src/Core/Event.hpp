@@ -14,7 +14,8 @@ enum class EEvent
     SimTypeChanged,
     GaussianBlurChanged,
     BloomBaseChanged,
-    BloomAmountChanged
+    BloomAmountChanged,
+    SeederChanged
 };
 
 typedef std::function<void(const EventData&)> EventCallback;

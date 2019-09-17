@@ -13,8 +13,6 @@
 
 #include "SimpleMath.h"
 
-#include <random>
-
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
@@ -30,6 +28,7 @@ void App::Initialize(HWND window, int width, int height)
     FLog::Get().Log("Initializing...");
 
     m_sim = CreateNBodySim(m_particles, ENBodySim::BruteForce);
+    m_seeder = CreateParticleSeeder(m_particles, EParticleSeeder::Random);
 
     m_mouse = std::make_unique<DirectX::Mouse>();
     m_mouse->SetWindow(window);
@@ -66,28 +65,18 @@ void App::RegisterEvents()
     EventStream::Register(EEvent::IsPausedChanged, [this](const EventData& data) {
         m_isPaused = static_cast<const BoolEventData&>(data).Value;
     });
+
+    EventStream::Register(EEvent::SeederChanged, [this](const EventData& data) {
+        m_seeder = CreateParticleSeeder(m_particles, static_cast<const SeederTypeEventData&>(data).Value);
+        InitParticles();
+    });
 }
 
 void App::InitParticles()
 {
-    std::default_random_engine generator;
-    std::uniform_real_distribution<double> dist(-500.0f, 500.0);
-    std::uniform_real_distribution<double> dist_mass(0.1f, 10.0f);
-
     m_ui->SetSelectedParticle(nullptr);
     m_particles.resize(m_numParticles);
-
-    for(unsigned int i = 0; i < m_numParticles; ++i)
-    {
-        m_particles[i].Position.x = static_cast<float>(dist(generator));
-        m_particles[i].Position.y = static_cast<float>(dist(generator));
-        m_particles[i].Position.z = static_cast<float>(dist(generator));
-        m_particles[i].Mass = dist_mass(generator);
-        m_particles[i].Velocity = Vec3d();
-        m_particles[i].Forces = Vec3d();
-        m_particles[i].Colour = DirectX::Colors::White;
-    }
-
+    m_seeder->Seed();
     m_particleBuffer.Reset();
 
     D3D11_BUFFER_DESC buffer;
