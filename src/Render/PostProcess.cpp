@@ -94,6 +94,9 @@ void PostProcess::RenderPP(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* 
     Context->OMSetRenderTargets(1, &rtv, dsv);
     func();
     Context->Draw(0, 0);
+
+    ID3D11ShaderResourceView *const nullSrv[2] = { nullptr, nullptr };
+    Context->PSSetShaderResources(0, 2, nullSrv);
 }
 
 void PostProcess::SetViewport(int width, int height)
