@@ -296,8 +296,9 @@ void App::CreateDeviceDependentResources()
     bool bVertex = LoadVertexShader(device, L"shaders/PassThruGS.vsh", m_vertexShader.ReleaseAndGetAddressOf(), &VertexCode);
     bool bGeometry = LoadGeometryShader(device, L"shaders/DrawParticle.gsh", m_geometryShader.ReleaseAndGetAddressOf());
     bool bPixel = LoadPixelShader(device, L"shaders/PlainColour.psh", m_pixelShader.ReleaseAndGetAddressOf());
+    bool bCompute = LoadComputeShader(device, L"shaders/Test.csh", m_computeShader.ReleaseAndGetAddressOf());
 
-    if(!(bVertex && bGeometry && bPixel))
+    if(!(bVertex && bGeometry && bPixel && bCompute))
         throw std::exception("Failed to load shader(s)");
 
     D3D11_INPUT_ELEMENT_DESC Layout[] = {
