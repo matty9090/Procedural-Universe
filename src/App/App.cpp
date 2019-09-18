@@ -27,7 +27,6 @@ void App::Initialize(HWND window, int width, int height)
 {
     FLog::Get().Log("Initializing...");
 
-    m_sim = CreateNBodySim(m_particles, ENBodySim::BruteForce);
     m_seeder = CreateParticleSeeder(m_particles, EParticleSeeder::Random);
 
     m_mouse = std::make_unique<DirectX::Mouse>();
@@ -59,7 +58,7 @@ void App::RegisterEvents()
 
     EventStream::Register(EEvent::SimTypeChanged, [this](const EventData& data) {
         m_sim.reset();
-        m_sim = CreateNBodySim(m_particles, static_cast<const SimTypeEventData&>(data).Value);
+        m_sim = CreateNBodySim(m_deviceResources->GetD3DDeviceContext(), m_particles, static_cast<const SimTypeEventData&>(data).Value);
     });
 
     EventStream::Register(EEvent::IsPausedChanged, [this](const EventData& data) {
@@ -289,6 +288,7 @@ void App::CreateDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
     auto context = m_deviceResources->GetD3DDeviceContext();
 
+    m_sim = CreateNBodySim(context, m_particles, ENBodySim::BruteForce);
     m_ui = std::make_unique<UI>(context, m_deviceResources->GetWindow());
 
     ID3DBlob* VertexCode;
@@ -296,9 +296,8 @@ void App::CreateDeviceDependentResources()
     bool bVertex = LoadVertexShader(device, L"shaders/PassThruGS.vsh", m_vertexShader.ReleaseAndGetAddressOf(), &VertexCode);
     bool bGeometry = LoadGeometryShader(device, L"shaders/DrawParticle.gsh", m_geometryShader.ReleaseAndGetAddressOf());
     bool bPixel = LoadPixelShader(device, L"shaders/PlainColour.psh", m_pixelShader.ReleaseAndGetAddressOf());
-    bool bCompute = LoadComputeShader(device, L"shaders/Test.csh", m_computeShader.ReleaseAndGetAddressOf());
 
-    if(!(bVertex && bGeometry && bPixel && bCompute))
+    if(!(bVertex && bGeometry && bPixel))
         throw std::exception("Failed to load shader(s)");
 
     D3D11_INPUT_ELEMENT_DESC Layout[] = {

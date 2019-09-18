@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <d3d11.h>
 
 #include "Render/Particle.hpp"
 
@@ -17,4 +18,4 @@ class INBodySim
         virtual void Update(float dt) = 0;
 };
 
-std::unique_ptr<INBodySim> CreateNBodySim(std::vector<Particle>& particles, ENBodySim type);
+std::unique_ptr<INBodySim> CreateNBodySim(ID3D11DeviceContext* context, std::vector<Particle>& particles, ENBodySim type);
