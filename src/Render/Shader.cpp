@@ -161,3 +161,37 @@ bool LoadPixelShader(ID3D11Device* device, const wstring& fileName, ID3D11PixelS
 
 	return true;
 }
+
+bool LoadComputeShader(ID3D11Device* device, const std::wstring& fileName, ID3D11ComputeShader** computeShader)
+{
+	ID3DBlob* shaderBlob = nullptr;
+    ID3DBlob* errorBlob = nullptr;
+
+    HRESULT hr = D3DCompileFromFile(fileName.c_str(), 0, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                                    "CSMain", "cs_4_0",
+                                    0, 0, &shaderBlob, &errorBlob);
+
+	
+	if(FAILED(hr))
+	{
+		if(errorBlob)
+		{
+			void* errorMsg = errorBlob->GetBufferPointer();
+			FLog::Get().Log((char*)errorMsg);
+			errorBlob->Release();
+		}
+
+		if(shaderBlob)
+			shaderBlob->Release();
+		
+		return false;
+	}
+
+	if(FAILED(device->CreateComputeShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, computeShader)))
+	{
+		FLog::Get().Log("Failed to create compute shader");
+		return false;
+	}
+
+	return true;
+}
