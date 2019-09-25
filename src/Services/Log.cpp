@@ -35,6 +35,16 @@ void FLog::Log(std::string msg, ELogType logLevel)
 #endif
 }
 
+void FLog::Log(Vec3d v, ELogType logLevel)
+{
+#ifdef _DEBUG
+    std::cout << "[" << LogTypes[logLevel] << "] (" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+#else
+    if (logLevel != Verbose)
+        std::cout << "[" << LogTypes[logLevel] << "] (" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+#endif
+}
+
 void FLog::Log(DirectX::SimpleMath::Vector2 v, ELogType logLevel)
 {
 #ifdef _DEBUG

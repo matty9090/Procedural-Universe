@@ -5,10 +5,11 @@
 class BarnesHut : public INBodySim
 {
     public:
-        BarnesHut(std::vector<Particle>& particles) : Particles(particles) {}
+        BarnesHut() {}
 
+        void Init(std::vector<Particle>& particles) final {}
         void Update(float dt) final {}
 
     private:
-        std::vector<Particle>& Particles;
+        std::vector<Particle>* Particles;
 };

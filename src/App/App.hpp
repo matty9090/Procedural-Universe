@@ -61,7 +61,7 @@ private:
     void InitParticles();
     void RegisterEvents();
 
-    void Update(DX::StepTimer const& timer);
+    void Update(float dt);
     void Render();
     void RenderParticles();
     void CheckParticleSelected(DirectX::Mouse::State& ms);

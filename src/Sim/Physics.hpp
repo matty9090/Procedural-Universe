@@ -16,6 +16,12 @@ namespace Phys
     const double StarSystemScale = 20 * AU;
     const double GalaxyScale = 1e6 * LY;
 
+    const char GStr[] = "6.674e-11";
+    const char SStr[] = "1e4";
+
+    const char StarSystemScaleStr[] = "2.3e13";
+    const char GalaxyScaleStr[] = "9.46e21";
+
     inline double Gravity(const Particle& a, const Particle& b)
     {
         Vec3d ap(a.Position.x, a.Position.y, a.Position.z);

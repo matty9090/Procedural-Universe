@@ -58,7 +58,8 @@ void App::RegisterEvents()
 
     EventStream::Register(EEvent::SimTypeChanged, [this](const EventData& data) {
         m_sim.reset();
-        m_sim = CreateNBodySim(m_deviceResources->GetD3DDeviceContext(), m_particles, static_cast<const SimTypeEventData&>(data).Value);
+        m_sim = CreateNBodySim(m_deviceResources->GetD3DDeviceContext(), static_cast<const SimTypeEventData&>(data).Value);
+        m_sim->Init(m_particles);
     });
 
     EventStream::Register(EEvent::IsPausedChanged, [this](const EventData& data) {
@@ -69,6 +70,11 @@ void App::RegisterEvents()
         m_seeder = CreateParticleSeeder(m_particles, static_cast<const SeederTypeEventData&>(data).Value);
         InitParticles();
     });
+
+    EventStream::Register(EEvent::ForceFrame, [this](const EventData& data) {
+        float dt = static_cast<const FloatEventData&>(data).Value;
+        m_sim->Update(dt * m_simSpeed);
+    });
 }
 
 void App::InitParticles()
@@ -76,6 +82,7 @@ void App::InitParticles()
     m_ui->SetSelectedParticle(nullptr);
     m_particles.resize(m_numParticles);
     m_seeder->Seed();
+    m_sim->Init(m_particles);
     m_particleBuffer.Reset();
 
     D3D11_BUFFER_DESC buffer;
@@ -97,17 +104,15 @@ void App::Tick()
 {
     m_timer.Tick([&]()
     {
-        Update(m_timer);
+        Update(static_cast<float>(m_timer.GetElapsedSeconds()));
     });
 
     Render();
 }
 
 // Updates the world.
-void App::Update(DX::StepTimer const& timer)
+void App::Update(float dt)
 {
-    float dt = float(timer.GetElapsedSeconds());
-
     auto mouse_state = m_mouse->GetState();
 
     CheckParticleSelected(mouse_state);
@@ -288,7 +293,7 @@ void App::CreateDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    m_sim = CreateNBodySim(context, m_particles, ENBodySim::BruteForce);
+    m_sim = CreateNBodySim(context, ENBodySim::BruteForce);
     m_ui = std::make_unique<UI>(context, m_deviceResources->GetWindow());
 
     ID3DBlob* VertexCode;

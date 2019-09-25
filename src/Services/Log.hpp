@@ -3,6 +3,8 @@
 #include <map>
 #include <string>
 
+#include "Core/Vec3.hpp"
+
 namespace DirectX
 {
     namespace SimpleMath
@@ -29,6 +31,7 @@ public:
     void Log(int num, ELogType logLevel = Info);
     void Log(double num, ELogType logLevel = Info);
     void Log(std::string msg, ELogType logLevel = Info);
+    void Log(Vec3d v, ELogType logLevel = Info);
     void Log(DirectX::SimpleMath::Vector2 v, ELogType logLevel = Info);
     void Log(DirectX::SimpleMath::Vector3 v, ELogType logLevel = Info);
 

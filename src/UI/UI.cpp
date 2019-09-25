@@ -54,7 +54,7 @@ void UI::Render()
 
     ImGui::Text("FPS: %i", (int)FPS);
     ImGui::Separator();
-    ImGui::SliderInt("Particles", &newParticles, 1, 2000);
+    ImGui::SliderInt("Particles", &newParticles, 1, 10000);
     ImGui::SliderFloat("Sim Speed", &newSimSpeed, 0.1f, 100.0f);
     
     if(ImGui::Combo("Seeder", &SelectedSeeder, "Random\0Galaxy\0StarSystem\0"))
@@ -80,6 +80,11 @@ void UI::Render()
     {
         Paused = !Paused;
         EventStream::Report(EEvent::IsPausedChanged, BoolEventData(Paused));
+    }
+
+    if(ImGui::Button("Force frame"))
+    {
+        EventStream::Report(EEvent::ForceFrame, FloatEventData(1.0f / 60.0f));
     }
 
     ImGui::Separator();

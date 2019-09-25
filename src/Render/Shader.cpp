@@ -11,7 +11,7 @@ bool LoadVertexShader(ID3D11Device* device, const wstring& fileName, ID3D11Verte
 		D3DCompileFromFile( fileName.c_str(), // File containing pixel shader (HLSL)
 		                       NULL, NULL,       // Advanced compilation options - not needed here
 		                       "main",           // Name of entry point in the shader
-		                       "vs_4_0",         // Target vertex shader hardware - vs_1_1 is lowest level
+		                       "vs_5_0",         // Target vertex shader hardware - vs_1_1 is lowest level
 		                                         // vs_2_0 works on most modern video cards, vs_4_0 required for DX10
 		                       0,                // Additional compilation flags (such as debug flags)
 		                       0,                // More compilation flags (added in DX10)
@@ -48,7 +48,7 @@ bool LoadGeometryShader(ID3D11Device* device, const wstring& fileName, ID3D11Geo
 		D3DCompileFromFile( fileName.c_str(), // File containing geometry shader (HLSL)
 		                       NULL, NULL,       // Advanced compilation options - not needed here
 		                       "main",           // Name of entry point in the shader
-		                       "gs_4_0",         // Target geometry shader hardware - ps_1_1 is lowest level
+		                       "gs_5_0",         // Target geometry shader hardware - ps_1_1 is lowest level
 		                                         // ps_2_0 works on most modern video cards, ps_4_0 required for DX10
 		                       0,                // Additional compilation flags (such as debug flags)
 		                       0,                // More compilation flags (added in DX10)
@@ -89,7 +89,7 @@ bool LoadStreamOutGeometryShader(ID3D11Device* device, const wstring& fileName, 
 		D3DCompileFromFile( fileName.c_str(), // File containing geometry shader (HLSL)
 		                       NULL, NULL,       // Advanced compilation options - not needed here
 		                       "main",           // Name of entry point in the shader
-		                       "gs_4_0",         // Target geometry shader hardware - ps_1_1 is lowest level
+		                       "gs_5_0",         // Target geometry shader hardware - ps_1_1 is lowest level
 		                                         // ps_2_0 works on most modern video cards, ps_4_0 required for DX10
 		                       0,                // Additional compilation flags (such as debug flags)
 		                       0,                // More compilation flags (added in DX10)
@@ -131,7 +131,7 @@ bool LoadPixelShader(ID3D11Device* device, const wstring& fileName, ID3D11PixelS
 		D3DCompileFromFile( fileName.c_str(), // File containing pixel shader (HLSL)
 		                       NULL, NULL,       // Advanced compilation options - not needed here
 		                       "main",           // Name of entry point in the shader
-		                       "ps_4_0",         // Target pixel shader hardware - ps_1_1 is lowest level
+		                       "ps_5_0",         // Target pixel shader hardware - ps_1_1 is lowest level
 		                                         // ps_2_0 works on most modern video cards, ps_4_0 required for DX10
 		                       0,                // Additional compilation flags (such as debug flags)
 		                       0,                // More compilation flags (added in DX10)
@@ -162,13 +162,13 @@ bool LoadPixelShader(ID3D11Device* device, const wstring& fileName, ID3D11PixelS
 	return true;
 }
 
-bool LoadComputeShader(ID3D11Device* device, const std::wstring& fileName, ID3D11ComputeShader** computeShader)
+bool LoadComputeShader(ID3D11Device* device, const std::wstring& fileName, ID3D11ComputeShader** computeShader, const D3D_SHADER_MACRO* defines)
 {
 	ID3DBlob* shaderBlob = nullptr;
     ID3DBlob* errorBlob = nullptr;
 
-    HRESULT hr = D3DCompileFromFile(fileName.c_str(), 0, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-                                    "CSMain", "cs_4_0",
+    HRESULT hr = D3DCompileFromFile(fileName.c_str(), defines, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+                                    "CSMain", "cs_5_0",
                                     0, 0, &shaderBlob, &errorBlob);
 
 	

@@ -2,133 +2,120 @@
 #include "Physics.hpp"
 #include "Core/Vec3.hpp"
 #include "Services/Log.hpp"
-
 #include "Render/Shader.hpp"
-#include "Render/ConstantBuffer.hpp"
+
+#include <stdlib.h>
 
 using namespace DirectX::SimpleMath;
 
-BruteForce::BruteForce(ID3D11DeviceContext* context, std::vector<Particle>& particles)
-    : Context(context), Particles(particles)
+BruteForce::BruteForce(ID3D11DeviceContext* context)
+    : Context(context)
 {
-    ID3D11Device* device = nullptr;
-    context->GetDevice(&device);
+    Context->GetDevice(&Device);
 
-    const int num = 20;
+    const D3D_SHADER_MACRO defines[] = {
+        { "G", Phys::GStr },
+        { "SCALE", Phys::StarSystemScaleStr },
+        { "S", Phys::SStr },
+        { nullptr, nullptr }
+    };
 
-    std::vector<TestData> data;
-    data.resize(num);
-
-    for(int x = 0; x < num; ++x)
+    if(!LoadComputeShader(Device, L"shaders/Gravity.csh", ComputeShader.ReleaseAndGetAddressOf(), defines))
     {
-        data[x].i = 200;
+        FLog::Get().Log("Could not load compute shader");
     }
+}
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> inBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> outBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> outResBuffer;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
-    Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> uav;
+void BruteForce::Init(std::vector<Particle>& particles)
+{
+    Particles = &particles;
+
+    CreateShader();
+}
+
+void BruteForce::Update(float dt)
+{
+    for(unsigned int i = 0; i < Particles->size(); ++i)
+        (*Particles)[i].Forces = Vec3d();
+    
+    Context->UpdateSubresource(inBuffer.Get(), 0, NULL, &(*Particles)[0], 0, 0);
+    Context->UpdateSubresource(outBuffer.Get(), 0, NULL, &(*Particles)[0], 0, 0);
+
+    unsigned int num = static_cast<unsigned int>(Particles->size());
+
+    Context->CSSetShader(ComputeShader.Get(), 0, 0);
+    Context->CSSetShaderResources(0, 1, srv.GetAddressOf());
+    Context->CSSetUnorderedAccessViews(0, 1, uav.GetAddressOf(), 0);
+    Context->Dispatch(num, num, 1);
+    Context->CopyResource(outResBuffer.Get(), outBuffer.Get());
+
+    D3D11_MAPPED_SUBRESOURCE mappedResource;
+    Context->Map(outResBuffer.Get(), 0, D3D11_MAP_READ, 0, &mappedResource);
+    memcpy_s(&(*Particles)[0], num * sizeof(Particle), mappedResource.pData, num * sizeof(Particle));
+    Context->Unmap(outResBuffer.Get(), 0);
+
+    for(size_t i = 0; i < Particles->size(); ++i)
+    {
+        auto a = (*Particles)[i].Forces / (*Particles)[i].Mass;
+        (*Particles)[i].Velocity += a * dt;
+
+        auto vel = ((*Particles)[i].Velocity * dt) / Phys::StarSystemScale;
+
+        (*Particles)[i].Position += Vector3(static_cast<float>(vel.x),
+                                             static_cast<float>(vel.y),
+                                             static_cast<float>(vel.z));
+    }
+}
+
+void BruteForce::CreateShader()
+{
+    unsigned int stride = static_cast<unsigned int>(sizeof(Particle));
+    unsigned int totalSize = static_cast<unsigned int>(Particles->size() * sizeof(Particle));
 
     D3D11_BUFFER_DESC constantDataDesc;
-    constantDataDesc.Usage                  = D3D11_USAGE_DYNAMIC;
-    constantDataDesc.ByteWidth              = sizeof(TestData) * num;
+    constantDataDesc.Usage                  = D3D11_USAGE_DEFAULT;
+    constantDataDesc.ByteWidth              = totalSize;
     constantDataDesc.BindFlags              = D3D11_BIND_SHADER_RESOURCE;
-    constantDataDesc.CPUAccessFlags         = D3D11_CPU_ACCESS_WRITE;
-    constantDataDesc.StructureByteStride    = sizeof(TestData);
+    constantDataDesc.CPUAccessFlags         = 0;
+    constantDataDesc.StructureByteStride    = stride;
     constantDataDesc.MiscFlags              = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
     D3D11_SUBRESOURCE_DATA initialData;
-    initialData.pSysMem = &data[0];
+    initialData.pSysMem = &(*Particles)[0];
 
-    device->CreateBuffer(&constantDataDesc, &initialData, inBuffer.ReleaseAndGetAddressOf());
+    Device->CreateBuffer(&constantDataDesc, &initialData, inBuffer.ReleaseAndGetAddressOf());
 
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
     srvDesc.Format                  = DXGI_FORMAT_UNKNOWN;
     srvDesc.ViewDimension           = D3D11_SRV_DIMENSION_BUFFEREX;
     srvDesc.BufferEx.FirstElement   = 0;
     srvDesc.BufferEx.Flags          = 0;
-    srvDesc.BufferEx.NumElements    = num;
+    srvDesc.BufferEx.NumElements    = static_cast<unsigned int>(Particles->size());
 
-    device->CreateShaderResourceView(inBuffer.Get(), &srvDesc, srv.ReleaseAndGetAddressOf() );
+    Device->CreateShaderResourceView(inBuffer.Get(), &srvDesc, srv.ReleaseAndGetAddressOf() );
 
     D3D11_BUFFER_DESC outputDesc;
     outputDesc.Usage                = D3D11_USAGE_DEFAULT;
-    outputDesc.ByteWidth            = sizeof(TestData) * num;
+    outputDesc.ByteWidth            = totalSize;
     outputDesc.BindFlags            = D3D11_BIND_UNORDERED_ACCESS;
     outputDesc.CPUAccessFlags       = 0;
-    outputDesc.StructureByteStride  = sizeof(TestData);
+    outputDesc.StructureByteStride  = stride;
     outputDesc.MiscFlags            = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
-    device->CreateBuffer(&outputDesc, 0, outBuffer.ReleaseAndGetAddressOf());
+    Device->CreateBuffer(&outputDesc, 0, outBuffer.ReleaseAndGetAddressOf());
 
     outputDesc.Usage            = D3D11_USAGE_STAGING;
     outputDesc.BindFlags        = 0;
     outputDesc.CPUAccessFlags   = D3D11_CPU_ACCESS_READ;
 
-    device->CreateBuffer(&outputDesc, 0, outResBuffer.ReleaseAndGetAddressOf());
+    Device->CreateBuffer(&outputDesc, 0, outResBuffer.ReleaseAndGetAddressOf());
 
     D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
     uavDesc.Buffer.FirstElement     = 0;
     uavDesc.Buffer.Flags            = 0;
-    uavDesc.Buffer.NumElements      = num;
+    uavDesc.Buffer.NumElements      = static_cast<unsigned int>(Particles->size());
     uavDesc.Format                  = DXGI_FORMAT_UNKNOWN;
     uavDesc.ViewDimension           = D3D11_UAV_DIMENSION_BUFFER;
 
-    device->CreateUnorderedAccessView(outBuffer.Get(), &uavDesc, uav.ReleaseAndGetAddressOf());
-
-    if(!LoadComputeShader(device, L"shaders/Test.csh", ComputeShader.ReleaseAndGetAddressOf()))
-        FLog::Get().Log("Could not load compute shader");
-
-    context->CSSetShader(ComputeShader.Get(), 0, 0);
-    context->CSSetShaderResources(0, 1, srv.GetAddressOf());
-    context->CSSetUnorderedAccessViews(0, 1, uav.GetAddressOf(), 0);
-    context->Dispatch(1, 1, 1);
-    context->CopyResource(outResBuffer.Get(), outBuffer.Get());
-
-    D3D11_MAPPED_SUBRESOURCE mappedResource;
-    context->Map(outResBuffer.Get(), 0, D3D11_MAP_READ, 0, &mappedResource);
-
-    TestData* d = reinterpret_cast<TestData*>(mappedResource.pData);
-
-    for(int i = 0; i < num; ++i)
-        FLog::Get().Log(d->i);
-
-    context->Unmap(outResBuffer.Get(), 0);
-}
-
-void BruteForce::Update(float dt)
-{
-    for(auto& particle : Particles)
-        particle.Forces = Vec3d();
-
-    for(int i = 0; i < Particles.size(); ++i)
-    {
-        for(int j = 0; j < Particles.size(); ++j)
-        {
-            if(i == j) continue;
-            
-            auto& a = Particles[i];
-            auto& b = Particles[j];
-
-            auto diff = (b.Position - a.Position);
-            auto len = diff.Length();
-
-            double f = Phys::Gravity(a, b);
-
-            b.Forces += Vec3d(f * diff.x / len, f * diff.y / len, f * diff.z / len);
-        }
-    }
-
-    for(auto& particle : Particles)
-    {
-        auto a = particle.Forces / particle.Mass;
-        particle.Velocity += a * dt;
-
-        auto vel = (particle.Velocity * dt) / Phys::StarSystemScale;
-
-        particle.Position += Vector3(static_cast<float>(vel.x),
-                                     static_cast<float>(vel.y),
-                                     static_cast<float>(vel.z));
-    }
+    Device->CreateUnorderedAccessView(outBuffer.Get(), &uavDesc, uav.ReleaseAndGetAddressOf());
 }
