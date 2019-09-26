@@ -293,7 +293,7 @@ void App::CreateDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    m_sim = CreateNBodySim(context, ENBodySim::BruteForce);
+    m_sim = CreateNBodySim(context, ENBodySim::BruteForceGPU);
     m_ui = std::make_unique<UI>(context, m_deviceResources->GetWindow());
 
     ID3DBlob* VertexCode;

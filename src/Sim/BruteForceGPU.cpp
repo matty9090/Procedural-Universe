@@ -1,4 +1,4 @@
-#include "BruteForce.hpp"
+#include "BruteForceGPU.hpp"
 #include "Physics.hpp"
 #include "Core/Vec3.hpp"
 #include "Services/Log.hpp"
@@ -8,7 +8,7 @@
 
 using namespace DirectX::SimpleMath;
 
-BruteForce::BruteForce(ID3D11DeviceContext* context)
+BruteForceGPU::BruteForceGPU(ID3D11DeviceContext* context)
     : Context(context)
 {
     Context->GetDevice(&Device);
@@ -33,14 +33,14 @@ BruteForce::BruteForce(ID3D11DeviceContext* context)
     UpdateBuffer = std::make_unique<ConstantBuffer<FrameBuffer>>(Device);
 }
 
-void BruteForce::Init(std::vector<Particle>& particles)
+void BruteForceGPU::Init(std::vector<Particle>& particles)
 {
     Particles = &particles;
 
     CreateShader();
 }
 
-void BruteForce::Update(float dt)
+void BruteForceGPU::Update(float dt)
 {
     unsigned int num = static_cast<unsigned int>(Particles->size());
 
@@ -68,7 +68,7 @@ void BruteForce::Update(float dt)
     Context->Unmap(OutResBuffer.Get(), 0);
 }
 
-void BruteForce::CreateShader()
+void BruteForceGPU::CreateShader()
 {
     unsigned int stride = static_cast<unsigned int>(sizeof(Particle));
     unsigned int totalSize = static_cast<unsigned int>(Particles->size() * sizeof(Particle));

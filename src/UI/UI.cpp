@@ -55,20 +55,26 @@ void UI::Render()
     ImGui::Text("FPS: %i", (int)FPS);
     ImGui::Separator();
     ImGui::SliderInt("Particles", &newParticles, 1, 10000);
-    ImGui::SliderFloat("Sim Speed", &newSimSpeed, 0.1f, 100.0f);
+    ImGui::SliderFloat("Sim Speed", &newSimSpeed, 0.01f, 10.0f);
     
     if(ImGui::Combo("Seeder", &SelectedSeeder, "Random\0Galaxy\0StarSystem\0"))
     {
         EventStream::Report(EEvent::SeederChanged, SeederTypeEventData(static_cast<EParticleSeeder>(SelectedSeeder)));
     }
 
-    if(ImGui::Button("Brute Force"))
+    if(ImGui::Button("Brute Force CPU"))
     {
-        SimType = ENBodySim::BruteForce;
+        SimType = ENBodySim::BruteForceCPU;
         EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
     }    
 
     ImGui::SameLine();
+
+    if(ImGui::Button("Brute Force GPU"))
+    {
+        SimType = ENBodySim::BruteForceGPU;
+        EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
+    }    
 
     if(ImGui::Button("Barnes-Hut"))
     {

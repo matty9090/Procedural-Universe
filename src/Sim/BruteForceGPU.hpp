@@ -5,10 +5,10 @@
 
 #include <wrl/client.h>
 
-class BruteForce : public INBodySim
+class BruteForceGPU : public INBodySim
 {
     public:
-        BruteForce(ID3D11DeviceContext* context);
+        BruteForceGPU(ID3D11DeviceContext* context);
 
         void Init(std::vector<Particle>& particles) final;
         void Update(float dt) final;

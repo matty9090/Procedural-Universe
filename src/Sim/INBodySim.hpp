@@ -8,7 +8,8 @@
 
 enum class ENBodySim
 {
-    BruteForce,
+    BruteForceCPU,
+    BruteForceGPU,
     BarnesHut
 };
 

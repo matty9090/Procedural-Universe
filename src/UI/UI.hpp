@@ -32,6 +32,6 @@ private:
     int SelectedSeeder = 0;
 
     Particle* SelectedParticle = nullptr;
-    ENBodySim SimType = ENBodySim::BruteForce;
+    ENBodySim SimType = ENBodySim::BruteForceGPU;
     EParticleSeeder SeederType = EParticleSeeder::Random;
 };

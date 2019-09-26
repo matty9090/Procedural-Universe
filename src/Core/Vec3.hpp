@@ -37,11 +37,11 @@ template <class T = float> struct Vec3 {
 		return Vec3(x / m, y / m, z / m);
 	}
 
-	inline Vec3 operator+(Vec3 v) {
+	inline Vec3 operator+(const Vec3& v) const {
 		return Vec3(x + v.x, y + v.y, z + v.z);
 	}
 
-	inline Vec3 operator-(Vec3 v) {
+	inline Vec3 operator-(const Vec3& v) const {
 		return Vec3(x - v.x, y - v.y, z - v.z);
 	}
 
