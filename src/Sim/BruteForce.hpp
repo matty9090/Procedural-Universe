@@ -1,6 +1,8 @@
 #pragma once
 
 #include "INBodySim.hpp"
+#include "Render/ConstantBuffer.hpp"
+
 #include <wrl/client.h>
 
 class BruteForce : public INBodySim
@@ -15,15 +17,24 @@ class BruteForce : public INBodySim
         void CreateShader();
         void RunShader();
 
+        struct FrameBuffer
+        {
+            float FrameTime;
+            double Scale;
+        };
+
         ID3D11Device* Device = nullptr;
         ID3D11DeviceContext* Context = nullptr;
 
         std::vector<Particle>* Particles;
+        std::unique_ptr<ConstantBuffer<FrameBuffer>> UpdateBuffer;
 
-        Microsoft::WRL::ComPtr<ID3D11Buffer> inBuffer;
-        Microsoft::WRL::ComPtr<ID3D11Buffer> outBuffer;
-        Microsoft::WRL::ComPtr<ID3D11Buffer> outResBuffer;
-        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv;
-        Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> uav;
-        Microsoft::WRL::ComPtr<ID3D11ComputeShader> ComputeShader;
+        Microsoft::WRL::ComPtr<ID3D11Buffer> InBuffer;
+        Microsoft::WRL::ComPtr<ID3D11Buffer> OutBuffer;
+        Microsoft::WRL::ComPtr<ID3D11Buffer> OutResBuffer;
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SrvIn;
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> SrvOut;
+        Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> UavOut;
+        Microsoft::WRL::ComPtr<ID3D11ComputeShader> GravityShader;
+        Microsoft::WRL::ComPtr<ID3D11ComputeShader> UpdateShader;
 };
