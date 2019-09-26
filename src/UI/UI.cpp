@@ -9,7 +9,7 @@
 #include "ImGuiWin32.h"
 
 UI::UI(ID3D11DeviceContext* context, HWND hwnd)
-{    
+{
     ID3D11Device* device = nullptr;
     context->GetDevice(&device);
 
@@ -20,6 +20,11 @@ UI::UI(ID3D11DeviceContext* context, HWND hwnd)
     io.LogFilename = nullptr;
 
     ImGui::StyleColorsDark();
+
+    EventStream::Register(EEvent::BenchmarkResult, [this](const EventData& data) {
+        auto& bdata = static_cast<const BenchmarkEventData&>(data);
+        BenchmarkData[bdata.SimType] = bdata;
+    });
 
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(device, context);
@@ -39,6 +44,7 @@ void UI::Render()
     float newBloomBase = BloomBase;
     float newBloomAmount = BloomAmount;
     float newGaussianBlur = GaussianBlur;
+    bool runBenchmark = false;
 
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
@@ -54,6 +60,8 @@ void UI::Render()
 
     ImGui::Text("FPS: %i", (int)FPS);
     ImGui::Separator();
+
+    ImGui::Text("Settings");
     ImGui::SliderInt("Particles", &newParticles, 1, 10000);
     ImGui::SliderFloat("Sim Speed", &newSimSpeed, 0.01f, 10.0f);
     
@@ -62,25 +70,24 @@ void UI::Render()
         EventStream::Report(EEvent::SeederChanged, SeederTypeEventData(static_cast<EParticleSeeder>(SelectedSeeder)));
     }
 
-    if(ImGui::Button("Brute Force CPU"))
-    {
-        SimType = ENBodySim::BruteForceCPU;
-        EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
-    }    
+    ImGui::Separator();
+    ImGui::Text("Simulators");
 
-    ImGui::SameLine();
-
-    if(ImGui::Button("Brute Force GPU"))
+    for(int sim = 0; sim < static_cast<int>(ENBodySim::NumSims); ++sim)
     {
-        SimType = ENBodySim::BruteForceGPU;
-        EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
-    }    
+        SimType = static_cast<ENBodySim>(sim);
 
-    if(ImGui::Button("Barnes-Hut"))
-    {
-        SimType = ENBodySim::BarnesHut;
-        EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
+        if(sim % 2 != 0)
+            ImGui::SameLine();
+
+        if(ImGui::Button(NBodySimGetName(SimType).c_str()))
+        {
+            EventStream::Report(EEvent::SimTypeChanged, SimTypeEventData(SimType));
+        }
     }
+
+    ImGui::Separator();
+    ImGui::Text("Frame options");
 
     if(ImGui::Button(Paused ? "Play simulation" : "Pause simulation"))
     {
@@ -88,19 +95,36 @@ void UI::Render()
         EventStream::Report(EEvent::IsPausedChanged, BoolEventData(Paused));
     }
 
+    ImGui::SameLine();
+
     if(ImGui::Button("Force frame"))
     {
         EventStream::Report(EEvent::ForceFrame, FloatEventData(1.0f / 60.0f));
     }
 
     ImGui::Separator();
+    ImGui::Text("Post processing");
     ImGui::SliderFloat("Blur", &newGaussianBlur, 0.1f, 12.0f);
     ImGui::SliderFloat("Bloom Base", &newBloomBase, 0.1f, 3.0f);
     ImGui::SliderFloat("Bloom Amount", &newBloomAmount, 0.1f, 6.0f);
 
+    ImGui::Separator();
+    ImGui::Text("Benchmarking");
+
+    if(ImGui::Button("Run benchmark"))
+    {
+        runBenchmark = true;
+    }
+
+    for(const auto& data : BenchmarkData)
+    {
+        ImGui::Text("%s: %i ms", NBodySimGetName(data.first).c_str(), data.second.Time);
+    }
+
     if(SelectedParticle)
     {
         ImGui::Separator();
+        ImGui::Text("Particle infomation");
         ImGui::Text("Position: (%.0f, %.0f, %.0f)", SelectedParticle->Position.x, SelectedParticle->Position.y, SelectedParticle->Position.z);
         ImGui::Text("Velocity: (%.2f, %.2f, %.2f)", SelectedParticle->Velocity.x, SelectedParticle->Velocity.y, SelectedParticle->Velocity.z);
         ImGui::Text("Force: (%.2f, %.2f, %.2f) N", SelectedParticle->Forces.x, SelectedParticle->Forces.y, SelectedParticle->Forces.z);
@@ -140,6 +164,11 @@ void UI::Render()
     {
         BloomAmount = newBloomAmount;
         EventStream::Report(EEvent::BloomAmountChanged, FloatEventData(BloomAmount));
+    }
+
+    if(runBenchmark)
+    {
+        EventStream::Report(EEvent::RunBenchmark, EventData {});
     }
 }
 

@@ -25,3 +25,15 @@ std::unique_ptr<INBodySim> CreateNBodySim(ID3D11DeviceContext* context, ENBodySi
 
     return std::move(sim);
 }
+
+std::string NBodySimGetName(ENBodySim type)
+{
+    switch(type)
+    {
+        case ENBodySim::BruteForceCPU:  return "Brute Force CPU"; break;
+        case ENBodySim::BruteForceGPU:  return "Brute Force GPU"; break;
+        case ENBodySim::BarnesHut:      return "Barnes-Hut"; break;
+    }
+
+    return "Unknown";
+}

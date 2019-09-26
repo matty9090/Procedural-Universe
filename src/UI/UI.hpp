@@ -2,7 +2,9 @@
 
 #include <d3d11.h>
 #include <vector>
+#include <map>
 
+#include "Core/Event.hpp"
 #include "Sim/INBodySim.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
@@ -30,6 +32,8 @@ private:
     float SimSpeed = 1.0f;
     int Particles = 100;
     int SelectedSeeder = 0;
+
+    std::map<ENBodySim, BenchmarkEventData> BenchmarkData;
 
     Particle* SelectedParticle = nullptr;
     ENBodySim SimType = ENBodySim::BruteForceGPU;

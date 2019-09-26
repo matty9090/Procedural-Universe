@@ -41,3 +41,12 @@ struct SeederTypeEventData : public EventData
 
     SeederTypeEventData(EParticleSeeder value) : Value(value) {}
 };
+
+struct BenchmarkEventData : public EventData
+{
+    ENBodySim SimType;
+    int Time;
+
+    BenchmarkEventData() : Time(0) {}
+    BenchmarkEventData(ENBodySim sim, int t) : SimType(sim), Time(t) {}
+};

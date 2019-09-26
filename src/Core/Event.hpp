@@ -16,7 +16,9 @@ enum class EEvent
     BloomBaseChanged,
     BloomAmountChanged,
     SeederChanged,
-    ForceFrame
+    ForceFrame,
+    RunBenchmark,
+    BenchmarkResult
 };
 
 typedef std::function<void(const EventData&)> EventCallback;

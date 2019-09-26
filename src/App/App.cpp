@@ -75,6 +75,10 @@ void App::RegisterEvents()
         float dt = static_cast<const FloatEventData&>(data).Value;
         m_sim->Update(dt * m_simSpeed);
     });
+
+    EventStream::Register(EEvent::RunBenchmark, [this](const EventData& data) {
+        RunBenchmark();
+    });
 }
 
 void App::InitParticles()
@@ -203,6 +207,36 @@ void App::Clear()
     context->RSSetViewports(1, &viewport);
 
     m_deviceResources->PIXEndEvent();
+}
+
+void App::RunBenchmark()
+{
+    FLog::Get().Log("Running benchmark");
+
+    for(int sim = 0; sim < static_cast<int>(ENBodySim::NumSims); ++sim)
+    {
+        LARGE_INTEGER startTime, endTime;
+        const int numFrames = 10;
+        
+        auto nbodySim = CreateNBodySim(m_deviceResources->GetD3DDeviceContext(), static_cast<ENBodySim>(sim));
+        nbodySim->Init(m_particles);
+
+        QueryPerformanceCounter(&startTime);
+
+        for(int frame = 0; frame < numFrames; ++frame)
+            nbodySim->Update(1.0f);
+
+        QueryPerformanceCounter(&endTime);
+        
+        EventStream::Report(EEvent::BenchmarkResult, BenchmarkEventData(
+            static_cast<ENBodySim>(sim),
+            static_cast<int>((endTime.QuadPart - startTime.QuadPart) / (numFrames * 10000)))
+        );
+
+        Render();
+    }
+
+    FLog::Get().Log("Benchmark finished");
 }
 
 void App::CheckParticleSelected(DirectX::Mouse::State& ms)

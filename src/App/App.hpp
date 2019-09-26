@@ -64,6 +64,7 @@ private:
     void Update(float dt);
     void Render();
     void RenderParticles();
+    void RunBenchmark();
     void CheckParticleSelected(DirectX::Mouse::State& ms);
     void Clear();
 

@@ -11,7 +11,7 @@ using namespace DirectX::SimpleMath;
 BruteForceCPU::BruteForceCPU(ID3D11DeviceContext* context)
     : Context(context)
 {
-    
+    FLog::Get().Log("Brute Force CPU");
 }
 
 void BruteForceCPU::Init(std::vector<Particle>& particles)

@@ -11,6 +11,8 @@ using namespace DirectX::SimpleMath;
 BruteForceGPU::BruteForceGPU(ID3D11DeviceContext* context)
     : Context(context)
 {
+    FLog::Get().Log("Brute Force GPU");
+
     Context->GetDevice(&Device);
 
     const D3D_SHADER_MACRO defines[] = {
