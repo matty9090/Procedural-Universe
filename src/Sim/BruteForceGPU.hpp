@@ -19,6 +19,7 @@ class BruteForceGPU : public INBodySim
 
         struct FrameBuffer
         {
+            int NumParticles;
             float FrameTime;
             double Scale;
         };

@@ -87,7 +87,7 @@ private:
 
     std::unique_ptr<ConstantBuffer<Buffers::GS>>    m_gsBuffer;
     std::vector<Particle>                           m_particles;
-    unsigned int                                    m_numParticles = 100;
+    unsigned int                                    m_numParticles = 256;
     Particle*                                       m_selectedParticle = nullptr;
 
     std::unique_ptr<INBodySim>                      m_sim;

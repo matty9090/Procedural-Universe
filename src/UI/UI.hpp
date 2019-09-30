@@ -30,7 +30,7 @@ private:
 
     bool Paused = false;
     float SimSpeed = 1.0f;
-    int Particles = 100;
+    int Particles = 256;
     int SelectedSeeder = 0;
 
     std::map<ENBodySim, BenchmarkEventData> BenchmarkData;

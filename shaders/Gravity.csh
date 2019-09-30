@@ -10,6 +10,13 @@ struct Particle
     double Mass;
 };
 
+cbuffer FrameBuffer : register(b0)
+{
+    int NumParticles;
+    float FrameTime;
+    double Scale;
+};
+
 StructuredBuffer<Particle> InBuffer : register(t0);
 RWStructuredBuffer<Particle> OutBuffer : register(u0);
 
@@ -34,16 +41,21 @@ void CSMain(uint3 ID : SV_DispatchThreadID)
     OutBuffer[ID.x].Velocity        = InBuffer[ID.x].Velocity;
     OutBuffer[ID.x].Mass            = InBuffer[ID.x].Mass;
 
-    if(ID.x != ID.y)
+    for(int i = 0; i < NumParticles; i += 256)
     {
-        double3 a = InBuffer[ID.x].Position;
-        double3 b = InBuffer[ID.y].Position;
+        for(int j = 0; j < 256; ++j)
+        {
+            int id = i + SV_GroupThreadID;
 
-        double3 d = double3(b - a);
-        double l = length(d);
+            double3 a = InBuffer[ID.x].Position;
+            double3 b = InBuffer[id].Position;
 
-        double f = Gravity(InBuffer[ID.x], InBuffer[ID.y]);
-        
-        OutBuffer[ID.x].Forces += double3(f * d.x / l, f * d.y / l, f * d.z / l);
+            double3 d = double3(b - a);
+            double l = length(d);
+
+            double f = Gravity(InBuffer[id], InBuffer[ID.x]);
+            
+            OutBuffer[ID.x].Forces += double3(f * d.x / l, f * d.y / l, f * d.z / l);
+        }
     }
 }

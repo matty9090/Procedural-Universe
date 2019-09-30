@@ -46,19 +46,19 @@ void BruteForceGPU::Update(float dt)
 {
     unsigned int num = static_cast<unsigned int>(Particles->size());
 
-    UpdateBuffer->SetData(Context, { dt, Phys::StarSystemScale });
+    UpdateBuffer->SetData(Context, { static_cast<int>(num), dt, Phys::StarSystemScale });
 
     Context->CSSetShader(GravityShader.Get(), 0, 0);
     Context->CSSetShaderResources(0, 1, SrvIn.GetAddressOf());
     Context->CSSetUnorderedAccessViews(0, 1, UavOut.GetAddressOf(), 0);
-    Context->Dispatch(num, num, 1);
+    Context->CSSetConstantBuffers(0, 1, UpdateBuffer->GetBuffer());
+    Context->Dispatch(num / 256, 1, 1);
 
     Context->CopyResource(InBuffer.Get(), OutBuffer.Get());
 
     Context->CSSetShader(UpdateShader.Get(), 0, 0);
     Context->CSSetShaderResources(0, 1, SrvIn.GetAddressOf());
     Context->CSSetUnorderedAccessViews(0, 1, UavOut.GetAddressOf(), 0);
-    Context->CSSetConstantBuffers(0, 1, UpdateBuffer->GetBuffer());
     Context->Dispatch(num, 1, 1);
     
     Context->CopyResource(InBuffer.Get(), OutBuffer.Get());

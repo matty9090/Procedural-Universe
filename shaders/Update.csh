@@ -12,9 +12,11 @@ struct Particle
 
 cbuffer FrameBuffer : register(b0)
 {
+    int NumParticles;
     float FrameTime;
     double Scale;
 };
+
 
 StructuredBuffer<Particle> InBuffer : register(t0);
 RWStructuredBuffer<Particle> OutBuffer : register(u0);

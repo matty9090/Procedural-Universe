@@ -53,6 +53,9 @@ void App::RegisterEvents()
 
     EventStream::Register(EEvent::NumParticlesChanged, [this](const EventData& data) {
         m_numParticles = static_cast<const IntEventData&>(data).Value;
+        m_numParticles -= m_numParticles % 256;
+        m_numParticles = (m_numParticles <= 0) ? 256 : m_numParticles;
+
         InitParticles();
     });
 
