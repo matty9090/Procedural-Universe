@@ -40,6 +40,9 @@ void App::Initialize(HWND window, int width, int height)
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
+    m_timer.SetFixedTimeStep(true);
+    m_timer.SetTargetElapsedSeconds(1.0 / 60.0);
+
     RegisterEvents();
 
     FLog::Get().Log("Initialized");

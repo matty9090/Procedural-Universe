@@ -27,7 +27,7 @@ namespace Phys
         Vec3d ap(a.Position.x, a.Position.y, a.Position.z);
         Vec3d bp(b.Position.x, b.Position.y, b.Position.z);
 
-        ap *= StarSystemScale;
+        ap *= StarSystemScale; 
         bp *= StarSystemScale;
 
         double d = Vector3::DistanceSquared(a.Position, b.Position);

@@ -17,4 +17,6 @@ class BruteForceCPU : public INBodySim
         ID3D11DeviceContext* Context = nullptr;
 
         std::vector<Particle>* Particles;
+
+        void Exec(size_t index, size_t loops);
 };
