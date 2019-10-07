@@ -33,11 +33,11 @@ void BruteForceCPU::Exec(size_t index, size_t loops)
             auto& b = (*Particles)[j];
 
             auto diff = (b.Position - a.Position);
-            auto len = diff.Length();
+            diff.Normalize();
 
             double f = Phys::Gravity(a, b);
 
-            b.Forces += Vec3d(f * diff.x / len, f * diff.y / len, f * diff.z / len);
+            b.Forces += Vec3d(f * diff.x, f * diff.y, f * diff.z);
         }
     }
 }
