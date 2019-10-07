@@ -192,6 +192,7 @@ void App::RenderParticles()
 
     m_gsBuffer->SetData(context, Buffers::GS { view * proj, view.Invert() });
     context->GSSetConstantBuffers(0, 1, m_gsBuffer->GetBuffer());
+    context->RSSetState(m_deviceResources->GetRasterizerState());
     context->Draw(m_numParticles, 0);
 }
 
@@ -334,7 +335,7 @@ void App::CreateDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    m_sim = CreateNBodySim(context, ENBodySim::BruteForceGPU);
+    m_sim = CreateNBodySim(context, ENBodySim::BarnesHut);
     m_ui = std::make_unique<UI>(context, m_deviceResources->GetWindow());
 
     ID3DBlob* VertexCode;

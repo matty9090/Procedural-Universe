@@ -54,6 +54,7 @@ namespace DX
         ID3D11RenderTargetView*     GetSceneRenderTargetView() const    { return m_sceneRtv.Get(); }
         ID3D11DepthStencilView*     GetDepthStencilView() const         { return m_d3dDepthStencilView.Get(); }
         ID3D11ShaderResourceView*   GetSceneShaderResourceView() const  { return m_sceneSrv.Get(); }
+        ID3D11RasterizerState*      GetRasterizerState() const          { return m_raster.Get(); }
         DXGI_FORMAT                 GetBackBufferFormat() const         { return m_backBufferFormat; }
         DXGI_FORMAT                 GetDepthBufferFormat() const        { return m_depthBufferFormat; }
         D3D11_VIEWPORT              GetScreenViewport() const           { return m_screenViewport; }
