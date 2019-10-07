@@ -127,7 +127,7 @@ void UI::Render()
         ImGui::Text("Particle infomation");
         ImGui::Text("Position: (%.0f, %.0f, %.0f)", SelectedParticle->Position.x, SelectedParticle->Position.y, SelectedParticle->Position.z);
         ImGui::Text("Velocity: (%.2f, %.2f, %.2f)", SelectedParticle->Velocity.x, SelectedParticle->Velocity.y, SelectedParticle->Velocity.z);
-        ImGui::Text("Force: (%.2f, %.2f, %.2f) N", SelectedParticle->Forces.x, SelectedParticle->Forces.y, SelectedParticle->Forces.z);
+        ImGui::Text("Accel: (%.2f, %.2f, %.2f) N", SelectedParticle->Accel.x, SelectedParticle->Accel.y, SelectedParticle->Accel.z);
         ImGui::Text("Mass: %f kg", SelectedParticle->Mass);
     }
 

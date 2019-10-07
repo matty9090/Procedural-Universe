@@ -7,7 +7,8 @@ cbuffer cb0
 struct GS_VertIn
 {
 	float3 Position : POSITION;
-    float4 Colour : COLOR;
+	float  Mass 	: TEXCOORD;
+    float4 Colour 	: COLOR;
 };
 
 struct GS_VertOut

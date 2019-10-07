@@ -5,14 +5,26 @@
 
 #include "Core/Vec3.hpp"
 
+using DirectX::SimpleMath::Vector3;
+using DirectX::SimpleMath::Color;
+
 struct Particle
 {
-    DirectX::SimpleMath::Vector3 Position;
-    DirectX::SimpleMath::Color Colour;
-    DirectX::SimpleMath::Color OriginalColour;
+    // 16 bytes
+    Vector3 Position;
+    float Mass;
 
-    Vec3d Velocity;
-    Vec3d Forces;
-    
-    double Mass;
+    // 16 bytes
+    Color Colour;
+
+    // 16 bytes
+    Vector3 Velocity;
+    float Custom1;
+
+    // 16 bytes
+    Vector3 Accel;
+    float Custom2;
+
+	// 16 bytes
+	Color OriginalColour;
 };

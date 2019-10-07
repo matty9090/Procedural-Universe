@@ -6,15 +6,15 @@ using namespace DirectX::SimpleMath;
 
 namespace Phys
 {
-    const double G = 6.674e-11; // Newton's gravitational constant
-    const double S = 1e4; // Softener
-    const double M = 1000; // Meter (in this programs's unit)
+    const float G = 0.1f; // Gravitational constant
+    const float S = 10.0f; // Softener
+    const float M = 1000; // Meter (in this programs's unit)
 
-    const double AU = 1.15e12; // Astronomical units
-    const double LY = 9.46e15; // Light year
+    const float AU = 1.15e12f; // Astronomical units
+    const float LY = 9.46e15f; // Light year
 
-    const double StarSystemScale = 20 * AU;
-    const double GalaxyScale = 1e6 * LY;
+    const float StarSystemScale = 20.0f * AU;
+    const float GalaxyScale = 1e6f * LY;
 
     const char GStr[] = "6.674e-11";
     const char SStr[] = "1e4";
@@ -22,15 +22,9 @@ namespace Phys
     const char StarSystemScaleStr[] = "2.3e13";
     const char GalaxyScaleStr[] = "9.46e21";
 
-    inline double Gravity(const Particle& a, const Particle& b)
+    __forceinline float Gravity(const Particle& a, const Particle& b)
     {
-        Vec3d ap(a.Position.x, a.Position.y, a.Position.z);
-        Vec3d bp(b.Position.x, b.Position.y, b.Position.z);
-
-        ap *= StarSystemScale; 
-        bp *= StarSystemScale;
-
-        double d = Vector3::DistanceSquared(a.Position, b.Position);
-        return -(G * a.Mass * b.Mass) / (d + S * S);
+        float d = Vector3::DistanceSquared(a.Position, b.Position);
+        return -(G * a.Mass * b.Mass) / (d + S);
     }
 }

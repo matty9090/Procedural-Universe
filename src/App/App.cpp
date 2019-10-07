@@ -330,7 +330,7 @@ void App::CreateDeviceDependentResources()
     auto device = m_deviceResources->GetD3DDevice();
     auto context = m_deviceResources->GetD3DDeviceContext();
 
-    m_sim = CreateNBodySim(context, ENBodySim::BruteForceGPU);
+    m_sim = CreateNBodySim(context, ENBodySim::BruteForceCPU);
     m_ui = std::make_unique<UI>(context, m_deviceResources->GetWindow());
 
     ID3DBlob* VertexCode;
@@ -343,12 +343,13 @@ void App::CreateDeviceDependentResources()
         throw std::exception("Failed to load shader(s)");
 
     D3D11_INPUT_ELEMENT_DESC Layout[] = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT         , 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
     
     DX::ThrowIfFailed(
-        device->CreateInputLayout(Layout, 2, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf())
+        device->CreateInputLayout(Layout, 3, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf())
     );
 
     m_gsBuffer = std::make_unique<ConstantBuffer<Buffers::GS>>(device);

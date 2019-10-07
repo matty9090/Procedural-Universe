@@ -5,8 +5,6 @@
 #include "Render/Shader.hpp"
 
 #include <stdlib.h>
-#include <thread>
-#include <array>
 
 using namespace DirectX::SimpleMath;
 
@@ -19,59 +17,61 @@ BruteForceCPU::BruteForceCPU(ID3D11DeviceContext* context)
 void BruteForceCPU::Init(std::vector<Particle>& particles)
 {
     Particles = &particles;
+    Accel.resize(Particles->size());
 }
 
-void BruteForceCPU::Exec(size_t index, size_t loops)
+void BruteForceCPU::Exec(float dt, size_t index, size_t loops)
 {
     for(size_t i = index * loops; i < (index + 1) * loops; ++i)
     {
-        for(size_t j = 0; j < Particles->size(); ++j)
+        auto& a = (*Particles)[i];
+
+        for(size_t j = i + 1; j < Particles->size(); ++j)
         {
-            if(i == j) continue;
-            
-            auto& a = (*Particles)[i];
             auto& b = (*Particles)[j];
 
-            auto diff = (b.Position - a.Position);
-            auto len = diff.Length();
+            auto diff = a.Position - b.Position;
+            auto dist = diff.Length();
+            auto d3   = dist * dist * dist;
 
-            double f = Phys::Gravity(a, b);
+            float fa = dt * a.Mass / d3;
+            float fb = dt * b.Mass / d3;
 
-            b.Forces += Vec3d(f * diff.x / len, f * diff.y / len, f * diff.z / len);
+            Accel[i] -= Vector3(fa * diff.x, fa * diff.y, fa * diff.z);
+            Accel[j] += Vector3(fb * diff.x, fb * diff.y, fb * diff.z);
         }
     }
 }
 
 void BruteForceCPU::Update(float dt)
 {
-    const size_t numThreads = 8;
-    std::array<std::thread, numThreads> threads;
+    for(int i = 0; i < Particles->size(); ++i)
+        Accel[i] = Vector3::Zero;
 
+    const size_t numThreads = 8;
     const size_t loopsPerThread = Particles->size() / numThreads;
     const int remainder = Particles->size() % numThreads;
 
     size_t thread;
 
+    Threads.clear();
+
     for(thread = 0; thread < numThreads; ++thread)
-        threads[thread] = std::thread(&BruteForceCPU::Exec, this, thread, loopsPerThread);
+        Threads.push_back(std::thread(&BruteForceCPU::Exec, this, dt, thread, loopsPerThread));
 
     if(remainder > 0)
-        Exec(thread, remainder);
+        Threads.push_back(std::thread(&BruteForceCPU::Exec, this, dt, thread, remainder));
 
-    for(int thread = 0; thread < numThreads; ++thread)
-        threads[thread].join();
+    for(auto& thread : Threads)
+        thread.join();
 
     for(int i = 0; i < Particles->size(); ++i)
     {
-        auto a = (*Particles)[i].Forces / (*Particles)[i].Mass;
-        (*Particles)[i].Velocity += a * dt;
+        auto& p = (*Particles)[i];
+        p.Velocity += Accel[i] * dt;
 
-        auto vel = ((*Particles)[i].Velocity * dt) / Phys::StarSystemScale;
-
-        (*Particles)[i].Position += Vector3(static_cast<float>(vel.x),
-                                            static_cast<float>(vel.y),
-                                            static_cast<float>(vel.z));
-        
-        (*Particles)[i].Forces = Vec3d();
+        p.Position += Vector3(static_cast<float>(p.Velocity.x),
+                              static_cast<float>(p.Velocity.y),
+                              static_cast<float>(p.Velocity.z));
     }
 }

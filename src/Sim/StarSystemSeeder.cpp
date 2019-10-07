@@ -15,18 +15,18 @@ StarSystemSeeder::StarSystemSeeder(std::vector<Particle>& particles) : Particles
 void StarSystemSeeder::Seed()
 {
     Particle& star = Particles[0];
-    star.Colour = DirectX::SimpleMath::Color(0.6f, 1.0f, 1.0f);
+    star.Colour = Color(0.6f, 1.0f, 1.0f);
     star.OriginalColour = star.Colour;
-    star.Mass = 1e30;
-    star.Position = DirectX::SimpleMath::Vector3::Zero;
-    star.Forces = Vec3d();
-    star.Velocity = Vec3d();
+    star.Mass = 1e10f;
+    star.Position = Vector3::Zero;
+    star.Accel = Vector3::Zero;
+    star.Velocity = Vector3::Zero;
 
     std::default_random_engine generator;
-    std::uniform_real_distribution<double> dist_rad(4.0 * Phys::AU * Phys::M, 7.0 * Phys::AU * Phys::M);
-    std::uniform_real_distribution<double> dist_vel(0.02 * Phys::AU * Phys::M, 0.08 * Phys::AU * Phys::M);
-    std::uniform_real_distribution<double> dist_mass(1e10, 1e26);
-    std::uniform_real_distribution<double> dist_angle(0, 360.0f);
+    std::uniform_real_distribution<float> dist_rad(4.0f * Phys::AU * Phys::M, 7.0f * Phys::AU * Phys::M);
+    std::uniform_real_distribution<float> dist_vel(0.02f * Phys::AU * Phys::M, 0.08f * Phys::AU * Phys::M);
+    std::exponential_distribution<float> dist_mass(1e10);
+    std::uniform_real_distribution<float> dist_angle(0, 360.0f);
 
     for(int i = 1; i < Particles.size(); ++i)
     {
@@ -36,11 +36,11 @@ void StarSystemSeeder::Seed()
         Particles[i].Position.z = static_cast<float>(dist_rad(generator) / Phys::StarSystemScale);
 
         Particles[i].Velocity.x = dist_vel(generator);
-        Particles[i].Velocity.y = dist_vel(generator) / 20.0;
+        Particles[i].Velocity.y = dist_vel(generator) / 20.0f;
         Particles[i].Velocity.z = 0;
 
         Particles[i].Colour = DirectX::Colors::White;
         Particles[i].OriginalColour = DirectX::Colors::White;
-        Particles[i].Forces = Vec3d();
+        Particles[i].Accel = Vector3::Zero;
     }
 }

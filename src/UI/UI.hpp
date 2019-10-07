@@ -36,6 +36,6 @@ private:
     std::map<ENBodySim, BenchmarkEventData> BenchmarkData;
 
     Particle* SelectedParticle = nullptr;
-    ENBodySim SimType = ENBodySim::BruteForceGPU;
+    ENBodySim SimType = ENBodySim::BruteForceCPU;
     EParticleSeeder SeederType = EParticleSeeder::Random;
 };
