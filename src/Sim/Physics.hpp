@@ -7,7 +7,7 @@ using namespace DirectX::SimpleMath;
 namespace Phys
 {
     const double G = 6.674e-11; // Newton's gravitational constant
-    const double S = 1e4; // Softener
+    const double S = 1e1; // Softener
     const double M = 1000; // Meter (in this programs's unit)
 
     const double AU = 1.15e12; // Astronomical units

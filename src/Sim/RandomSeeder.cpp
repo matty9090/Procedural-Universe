@@ -20,9 +20,13 @@ void RandomSeeder::Seed()
         Particles[i].Position.x = static_cast<float>(dist(generator));
         Particles[i].Position.y = static_cast<float>(dist(generator));
         Particles[i].Position.z = static_cast<float>(dist(generator));
-        Particles[i].Velocity.x = static_cast<float>(dist_vel(generator));
-        Particles[i].Velocity.y = static_cast<float>(dist_vel(generator));
-        Particles[i].Velocity.z = static_cast<float>(dist_vel(generator));
+
+        auto normal = Particles[i].Position;
+        normal.Normalize();
+
+        Particles[i].Velocity.x = normal.x * 10000000000000000.0f;
+        Particles[i].Velocity.y = normal.y * 10000000000000000.0f;
+        Particles[i].Velocity.z = normal.z * 10000000000000000.0f;
         Particles[i].Mass   = dist_mass(generator);
         Particles[i].Forces = Vec3d();
         Particles[i].Colour = DirectX::Colors::White;
