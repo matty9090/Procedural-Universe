@@ -70,6 +70,12 @@ void UI::Render()
         EventStream::Report(EEvent::SeederChanged, SeederTypeEventData(static_cast<EParticleSeeder>(SelectedSeeder)));
     }
 
+    if(ImGui::Button(DrawDebug ? "Debug Off" : "Debug On"))
+    {
+        DrawDebug = !DrawDebug;
+        EventStream::Report(EEvent::DrawDebugChanged, BoolEventData(DrawDebug));
+    }
+
     ImGui::Separator();
     ImGui::Text("Simulators");
 

@@ -87,11 +87,12 @@ private:
 
     std::unique_ptr<ConstantBuffer<Buffers::GS>>    m_gsBuffer;
     std::vector<Particle>                           m_particles;
-    unsigned int                                    m_numParticles = 100;
+    unsigned int                                    m_numParticles = 10;
     Particle*                                       m_selectedParticle = nullptr;
 
     std::unique_ptr<INBodySim>                      m_sim;
     std::unique_ptr<IParticleSeeder>                m_seeder;
     bool                                            m_isPaused = false;
     float                                           m_simSpeed = 1.0f;
+    bool                                            m_drawDebug = false;
 };

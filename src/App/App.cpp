@@ -82,6 +82,10 @@ void App::RegisterEvents()
     EventStream::Register(EEvent::RunBenchmark, [this](const EventData& data) {
         RunBenchmark();
     });
+
+    EventStream::Register(EEvent::DrawDebugChanged, [this](const EventData& data) {
+        m_drawDebug = static_cast<const BoolEventData&>(data).Value;
+    });
 }
 
 void App::InitParticles()
@@ -158,11 +162,13 @@ void App::Render()
     context->GSSetShader(nullptr, 0, 0);
 
     m_postProcess->Render(renderTarget, dsv, m_deviceResources->GetSceneShaderResourceView());
+    
+    if(m_drawDebug)
+        m_sim->RenderDebug(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
+    
     m_ui->Render();
 
     m_deviceResources->PIXEndEvent();
-
-    // Show the new frame.
     m_deviceResources->Present();
 }
 
@@ -185,9 +191,7 @@ void App::RenderParticles()
     DirectX::SimpleMath::Matrix proj = m_camera.GetProjectionMatrix();
 
     m_gsBuffer->SetData(context, Buffers::GS { view * proj, view.Invert() });
-
     context->GSSetConstantBuffers(0, 1, m_gsBuffer->GetBuffer());
-
     context->Draw(m_numParticles, 0);
 }
 

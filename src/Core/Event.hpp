@@ -18,7 +18,8 @@ enum class EEvent
     SeederChanged,
     ForceFrame,
     RunBenchmark,
-    BenchmarkResult
+    BenchmarkResult,
+    DrawDebugChanged
 };
 
 typedef std::function<void(const EventData&)> EventCallback;

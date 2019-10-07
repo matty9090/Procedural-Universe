@@ -19,7 +19,7 @@ std::unique_ptr<INBodySim> CreateNBodySim(ID3D11DeviceContext* context, ENBodySi
             break;
 
         case ENBodySim::BarnesHut:
-            sim = std::make_unique<BarnesHut>();
+            sim = std::make_unique<BarnesHut>(context);
             break;
     }
 

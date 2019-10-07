@@ -28,9 +28,9 @@ private:
     float GaussianBlur = 2.0f;
     float BloomAmount = 1.0f, BloomBase = 1.4f;
 
-    bool Paused = false;
+    bool Paused = false, DrawDebug;
     float SimSpeed = 1.0f;
-    int Particles = 100;
+    int Particles = 10;
     int SelectedSeeder = 0;
 
     std::map<ENBodySim, BenchmarkEventData> BenchmarkData;

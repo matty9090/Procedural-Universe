@@ -31,6 +31,6 @@ namespace Phys
         bp *= StarSystemScale;
 
         double d = Vector3::DistanceSquared(a.Position, b.Position);
-        return -(G * a.Mass * b.Mass) / (d + S * S);
+        return -(G * a.Mass * b.Mass) / (d + S);
     }
 }
