@@ -1,5 +1,6 @@
 #include "StarSystemSeeder.hpp"
 #include "Physics.hpp"
+#include "Core/Event.hpp"
 
 #include <random>
 #include <DirectXColors.h>
@@ -43,4 +44,6 @@ void StarSystemSeeder::Seed()
         Particles[i].OriginalColour = DirectX::Colors::White;
         Particles[i].Forces = Vec3d();
     }
+
+    EventStream::Report(EEvent::TrackParticle, ParticleEventData(&Particles[0]));
 }

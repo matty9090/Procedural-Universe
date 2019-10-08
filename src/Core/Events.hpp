@@ -4,6 +4,7 @@
 
 #include "Sim/INBodySim.hpp"
 #include "Sim/IParticleSeeder.hpp"
+#include "Render/Particle.hpp"
 
 struct EventData {};
 
@@ -49,4 +50,11 @@ struct BenchmarkEventData : public EventData
 
     BenchmarkEventData() : Time(0) {}
     BenchmarkEventData(ENBodySim sim, int t) : SimType(sim), Time(t) {}
+};
+
+struct ParticleEventData : public EventData
+{
+    Particle* Value;
+
+    ParticleEventData(Particle* value) : Value(value) {}
 };

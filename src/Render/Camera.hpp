@@ -6,6 +6,8 @@
 #include <Mouse.h>
 #include <SimpleMath.h>
 
+#include "Render/Particle.hpp"
+
 /**
  * @brief Camera class
  * 
@@ -50,6 +52,13 @@ class Camera
          * @param p 
          */
         void SetPosition(DirectX::SimpleMath::Vector3 p) { m_cameraPos = p; }
+
+        /**
+         * @brief Track a particle
+         * 
+         * @param p 
+         */
+        void Track(Particle* p) { m_tracked = p; }
 
         /**
          * @brief Get the view matrix
@@ -101,4 +110,7 @@ class Camera
 
         DirectX::SimpleMath::Matrix m_view, m_proj;
         DirectX::SimpleMath::Vector3 m_cameraPos;
+
+        Particle* m_tracked = nullptr;
+        DirectX::SimpleMath::Vector3 m_lastPos;
 };

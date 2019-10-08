@@ -86,6 +86,12 @@ void App::RegisterEvents()
     EventStream::Register(EEvent::DrawDebugChanged, [this](const EventData& data) {
         m_drawDebug = static_cast<const BoolEventData&>(data).Value;
     });
+
+    EventStream::Register(EEvent::TrackParticle, [this](const EventData& data) {
+        auto p = static_cast<const ParticleEventData&>(data).Value;
+        m_camera.Track(p);
+        FLog::Get().Log("Tracking particle");
+    });
 }
 
 void App::InitParticles()

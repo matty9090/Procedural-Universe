@@ -16,8 +16,17 @@ Camera::Camera(size_t width, size_t height)
 }
 
 void Camera::Update(float dt)
-{    
-    m_view = Matrix::CreateLookAt(m_cameraPos, Vector3::Zero, Vector3::Up);
+{
+    Vector3 look = Vector3::Zero;
+
+    if(m_tracked)
+    {
+        m_cameraPos += m_lastPos - m_tracked->Position;
+        m_lastPos = m_tracked->Position;
+        look = m_tracked->Position;
+    }
+
+    m_view = Matrix::CreateLookAt(m_cameraPos, look, Vector3::Up);
 }
 
 void Camera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, float dt)

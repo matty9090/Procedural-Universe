@@ -6,7 +6,7 @@ BarnesHut::BarnesHut(ID3D11DeviceContext* context) : Context(context)
 {
     FLog::Get().Log("Barnes-Hut");
 
-    const float size = 2000.0f;
+    const float size = 4000.0f;
 
     Bounds = {
         { -size, -size, -size },
