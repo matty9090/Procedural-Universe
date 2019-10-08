@@ -49,7 +49,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     cxxopts::Options options("NBody Simulator", "Simulate gravitational physics");
 
     bool compute = false;
-    int simtime = 120, particles = 4000;
+    int simtime = 10, particles = 4000;
     float timestep = 0.02f;
 
     options.add_options()

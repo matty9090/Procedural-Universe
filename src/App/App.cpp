@@ -191,7 +191,7 @@ void App::RunSimulation(float dt, int time, int numparticles)
     std::vector<Particle> particles(numparticles);
 
     auto sim = CreateNBodySim(nullptr, ENBodySim::BarnesHut);
-    auto seeder = CreateParticleSeeder(particles, EParticleSeeder::Random);
+    auto seeder = CreateParticleSeeder(particles, EParticleSeeder::StarSystem);
     
     seeder->Seed();
     sim->Init(particles);

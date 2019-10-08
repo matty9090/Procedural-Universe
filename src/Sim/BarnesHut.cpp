@@ -2,6 +2,8 @@
 #include "Services/Log.hpp"
 #include "Sim/Physics.hpp"
 
+#include <thread>
+
 BarnesHut::BarnesHut(ID3D11DeviceContext* context) : Context(context)
 {
     FLog::Get().Log("Barnes-Hut");
@@ -43,11 +45,36 @@ void BarnesHut::Update(float dt)
     Tree->CalculateMass();
     particle = Particles->data();
 
-    for(int i = 0; i < Particles->size(); ++i)
+    const size_t numThreads = 8;
+    std::array<std::thread, numThreads> threads;
+
+    const size_t loopsPerThread = Particles->size() / numThreads;
+    const int remainder = Particles->size() % numThreads;
+
+    size_t thread;
+
+    for(thread = 0; thread < numThreads; ++thread)
     {
-        particle->Forces = Tree->CalculateForce(particle);
-        particle++;
+        threads[thread] = std::thread([&](size_t t, size_t loops) {
+            for(size_t i = t * loops; i < (t + 1) * loops; ++i)
+            {
+                Particle* p = &(*Particles)[i];
+                p->Forces = Tree->CalculateForce(p);
+            }
+        }, thread, loopsPerThread);
     }
+    
+    if(remainder > 0)
+    {
+        for(size_t i = thread; i < thread + remainder; ++i)
+        {
+            Particle* p = &(*Particles)[i];
+            p->Forces = Tree->CalculateForce(p);
+        }
+    }
+
+    for(int thread = 0; thread < numThreads; ++thread)
+        threads[thread].join();
 
     particle = Particles->data();
 
