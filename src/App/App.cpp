@@ -288,11 +288,11 @@ void App::Render()
     RenderParticles();
     context->GSSetShader(nullptr, 0, 0);
 
-    m_postProcess->Render(renderTarget, dsv, m_deviceResources->GetSceneShaderResourceView());
     
     if(m_drawDebug)
         m_sim->RenderDebug(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
     
+    m_postProcess->Render(renderTarget, dsv, m_deviceResources->GetSceneShaderResourceView());
     m_ui->Render();
 
     m_deviceResources->PIXEndEvent();

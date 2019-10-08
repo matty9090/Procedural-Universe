@@ -2,7 +2,7 @@
 #include "Services/Log.hpp"
 #include "Sim/Physics.hpp"
 
-Octree::Octree(const Cube& bounds, int depth)
+Octree::Octree(const BoundingCube& bounds, int depth)
     : Bounds(bounds),
       Size(bounds.BottomRight.x - bounds.TopLeft.x),
       Depth(depth)
@@ -30,7 +30,7 @@ void Octree::Split()
 
             for(size_t x = 0; x < 2; ++x, ++i)
             {
-                Cube bounds;
+                BoundingCube bounds;
                 bounds.TopLeft = cur;
                 bounds.BottomRight = cur + off;
 
@@ -140,7 +140,7 @@ Vec3d Octree::CalculateForce(Particle* p)
     return force;
 }
 
-void Octree::RenderDebug(DirectX::GeometricPrimitive* cube, DirectX::GeometricPrimitive* sphere, DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Matrix proj)
+void Octree::RenderDebug(Cube* cube, DirectX::GeometricPrimitive* sphere, DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Matrix proj)
 {
     if(Depth > 0 && !IsLeaf)
     {
@@ -159,7 +159,7 @@ void Octree::RenderDebug(DirectX::GeometricPrimitive* cube, DirectX::GeometricPr
 
         auto col = DirectX::SimpleMath::Color(colp.x, colp.y, colp.z);
 
-        cube->Draw(cworld, view, proj, col, nullptr, true);
+        cube->Render(pos, size, view * proj);
         // sphere->Draw(sworld, view, proj, DirectX::Colors::Blue);
     }
 

@@ -1,2 +1,12 @@
-- Brute force (CPU/GPU)
-- Barnes-Hut
+Done 
+ - Brute force (CPU/GPU)
+ - Barnes-Hut
+ - Particle picking
+ - Benchmarking
+ - Precomputation
+ - Post processing
+ - Octree debug
+
+Todo:
+ - Append to precomputated simulation
+ - Splatting

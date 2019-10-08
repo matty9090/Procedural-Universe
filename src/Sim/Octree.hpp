@@ -6,9 +6,10 @@
 #include <GeometricPrimitive.h>
 
 #include "Core/Vec3.hpp"
+#include "Render/Cube.hpp"
 #include "Render/Particle.hpp"
 
-struct Cube
+struct BoundingCube
 {
     Vec3<> TopLeft;
     Vec3<> BottomRight;    
@@ -23,17 +24,17 @@ struct Cube
 class Octree
 {
     public:
-        Octree(const Cube& bounds, int depth = 0);
+        Octree(const BoundingCube& bounds, int depth = 0);
 
         void Split();
         void Add(Particle* p);
         void CalculateMass();
         Vec3d CalculateForce(Particle *p);
-        void RenderDebug(DirectX::GeometricPrimitive* cube, DirectX::GeometricPrimitive* sphere, DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Matrix proj);
+        void RenderDebug(Cube* cube, DirectX::GeometricPrimitive* sphere, DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Matrix proj);
 
         int Depth = 0;
         int NumParticles = 0;
-        Cube Bounds;
+        BoundingCube Bounds;
         double TotalMass = 0.0;
         DirectX::SimpleMath::Vector3 CentreOfMass;
 
