@@ -33,4 +33,16 @@ namespace Phys
         double d = Vector3::DistanceSquared(a.Position, b.Position);
         return -(G * a.Mass * b.Mass) / (d + S);
     }
+
+    inline double Gravity(const Particle& a, const Vector3& b, double Mass)
+    {
+        Vec3d ap(a.Position.x, a.Position.y, a.Position.z);
+        Vec3d bp(b.x, b.y, b.z);
+
+        ap *= StarSystemScale; 
+        bp *= StarSystemScale;
+
+        double d = Vector3::DistanceSquared(a.Position, b);
+        return -(G * a.Mass * Mass) / (d + S);
+    }
 }

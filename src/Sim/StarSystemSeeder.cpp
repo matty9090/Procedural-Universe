@@ -24,7 +24,7 @@ void StarSystemSeeder::Seed()
 
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist_rad(4.0 * Phys::AU * Phys::M, 7.0 * Phys::AU * Phys::M);
-    std::uniform_real_distribution<double> dist_vel(0.02 * Phys::AU * Phys::M, 0.08 * Phys::AU * Phys::M);
+    std::uniform_real_distribution<double> dist_vel(1 * Phys::AU * Phys::M, 5 * Phys::AU * Phys::M);
     std::uniform_real_distribution<double> dist_mass(1e10, 1e26);
     std::uniform_real_distribution<double> dist_angle(0, 360.0f);
 

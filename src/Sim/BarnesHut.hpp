@@ -21,5 +21,7 @@ class BarnesHut : public INBodySim
         std::vector<Particle>* Particles;
 
         ID3D11DeviceContext* Context;
+        
         std::unique_ptr<DirectX::GeometricPrimitive> DebugCube;
+        std::unique_ptr<DirectX::GeometricPrimitive> DebugSphere;
 };

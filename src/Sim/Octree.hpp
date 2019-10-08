@@ -23,20 +23,26 @@ struct Cube
 class Octree
 {
     public:
-        Octree(const Cube& bounds);
+        Octree(const Cube& bounds, int depth = 0);
 
         void Split();
         void Add(Particle* p);
+        void CalculateMass();
+        Vec3d CalculateForce(Particle *p);
+        void RenderDebug(DirectX::GeometricPrimitive* cube, DirectX::GeometricPrimitive* sphere, DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Matrix proj);
 
-        void RenderDebug(DirectX::GeometricPrimitive* cube, DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Matrix proj);
-
+        int Depth = 0;
+        int NumParticles = 0;
         Cube Bounds;
+        double TotalMass = 0.0;
+        DirectX::SimpleMath::Vector3 CentreOfMass;
 
     private:
         bool IsLeaf = true;
-        float Size;
-        const int MaxParticles = 10;
+        float Size = 0.0f;
 
-        std::list<Particle*> Particles;
+        const double Theta = 2.0f;
+
+        Particle* P = nullptr;
         std::array<std::unique_ptr<Octree>, 8> Children;
 };
