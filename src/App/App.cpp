@@ -11,7 +11,9 @@
 #include "Render/Shader.hpp"
 #include "Services/Log.hpp"
 
-#include "SimpleMath.h"
+#include <SimpleMath.h>
+#include <fstream>
+#include <direct.h>
 
 using namespace DirectX;
 using Microsoft::WRL::ComPtr;
@@ -92,6 +94,10 @@ void App::RegisterEvents()
         m_camera.Track(p);
         FLog::Get().Log("Tracking particle");
     });
+
+    EventStream::Register(EEvent::LoadParticleFile, [this](const EventData& data) {
+        InitParticlesFromFile(static_cast<const StringEventData&>(data).Value);
+    });
 }
 
 void App::InitParticles()
@@ -113,6 +119,121 @@ void App::InitParticles()
     init.pSysMem = &m_particles[0];
 
     DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
+}
+
+void App::InitParticlesFromFile(std::string fname)
+{
+    std::ifstream infile("data/" + fname, std::ios::binary);
+    std::vector<Particle> particles;
+
+    if(!infile.is_open())
+    {
+        FLog::Get().Log("Could not read particle file " + fname, FLog::Error);
+        return;
+    }
+
+    while(true)
+    {
+        Particle p;
+        infile.read(reinterpret_cast<char*>(&p), sizeof(Particle));
+
+        if(!infile)
+            break;
+        
+        particles.push_back(p);
+    }
+
+    infile.close();
+
+    m_numParticles = static_cast<unsigned int>(particles.size());
+    FLog::Get().Log("Read " + std::to_string(m_numParticles) + " particles from file");
+    
+    m_particles = particles;
+
+    long double TotalMass = 0.0;
+    Vec3d CentreOfMass;
+
+    for(const auto& particle : m_particles)
+    {
+        Vec3d pos(particle.Position.x, particle.Position.y, particle.Position.z);
+
+        TotalMass += particle.Mass;
+        CentreOfMass += pos * particle.Mass;
+    }
+
+    CentreOfMass /= TotalMass;
+
+    DirectX::SimpleMath::Vector3 Centre(static_cast<float>(CentreOfMass.x),
+                                        static_cast<float>(CentreOfMass.y),
+                                        static_cast<float>(CentreOfMass.z));
+
+    for(auto& particle : m_particles)
+        particle.Position -= Centre;
+
+    m_sim->Init(m_particles);
+    m_particleBuffer.Reset();
+
+    D3D11_BUFFER_DESC buffer;
+    buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    buffer.Usage = D3D11_USAGE_DEFAULT;
+    buffer.ByteWidth = m_numParticles * sizeof(Particle);
+    buffer.CPUAccessFlags = 0;
+    buffer.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA init;
+    init.pSysMem = &m_particles[0];
+
+    DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
+}
+
+void App::RunSimulation(float dt, int time, int numparticles)
+{
+    std::vector<Particle> particles(numparticles);
+
+    auto sim = CreateNBodySim(nullptr, ENBodySim::BarnesHut);
+    auto seeder = CreateParticleSeeder(particles, EParticleSeeder::Random);
+    
+    seeder->Seed();
+    sim->Init(particles);
+
+    LARGE_INTEGER startTime, endTime, timer, tstart;
+    QueryPerformanceCounter(&startTime);
+    QueryPerformanceCounter(&tstart);
+
+    long iterations = 0;
+
+    while(true)
+    {
+        ++iterations;
+
+        QueryPerformanceCounter(&endTime);
+        timer = endTime;
+
+        if(static_cast<int>((endTime.QuadPart - startTime.QuadPart) / 10000000) >= time)
+            break;
+
+        if(static_cast<int>(((timer.QuadPart - tstart.QuadPart) / 10000000) >= 1))
+        {
+            QueryPerformanceCounter(&tstart);
+            FLog::Get().Log("Running... (" + std::to_string(iterations) + " iterations)");
+        }
+        
+        sim->Update(dt);
+    }
+
+    _mkdir("data");
+    auto filename = "data/" + std::to_string(endTime.QuadPart) + ".nbody";
+    std::ofstream file(filename, std::ios::binary);
+    
+    if(file.is_open())
+    {
+        for(const auto& p : particles)
+        {
+            file.write(reinterpret_cast<const char*>(&p), sizeof(p));
+        }
+
+        file.close();
+    }
 }
 
 #pragma region Frame Update

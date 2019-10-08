@@ -5,6 +5,9 @@ set(CMAKE_CXX_STANDARD 14)
 
 option(ENABLE_TESTING "Turns on testing" OFF)
 
+# CxxOpts
+include_directories(lib/CxxOpts/include)
+
 # DirectXTK
 add_subdirectory(lib/DirectXTK)
 include_directories(lib/DirectXTK/Inc)

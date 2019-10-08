@@ -32,6 +32,7 @@ private:
     float SimSpeed = 1.0f;
     int Particles = 10;
     int SelectedSeeder = 0;
+    char FileBuf[200];
 
     std::map<ENBodySim, BenchmarkEventData> BenchmarkData;
 

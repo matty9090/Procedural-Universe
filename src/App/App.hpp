@@ -38,9 +38,9 @@ public:
 
     // Initialization and management
     void Initialize(HWND window, int width, int height);
-
-    // Basic game loop
     void Tick();
+
+    static void RunSimulation(float dt, int time, int numparticles);
 
     // IDeviceNotify
     virtual void OnDeviceLost() override;
@@ -59,6 +59,7 @@ public:
 
 private:
     void InitParticles();
+    void InitParticlesFromFile(std::string fname);
     void RegisterEvents();
 
     void Update(float dt);

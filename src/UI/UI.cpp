@@ -28,6 +28,8 @@ UI::UI(ID3D11DeviceContext* context, HWND hwnd)
 
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(device, context);
+
+    memset(FileBuf, '\0', 200);
 }
 
 UI::~UI()
@@ -113,6 +115,15 @@ void UI::Render()
     ImGui::SliderFloat("Blur", &newGaussianBlur, 0.1f, 12.0f);
     ImGui::SliderFloat("Bloom Base", &newBloomBase, 0.1f, 3.0f);
     ImGui::SliderFloat("Bloom Amount", &newBloomAmount, 0.1f, 6.0f);
+
+    ImGui::Separator();
+    ImGui::Text("Precomputation");
+    ImGui::InputText("File", FileBuf, 200);
+    
+    if(ImGui::Button("Load"))
+    {
+        EventStream::Report(EEvent::LoadParticleFile, StringEventData(FileBuf));
+    }
 
     ImGui::Separator();
     ImGui::Text("Benchmarking");

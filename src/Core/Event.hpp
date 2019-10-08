@@ -20,7 +20,8 @@ enum class EEvent
     RunBenchmark,
     BenchmarkResult,
     DrawDebugChanged,
-    TrackParticle
+    TrackParticle,
+    LoadParticleFile
 };
 
 typedef std::function<void(const EventData&)> EventCallback;

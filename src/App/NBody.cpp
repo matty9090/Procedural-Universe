@@ -2,10 +2,13 @@
 // Main.cpp
 //
 
-#include "app/AppCore.hpp"
-#include "app/App.hpp"
+#include "App/AppCore.hpp"
+#include "App/App.hpp"
+#include "Services/Log.hpp"
 
 #include <imgui.h>
+#include <cxxopts.hpp>
+#include <shellapi.h>
 
 namespace
 {
@@ -25,15 +28,62 @@ extern "C"
 // Entry point
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
+    bool showCmd = false;
+
 #ifdef _DEBUG
-    AllocConsole();
-
-    FILE *stdOut, *stdErr, *stdIn;
-
-    freopen_s(&stdOut, "conin$", "r", stdin);
-    freopen_s(&stdErr, "conout$", "w", stdout);
-    freopen_s(&stdIn,  "conout$", "w", stderr);
+    showCmd = true;
 #endif
+
+    int num;
+    auto cmd = CommandLineToArgvW(GetCommandLineW(), &num);
+    char** argv = new char*[num];
+
+    for(int i = 0; i < num; ++i)
+    {
+        int size = WideCharToMultiByte(CP_ACP, 0, cmd[i], -1, NULL, 0, NULL, NULL);
+        argv[i] = new char[size];
+        WideCharToMultiByte(CP_ACP, 0, cmd[i], -1, argv[i], size, NULL, NULL);
+        FLog::Get().Log(argv[i]);
+    }
+
+    cxxopts::Options options("NBody Simulator", "Simulate gravitational physics");
+
+    bool compute = false;
+    int simtime = 120, particles = 4000;
+    float timestep = 0.02f;
+
+    options.add_options()
+        ("c,compute", "Precompute a simulation", cxxopts::value<bool>(compute))
+        ("t,simtime", "Time to run the precomputed simulation for", cxxopts::value<int>(simtime))
+        ("s,timestep", "Timestep", cxxopts::value<float>(timestep))
+        ("p,particles", "Number of particles", cxxopts::value<int>(particles));
+    
+    auto result = options.parse(num, argv);
+
+    for(int i = 0; i < num; ++i)
+        delete[] argv[i];
+
+    delete[] argv;
+
+    if(result.count("compute") > 0)
+        showCmd = true;
+
+    if(showCmd)
+    {
+        AllocConsole();
+
+        FILE *stdOut, *stdErr, *stdIn;
+
+        freopen_s(&stdOut, "conin$", "r", stdin);
+        freopen_s(&stdErr, "conout$", "w", stdout);
+        freopen_s(&stdIn,  "conout$", "w", stderr);
+    }
+
+    if(result.count("compute") > 0)
+    {
+        App::RunSimulation(timestep * (1.0 / 60.0), simtime, particles);
+        return 0;
+    }
 
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);

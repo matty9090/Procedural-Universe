@@ -29,6 +29,13 @@ struct BoolEventData : public EventData
     BoolEventData(bool value) : Value(value) {}
 };
 
+struct StringEventData : public EventData
+{
+    std::string Value;
+
+    StringEventData(std::string value) : Value(value) {}
+};
+
 struct SimTypeEventData : public EventData
 {
     ENBodySim Value;

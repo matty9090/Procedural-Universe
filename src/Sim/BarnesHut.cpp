@@ -15,8 +15,11 @@ BarnesHut::BarnesHut(ID3D11DeviceContext* context) : Context(context)
 
     Tree = std::make_unique<Octree>(Bounds);
     
-    DebugCube = DirectX::GeometricPrimitive::CreateCube(context);
-    DebugSphere = DirectX::GeometricPrimitive::CreateSphere(context);
+    if(context)
+    {
+        DebugCube = DirectX::GeometricPrimitive::CreateCube(context);
+        DebugSphere = DirectX::GeometricPrimitive::CreateSphere(context);
+    }
 }
 
 

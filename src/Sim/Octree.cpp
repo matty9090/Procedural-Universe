@@ -95,7 +95,8 @@ void Octree::CalculateMass()
             CentreOfMass += child->CentreOfMass * static_cast<float>(child->TotalMass);
         }
 
-        CentreOfMass /= static_cast<float>(TotalMass);
+        if(TotalMass > 0.0)
+            CentreOfMass /= static_cast<float>(TotalMass);
     }
 }
 

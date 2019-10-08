@@ -7,3 +7,6 @@
 [submodule "lib/DirectXTK"]
 	path = lib/DirectXTK
 	url = https://github.com/microsoft/DirectXTK.git
+[submodule "lib/CxxOpts"]
+	path = lib/CxxOpts
+	url = https://github.com/jarro2783/cxxopts.git
