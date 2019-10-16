@@ -24,6 +24,8 @@ void StarSystemSeeder::Seed()
     star.Velocity = Vec3d();
 
     std::default_random_engine generator;
+    std::uniform_real_distribution<float>  dist_col(0.2f, 1.0f);
+    std::uniform_real_distribution<float>  dist_red(0.0f, 0.4f);
     std::uniform_real_distribution<double> dist_rad(4.0 * Phys::AU * Phys::M, 7.0 * Phys::AU * Phys::M);
     std::uniform_real_distribution<double> dist_vel(1 * Phys::AU * Phys::M, 5 * Phys::AU * Phys::M);
     std::uniform_real_distribution<double> dist_mass(1e10, 1e26);
@@ -40,8 +42,8 @@ void StarSystemSeeder::Seed()
         Particles[i].Velocity.y = dist_vel(generator) / 20.0;
         Particles[i].Velocity.z = 0;
 
-        Particles[i].Colour = DirectX::Colors::White;
-        Particles[i].OriginalColour = DirectX::Colors::White;
+        Particles[i].Colour = DirectX::SimpleMath::Color(dist_red(generator), dist_col(generator), dist_col(generator), 1.0f);
+        Particles[i].OriginalColour = Particles[i].Colour;
         Particles[i].Forces = Vec3d();
     }
 

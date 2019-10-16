@@ -52,6 +52,8 @@ private:
         BloomTarget1,
         BloomTarget2,
         BloomTarget3,
+        BloomTarget4,
+        BloomTarget5,
         BloomCombine
     };
 

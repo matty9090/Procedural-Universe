@@ -18,6 +18,7 @@
 
 #include <d3d11.h>
 #include <SimpleMath.h>
+#include <CommonStates.h>
 
 class UI;
 
@@ -79,6 +80,7 @@ private:
     DX::StepTimer                                   m_timer;
     std::unique_ptr<UI>                             m_ui;
     std::unique_ptr<PostProcess>                    m_postProcess;
+    std::unique_ptr<DirectX::CommonStates>          m_commonStates;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader>      m_vertexShader;
     Microsoft::WRL::ComPtr<ID3D11GeometryShader>    m_geometryShader;

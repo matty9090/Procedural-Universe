@@ -287,7 +287,6 @@ void App::Render()
     
     RenderParticles();
     context->GSSetShader(nullptr, 0, 0);
-
     
     if(m_drawDebug)
         m_sim->RenderDebug(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
@@ -320,6 +319,7 @@ void App::RenderParticles()
     m_gsBuffer->SetData(context, Buffers::GS { view * proj, view.Invert() });
     context->GSSetConstantBuffers(0, 1, m_gsBuffer->GetBuffer());
     context->RSSetState(m_deviceResources->GetRasterizerState());
+    context->OMSetBlendState(m_commonStates->Additive(), Colors::Black, 0xFFFFFFFF);
     context->Draw(m_numParticles, 0);
 }
 
@@ -464,6 +464,7 @@ void App::CreateDeviceDependentResources()
 
     m_sim = CreateNBodySim(context, ENBodySim::BarnesHut);
     m_ui = std::make_unique<UI>(context, m_deviceResources->GetWindow());
+    m_commonStates = std::make_unique<DirectX::CommonStates>(device);
 
     ID3DBlob* VertexCode;
 
