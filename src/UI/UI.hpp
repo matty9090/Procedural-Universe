@@ -27,10 +27,11 @@ private:
 
     float GaussianBlur = 2.0f;
     float BloomAmount = 1.0f, BloomBase = 1.4f;
+    float BloomSat = 1.0f, BloomBaseSat = 1.0f;
 
     bool Paused = false, DrawDebug;
     float SimSpeed = 1.0f;
-    int Particles = 10;
+    int NumParticles = 10;
     int SelectedSeeder = 0;
     char FileBuf[200];
 

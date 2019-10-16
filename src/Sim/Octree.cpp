@@ -142,7 +142,7 @@ Vec3d Octree::CalculateForce(Particle* p)
 
 void Octree::RenderDebug(Cube* cube, DirectX::GeometricPrimitive* sphere, DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Matrix proj)
 {
-    if(Depth > 0 && !IsLeaf)
+    if(IsLeaf && NumParticles > 0)
     {
         auto avg  = (Bounds.TopLeft + Bounds.BottomRight) / 2;
         auto pos  = DirectX::SimpleMath::Vector3(avg.x, avg.y, avg.z);

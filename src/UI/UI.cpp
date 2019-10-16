@@ -8,6 +8,12 @@
 #include "ImGuiDx11.h"
 #include "ImGuiWin32.h"
 
+#define UIPROPCHANGE(name, type) if(new##name != ##name) \
+    { \
+        ##name = new##name; \
+        EventStream::Report(EEvent::##name##Changed, ##type##EventData(##name)); \
+    } \
+
 UI::UI(ID3D11DeviceContext* context, HWND hwnd)
 {
     ID3D11Device* device = nullptr;
@@ -42,9 +48,11 @@ UI::~UI()
 void UI::Render()
 {
     float newSimSpeed = SimSpeed;
-    int newParticles = Particles;
+    int newNumParticles = NumParticles;
     float newBloomBase = BloomBase;
     float newBloomAmount = BloomAmount;
+    float newBloomSat = BloomSat;
+    float newBloomBaseSat = BloomBaseSat;
     float newGaussianBlur = GaussianBlur;
     bool runBenchmark = false;
 
@@ -64,7 +72,7 @@ void UI::Render()
     ImGui::Separator();
 
     ImGui::Text("Settings");
-    ImGui::SliderInt("Particles", &newParticles, 1, 20000);
+    ImGui::SliderInt("Particles", &newNumParticles, 1, 20000);
     ImGui::SliderFloat("Sim Speed", &newSimSpeed, 0.001f, 1.0f);
     
     if(ImGui::Combo("Seeder", &SelectedSeeder, "Random\0Galaxy\0StarSystem\0"))
@@ -113,8 +121,10 @@ void UI::Render()
     ImGui::Separator();
     ImGui::Text("Post processing");
     ImGui::SliderFloat("Blur", &newGaussianBlur, 0.1f, 12.0f);
-    ImGui::SliderFloat("Bloom Base", &newBloomBase, 0.1f, 3.0f);
-    ImGui::SliderFloat("Bloom Amount", &newBloomAmount, 0.1f, 6.0f);
+    ImGui::SliderFloat("Blm Base", &newBloomBase, 0.1f, 3.0f);
+    ImGui::SliderFloat("Blm Amount", &newBloomAmount, 0.1f, 6.0f);
+    ImGui::SliderFloat("Blm Saturation", &newBloomSat, 0.1f, 8.0f);
+    ImGui::SliderFloat("Blm Base Sat", &newBloomBaseSat, 0.1f, 8.0f);
 
     ImGui::Separator();
     ImGui::Text("Precomputation");
@@ -153,35 +163,13 @@ void UI::Render()
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-    if(newParticles != Particles)
-    {
-        Particles = newParticles;
-        EventStream::Report(EEvent::NumParticlesChanged, IntEventData(Particles));
-    }
-
-    if(newSimSpeed != SimSpeed)
-    {
-        SimSpeed = newSimSpeed;
-        EventStream::Report(EEvent::SimSpeedChanged, FloatEventData(SimSpeed));
-    }
-
-    if(newGaussianBlur != GaussianBlur)
-    {
-        GaussianBlur = newGaussianBlur;
-        EventStream::Report(EEvent::GaussianBlurChanged, FloatEventData(GaussianBlur));
-    }
-
-    if(newBloomBase != BloomBase)
-    {
-        BloomBase = newBloomBase;
-        EventStream::Report(EEvent::BloomBaseChanged, FloatEventData(BloomBase));
-    }
-
-    if(newBloomAmount != BloomAmount)
-    {
-        BloomAmount = newBloomAmount;
-        EventStream::Report(EEvent::BloomAmountChanged, FloatEventData(BloomAmount));
-    }
+    UIPROPCHANGE(NumParticles, Int)
+    UIPROPCHANGE(SimSpeed, Float)
+    UIPROPCHANGE(GaussianBlur, Float)
+    UIPROPCHANGE(BloomBase, Float)
+    UIPROPCHANGE(BloomAmount, Float)
+    UIPROPCHANGE(BloomSat, Float)
+    UIPROPCHANGE(BloomBaseSat, Float)
 
     if(runBenchmark)
     {

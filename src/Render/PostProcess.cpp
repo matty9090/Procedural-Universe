@@ -31,6 +31,14 @@ PostProcess::PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int
     EventStream::Register(EEvent::BloomAmountChanged, [this](const EventData& data) {
         BloomAmount = static_cast<const FloatEventData&>(data).Value;
     });
+
+    EventStream::Register(EEvent::BloomSatChanged, [this](const EventData& data) {
+        BloomSat = static_cast<const FloatEventData&>(data).Value;
+    });
+
+    EventStream::Register(EEvent::BloomBaseSatChanged, [this](const EventData& data) {
+        BloomBaseSat = static_cast<const FloatEventData&>(data).Value;
+    });
 }
 
 void PostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex)
@@ -88,7 +96,7 @@ void PostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* ds
         DualPostProcess->SetEffect(DirectX::DualPostProcess::BloomCombine);
         DualPostProcess->SetSourceTexture(Targets[BloomTarget5].Srv.Get());
         DualPostProcess->SetSourceTexture2(sceneTex);
-        DualPostProcess->SetBloomCombineParameters(BloomAmount, BloomBase, 1.0f, 1.0f);
+        DualPostProcess->SetBloomCombineParameters(BloomAmount, BloomBase, BloomSat, BloomBaseSat);
         DualPostProcess->Process(Context);
     });
 

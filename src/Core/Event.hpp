@@ -15,6 +15,8 @@ enum class EEvent
     GaussianBlurChanged,
     BloomBaseChanged,
     BloomAmountChanged,
+    BloomSatChanged,
+    BloomBaseSatChanged,
     SeederChanged,
     ForceFrame,
     RunBenchmark,
