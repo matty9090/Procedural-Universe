@@ -20,6 +20,10 @@ PostProcess::PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int
     Targets[BloomTarget5] = CreateTarget(Width, Height);
     Targets[BloomCombine] = CreateTarget(Width, Height);
 
+    EventStream::Register(EEvent::UseBloomChanged, [this](const EventData& data) {
+        UseBloom = static_cast<const BoolEventData&>(data).Value;
+    });
+
     EventStream::Register(EEvent::GaussianBlurChanged, [this](const EventData& data) {
         GaussianBlur = static_cast<const FloatEventData&>(data).Value;
     });
@@ -43,68 +47,79 @@ PostProcess::PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int
 
 void PostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex)
 {
-    RenderPP(Targets[Blur], [&]() {
-        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::GaussianBlur_5x5);
-        BasicPostProcess->SetGaussianParameter(GaussianBlur);
-        BasicPostProcess->SetSourceTexture(sceneTex);
-        BasicPostProcess->Process(Context);
-    });
+    if(UseBloom)
+    {
+        RenderPP(Targets[Blur], [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::GaussianBlur_5x5);
+            BasicPostProcess->SetGaussianParameter(GaussianBlur);
+            BasicPostProcess->SetSourceTexture(sceneTex);
+            BasicPostProcess->Process(Context);
+        });
 
-    RenderPP(Targets[BloomExtract], [&]() {
-        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::BloomExtract);
-        BasicPostProcess->SetSourceTexture(Targets[Blur].Srv.Get());
-        BasicPostProcess->Process(Context);
-    });
+        RenderPP(Targets[BloomExtract], [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::BloomExtract);
+            BasicPostProcess->SetSourceTexture(Targets[Blur].Srv.Get());
+            BasicPostProcess->Process(Context);
+        });
 
-    RenderPP(Targets[BloomTarget0], [&]() {
-        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::DownScale_2x2);
-        BasicPostProcess->SetSourceTexture(Targets[BloomExtract].Srv.Get());
-        BasicPostProcess->Process(Context);
-    });
+        RenderPP(Targets[BloomTarget0], [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::DownScale_2x2);
+            BasicPostProcess->SetSourceTexture(Targets[BloomExtract].Srv.Get());
+            BasicPostProcess->Process(Context);
+        });
 
-    RenderPP(Targets[BloomTarget1], [&]() {
-        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::DownScale_2x2);
-        BasicPostProcess->SetSourceTexture(Targets[BloomTarget0].Srv.Get());
-        BasicPostProcess->Process(Context);
-    });
+        RenderPP(Targets[BloomTarget1], [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::DownScale_2x2);
+            BasicPostProcess->SetSourceTexture(Targets[BloomTarget0].Srv.Get());
+            BasicPostProcess->Process(Context);
+        });
 
-    RenderPP(Targets[BloomTarget2], [&]() {
-        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::DownScale_2x2);
-        BasicPostProcess->SetSourceTexture(Targets[BloomTarget1].Srv.Get());
-        BasicPostProcess->Process(Context);
-    });
+        RenderPP(Targets[BloomTarget2], [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::DownScale_2x2);
+            BasicPostProcess->SetSourceTexture(Targets[BloomTarget1].Srv.Get());
+            BasicPostProcess->Process(Context);
+        });
 
-    RenderPP(Targets[BloomTarget3], [&]() {
-        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::DownScale_2x2);
-        BasicPostProcess->SetSourceTexture(Targets[BloomTarget2].Srv.Get());
-        BasicPostProcess->Process(Context);
-    });
+        RenderPP(Targets[BloomTarget3], [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::DownScale_2x2);
+            BasicPostProcess->SetSourceTexture(Targets[BloomTarget2].Srv.Get());
+            BasicPostProcess->Process(Context);
+        });
 
-    RenderPP(Targets[BloomTarget4], [&]() {
-        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::BloomBlur);
-        BasicPostProcess->SetSourceTexture(Targets[BloomTarget3].Srv.Get());
-        BasicPostProcess->Process(Context);
-    });
+        RenderPP(Targets[BloomTarget4], [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::BloomBlur);
+            BasicPostProcess->SetSourceTexture(Targets[BloomTarget3].Srv.Get());
+            BasicPostProcess->Process(Context);
+        });
 
-    RenderPP(Targets[BloomTarget5], [&]() {
-        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::Copy);
-        BasicPostProcess->SetSourceTexture(Targets[BloomTarget4].Srv.Get());
-        BasicPostProcess->Process(Context);
-    });
+        RenderPP(Targets[BloomTarget5], [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::Copy);
+            BasicPostProcess->SetSourceTexture(Targets[BloomTarget4].Srv.Get());
+            BasicPostProcess->Process(Context);
+        });
 
-    RenderPP(Targets[BloomCombine], [&]() {
-        DualPostProcess->SetEffect(DirectX::DualPostProcess::BloomCombine);
-        DualPostProcess->SetSourceTexture(Targets[BloomTarget5].Srv.Get());
-        DualPostProcess->SetSourceTexture2(sceneTex);
-        DualPostProcess->SetBloomCombineParameters(BloomAmount, BloomBase, BloomSat, BloomBaseSat);
-        DualPostProcess->Process(Context);
-    });
+        RenderPP(Targets[BloomCombine], [&]() {
+            DualPostProcess->SetEffect(DirectX::DualPostProcess::BloomCombine);
+            DualPostProcess->SetSourceTexture(Targets[BloomTarget5].Srv.Get());
+            DualPostProcess->SetSourceTexture2(sceneTex);
+            DualPostProcess->SetBloomCombineParameters(BloomAmount, BloomBase, BloomSat, BloomBaseSat);
+            DualPostProcess->Process(Context);
+        });
 
-    RenderPP(rtv, dsv, [&]() {
-        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::Copy);
-        BasicPostProcess->SetSourceTexture(Targets[BloomCombine].Srv.Get());
-        BasicPostProcess->Process(Context);
-    });
+        RenderPP(rtv, dsv, [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::Copy);
+            BasicPostProcess->SetSourceTexture(Targets[BloomCombine].Srv.Get());
+            BasicPostProcess->Process(Context);
+        });
+    }
+    else
+    {
+        RenderPP(rtv, dsv, [&]() {
+            BasicPostProcess->SetEffect(DirectX::BasicPostProcess::Copy);
+            BasicPostProcess->SetSourceTexture(sceneTex);
+            BasicPostProcess->Process(Context);
+        });
+    }
 }
 
 void PostProcess::RenderPP(Target target, std::function<void()> func)

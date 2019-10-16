@@ -34,6 +34,7 @@ private:
     float BHTheta = 3.0f;
     int NumParticles = 10;
     int SelectedSeeder = 0;
+    bool UseBloom = true;
     bool UseSplatting = false;
     char FileBuf[200];
 

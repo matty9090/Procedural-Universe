@@ -59,6 +59,7 @@ private:
 
     std::map<int, Target> Targets;
 
+    bool UseBloom = true;
     float GaussianBlur = 2.0f;
     float BloomAmount = 1.0f, BloomBase = 1.4f;
     float BloomSat = 1.0f, BloomBaseSat = 1.0f;

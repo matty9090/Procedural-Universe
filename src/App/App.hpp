@@ -98,4 +98,6 @@ private:
     bool                                            m_isPaused = false;
     float                                           m_simSpeed = 0.02f;
     bool                                            m_drawDebug = false;
+    bool                                            m_useBloom = true;
+    bool                                            m_useSplatting = false;
 };

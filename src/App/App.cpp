@@ -98,6 +98,10 @@ void App::RegisterEvents()
     EventStream::Register(EEvent::LoadParticleFile, [this](const EventData& data) {
         InitParticlesFromFile(static_cast<const StringEventData&>(data).Value);
     });
+
+    EventStream::Register(EEvent::UseSplattingChanged, [this](const EventData& data) {
+        m_useSplatting = static_cast<const BoolEventData&>(data).Value;
+    });
 }
 
 void App::InitParticles()
@@ -292,6 +296,7 @@ void App::Render()
         m_sim->RenderDebug(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
     
     m_postProcess->Render(renderTarget, dsv, m_deviceResources->GetSceneShaderResourceView());
+
     m_ui->Render();
 
     m_deviceResources->PIXEndEvent();

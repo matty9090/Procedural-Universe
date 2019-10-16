@@ -24,8 +24,9 @@ enum class EEvent
     DrawDebugChanged,
     TrackParticle,
     LoadParticleFile,
-    UseSplattingChanged,
-    BHThetaChanged
+    BHThetaChanged,
+    UseBloomChanged,
+    UseSplattingChanged
 };
 
 typedef std::function<void(const EventData&)> EventCallback;

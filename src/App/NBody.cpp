@@ -81,7 +81,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
     if(result.count("compute") > 0)
     {
-        App::RunSimulation(timestep * (1.0 / 60.0), simtime, particles);
+        App::RunSimulation(timestep * (1.0f / 60.0f), simtime, particles);
         return 0;
     }
 
