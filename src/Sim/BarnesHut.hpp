@@ -10,6 +10,7 @@ class BarnesHut : public INBodySim
 {
     public:
         BarnesHut(ID3D11DeviceContext* context);
+        ~BarnesHut();
 
         void Init(std::vector<Particle>& particles) final;
         void Update(float dt) final;

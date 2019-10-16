@@ -30,9 +30,11 @@ private:
     float BloomSat = 1.0f, BloomBaseSat = 1.0f;
 
     bool Paused = false, DrawDebug;
-    float SimSpeed = 1.0f;
+    float SimSpeed = 0.02f;
+    float BHTheta = 3.0f;
     int NumParticles = 10;
     int SelectedSeeder = 0;
+    bool UseSplatting = false;
     char FileBuf[200];
 
     std::map<ENBodySim, BenchmarkEventData> BenchmarkData;

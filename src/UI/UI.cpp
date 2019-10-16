@@ -54,6 +54,8 @@ void UI::Render()
     float newBloomSat = BloomSat;
     float newBloomBaseSat = BloomBaseSat;
     float newGaussianBlur = GaussianBlur;
+    float newBHTheta = BHTheta;
+
     bool runBenchmark = false;
 
     ImGui_ImplDX11_NewFrame();
@@ -102,6 +104,11 @@ void UI::Render()
         }
     }
 
+    if(SimType == ENBodySim::BarnesHut)
+    {
+        ImGui::SliderFloat("Theta", &newBHTheta, 0.1f, 6.0f);
+    }
+
     ImGui::Separator();
     ImGui::Text("Frame options");
 
@@ -120,11 +127,27 @@ void UI::Render()
 
     ImGui::Separator();
     ImGui::Text("Post processing");
-    ImGui::SliderFloat("Blur", &newGaussianBlur, 0.1f, 12.0f);
-    ImGui::SliderFloat("Blm Base", &newBloomBase, 0.1f, 3.0f);
-    ImGui::SliderFloat("Blm Amount", &newBloomAmount, 0.1f, 6.0f);
-    ImGui::SliderFloat("Blm Saturation", &newBloomSat, 0.1f, 8.0f);
-    ImGui::SliderFloat("Blm Base Sat", &newBloomBaseSat, 0.1f, 8.0f);
+    
+    if(ImGui::Button("Bloom"))
+    {
+        UseSplatting = false;
+    }
+
+    ImGui::SameLine();
+
+    if(ImGui::Button("Splatting"))
+    {
+        UseSplatting = true;
+    }
+
+    if(!UseSplatting)
+    {
+        ImGui::SliderFloat("Blur", &newGaussianBlur, 0.1f, 12.0f);
+        ImGui::SliderFloat("Blm Base", &newBloomBase, 0.1f, 3.0f);
+        ImGui::SliderFloat("Blm Amount", &newBloomAmount, 0.1f, 6.0f);
+        ImGui::SliderFloat("Blm Saturation", &newBloomSat, 0.1f, 8.0f);
+        ImGui::SliderFloat("Blm Base Sat", &newBloomBaseSat, 0.1f, 8.0f);
+    }
 
     ImGui::Separator();
     ImGui::Text("Precomputation");
@@ -170,6 +193,7 @@ void UI::Render()
     UIPROPCHANGE(BloomAmount, Float)
     UIPROPCHANGE(BloomSat, Float)
     UIPROPCHANGE(BloomBaseSat, Float)
+    UIPROPCHANGE(BHTheta, Float)
 
     if(runBenchmark)
     {

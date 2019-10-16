@@ -1,6 +1,7 @@
 #include "BarnesHut.hpp"
 #include "Services/Log.hpp"
 #include "Sim/Physics.hpp"
+#include "Core/Event.hpp"
 
 #include <thread>
 
@@ -22,8 +23,16 @@ BarnesHut::BarnesHut(ID3D11DeviceContext* context) : Context(context)
         DebugCube = std::make_unique<Cube>(context);
         DebugSphere = DirectX::GeometricPrimitive::CreateSphere(context);
     }
+
+    EventStream::Register(EEvent::BHThetaChanged, [&](const EventData& data) {
+        Octree::Theta = static_cast<const FloatEventData&>(data).Value;
+    });
 }
 
+BarnesHut::~BarnesHut()
+{
+    EventStream::UnregisterAll(EEvent::BHThetaChanged);
+}
 
 void BarnesHut::Init(std::vector<Particle>& particles)
 {

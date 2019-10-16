@@ -2,6 +2,8 @@
 #include "Services/Log.hpp"
 #include "Sim/Physics.hpp"
 
+double Octree::Theta = 2.0f;
+
 Octree::Octree(const BoundingCube& bounds, int depth)
     : Bounds(bounds),
       Size(bounds.BottomRight.x - bounds.TopLeft.x),

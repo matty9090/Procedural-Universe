@@ -12,3 +12,8 @@ void EventStream::Report(EEvent event, EventData& data)
     for(auto callback : Events[event])
         callback(data);
 }
+
+void EventStream::UnregisterAll(EEvent event)
+{
+    Events[event].clear();
+}

@@ -23,7 +23,9 @@ enum class EEvent
     BenchmarkResult,
     DrawDebugChanged,
     TrackParticle,
-    LoadParticleFile
+    LoadParticleFile,
+    UseSplattingChanged,
+    BHThetaChanged
 };
 
 typedef std::function<void(const EventData&)> EventCallback;
@@ -33,6 +35,7 @@ class EventStream
 public:
     static void Report(EEvent event, EventData& data);
     static void Register(EEvent event, EventCallback callback);
+    static void UnregisterAll(EEvent event);
 
 private:
     static std::unordered_map<EEvent, std::list<EventCallback>> Events;

@@ -38,11 +38,11 @@ class Octree
         double TotalMass = 0.0;
         DirectX::SimpleMath::Vector3 CentreOfMass;
 
+        static double Theta;
+
     private:
         bool IsLeaf = true;
         float Size = 0.0f;
-
-        const double Theta = 2.0f;
 
         Particle* P = nullptr;
         std::array<std::unique_ptr<Octree>, 8> Children;
