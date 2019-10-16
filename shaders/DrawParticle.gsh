@@ -14,6 +14,7 @@ struct GS_VertOut
 {
 	float4 ViewportPosition : SV_Position;
     float4 Colour : COLOR;
+    float2 UV : TEXCOORD0;
 };
 
 [maxvertexcount(4)]  
@@ -30,6 +31,14 @@ void main
         float3(-1, -1, 0),
         float3( 1, -1, 0),
     };
+
+    const float2 UVs[4] =
+    {
+        float2( 0, 0),
+        float2( 1, 0),
+        float2( 0, 1),
+        float2( 1, 1),
+    };
     
     GS_VertOut outVert;
 
@@ -41,6 +50,7 @@ void main
         
 		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
         outVert.Colour = inParticle[0].Colour;
+        outVert.UV = UVs[i];
 		outStrip.Append( outVert );
 	}
     

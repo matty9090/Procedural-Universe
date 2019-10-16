@@ -2,15 +2,19 @@ struct PS_Input
 {
 	float4 Position : SV_Position;
     float4 Colour : COLOR;
+	float2 UV : TEXCOORD0;
 };
 
-struct PS_Output
+float4 main(in PS_Input i) : SV_TARGET
 {
-	float4 Colour : SV_Target;
-};
+	float2 a = i.UV * 2.0 - 1.0;
+	float r2 = dot(a, a);
+	
+	if(r2 > 1.0) discard;
 
-void main(in PS_Input i, out PS_Output o) 
-{
-	o.Colour.rgb = i.Colour;
-	o.Colour.a = 1.0f;
+	float4 Col;
+	Col.rgb = i.Colour;
+	Col.a = 1.0f;
+
+	return Col;
 }
