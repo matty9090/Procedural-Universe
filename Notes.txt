@@ -11,3 +11,5 @@ Todo:
  - Append to precomputated simulation
  - Splatting
  - Blending / fading out particles < 1 pixel
+ - Arrange in galaxy formation
+ - Zoom into stars

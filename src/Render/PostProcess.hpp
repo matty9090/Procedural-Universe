@@ -7,34 +7,19 @@
 #include <map>
 #include <functional>
 
+#include "RenderCommon.hpp"
+
 class PostProcess
 {
-private:
-    struct Target
-    {
-        Microsoft::WRL::ComPtr<ID3D11Texture2D> Rt;
-        Microsoft::WRL::ComPtr<ID3D11Texture2D> Ds;
-        Microsoft::WRL::ComPtr<ID3D11RenderTargetView> Rtv;
-        Microsoft::WRL::ComPtr<ID3D11DepthStencilView> Dsv;
-        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Srv;
-
-        int Width, Height;
-
-        void Clear(ID3D11DeviceContext* context);
-    };
-
 public:
     PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int width, int height);
 
     void Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex);
 
 private:
-    void Clear();
-    void RenderPP(Target target, std::function<void()> func);
+    void RenderPP(RenderView target, std::function<void()> func);
     void RenderPP(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, std::function<void()> func);
     void SetViewport(int width, int height);
-
-    Target CreateTarget(int width, int height);
 
     ID3D11Device* Device;
     ID3D11DeviceContext *Context;
@@ -57,7 +42,7 @@ private:
         BloomCombine
     };
 
-    std::map<int, Target> Targets;
+    std::map<int, RenderView> Targets;
 
     bool UseBloom = true;
     float GaussianBlur = 2.0f;

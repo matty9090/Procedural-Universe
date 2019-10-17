@@ -142,11 +142,11 @@ void UI::Render()
         EventStream::Report(EEvent::UseSplattingChanged, BoolEventData(UseSplatting));
     }
 
-    ImGui::SliderFloat("Blur", &newGaussianBlur, 0.1f, 12.0f);
-    ImGui::SliderFloat("Blm Base", &newBloomBase, 0.1f, 3.0f);
-    ImGui::SliderFloat("Blm Amount", &newBloomAmount, 0.1f, 6.0f);
-    ImGui::SliderFloat("Blm Saturation", &newBloomSat, 0.1f, 8.0f);
-    ImGui::SliderFloat("Blm Base Sat", &newBloomBaseSat, 0.1f, 8.0f);
+    ImGui::SliderFloat("Blur", &newGaussianBlur, 0.1f, 10.0f);
+    ImGui::SliderFloat("Blm Base", &newBloomBase, 0.1f, 2.0f);
+    ImGui::SliderFloat("Blm Amount", &newBloomAmount, 0.0f, 1.0f);
+    ImGui::SliderFloat("Blm Saturation", &newBloomSat, 0.1f, 6.0f);
+    ImGui::SliderFloat("Blm Base Sat", &newBloomBaseSat, 0.1f, 6.0f);
 
     ImGui::Separator();
     ImGui::Text("Precomputation");

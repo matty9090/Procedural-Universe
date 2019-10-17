@@ -106,7 +106,7 @@ class Camera
         size_t m_width, m_height;
         float m_initialLength = 1000.0f;
         float m_length = m_initialLength;
-        float m_near = 1.0f, m_far = 10000.0f;
+        float m_near = 10.0f, m_far = 30000.0f;
 
         DirectX::SimpleMath::Matrix m_view, m_proj;
         DirectX::SimpleMath::Vector3 m_cameraPos;

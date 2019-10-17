@@ -44,7 +44,7 @@ void main
 
 	for (int i = 0; i < 4; ++i)
 	{
-		const float scale = 1.2f;
+		const float scale = 8.0f;
         float3 corner = Corners[i] * scale;
         float3 worldPosition = inParticle[0].Position + mul( corner, (float3x3)InvViewMatrix );
         

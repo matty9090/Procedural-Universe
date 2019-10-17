@@ -289,12 +289,19 @@ void App::Render()
 
     context->OMSetRenderTargets(1, &sceneTarget, dsv);
     
+    // HACK
     RenderParticles();
+
+    if(m_useSplatting)
+        m_splatting->Render(m_numParticles, m_deviceResources->GetSceneShaderResourceView());
+    
+    RenderParticles();
+
     context->GSSetShader(nullptr, 0, 0);
     
     if(m_drawDebug)
         m_sim->RenderDebug(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
-    
+
     m_postProcess->Render(renderTarget, dsv, m_deviceResources->GetSceneShaderResourceView());
 
     m_ui->Render();
@@ -505,6 +512,8 @@ void App::CreateWindowSizeDependentResources()
     m_postProcess = std::make_unique<PostProcess>(m_deviceResources->GetD3DDevice(),
                                                   m_deviceResources->GetD3DDeviceContext(),
                                                   width, height);
+
+    m_splatting = std::make_unique<Splatting>(m_deviceResources->GetD3DDeviceContext(), width, height);
 }
 
 void App::OnDeviceLost()

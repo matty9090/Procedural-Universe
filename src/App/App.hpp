@@ -13,6 +13,7 @@
 
 #include "Render/Camera.hpp"
 #include "Render/Particle.hpp"
+#include "Render/Splatting.hpp"
 #include "Render/PostProcess.hpp"
 #include "Render/ConstantBuffer.hpp"
 
@@ -21,6 +22,7 @@
 #include <CommonStates.h>
 
 class UI;
+class Splatting;
 
 namespace Buffers
 {
@@ -80,6 +82,7 @@ private:
     DX::StepTimer                                   m_timer;
     std::unique_ptr<UI>                             m_ui;
     std::unique_ptr<PostProcess>                    m_postProcess;
+    std::unique_ptr<Splatting>                      m_splatting;
     std::unique_ptr<DirectX::CommonStates>          m_commonStates;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader>      m_vertexShader;

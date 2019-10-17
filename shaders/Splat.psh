@@ -1,0 +1,16 @@
+struct PS_Input
+{
+	float4 Position : SV_Position;
+    float4 Colour : COLOR;
+	float2 UV : TEXCOORD0;
+};
+
+float4 main(in PS_Input i) : SV_TARGET
+{
+	float2 a = i.UV * 2.0 - 1.0;
+	float r2 = dot(a, a);
+	
+	if(r2 > 1.0) discard;
+
+	return float4(i.Colour.xyz, 0.1f);
+}
