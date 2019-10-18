@@ -13,3 +13,4 @@ Todo:
  - Blending / fading out particles < 1 pixel
  - Arrange in galaxy formation
  - Zoom into stars
+ - Dark energy
