@@ -8,62 +8,35 @@ using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
 Camera::Camera(size_t width, size_t height)
-    : m_width(width),
-      m_height(height),
-      m_cameraPos(0.0f, 0.0f, -1000.0f)
+    : Width(width),
+      Height(height),
+      View(Matrix::CreateTranslation(0.0f, 0.0f, -1000.0f)),
+      CameraMode(std::make_unique<ArcballCameraMode>(width, height, View))
 {
-    m_proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f, float(width) / float(height), m_near, m_far);
+    Proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f, float(width) / float(height), NearPlane, FarPlane);
 }
 
 void Camera::Update(float dt)
 {
-    Vector3 look = Vector3::Zero;
-
-    if(m_tracked)
-    {
-        m_cameraPos += m_lastPos - m_tracked->Position;
-        m_lastPos = m_tracked->Position;
-        look = m_tracked->Position;
-    }
-
-    m_view = Matrix::CreateLookAt(m_cameraPos, look, Vector3::Up);
+    CameraMode->Update(dt);
 }
 
 void Camera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, float dt)
 {
-    if (ms.positionMode == Mouse::MODE_RELATIVE)
-    {
-        Vector3 delta = Vector3(float(ms.x), float(ms.y), 0.f) * dt * 0.5f;
-        m_cameraPos += delta * dt * 40000.0f;
-    }
-    else
-    {
-        m_length = m_initialLength - ms.scrollWheelValue;
-    }
-
-    if(m_length < 100.0f) m_length = 100.0f;
-    if(m_length > 6000.0f) m_length = 6000.0f;
-
-    m_cameraPos.Normalize();
-    m_cameraPos *= m_length;
-
-    if((ms.positionMode == Mouse::MODE_ABSOLUTE && ms.x > 260)
-        || ms.positionMode == Mouse::MODE_RELATIVE)
-    {
-        mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
-    }
+    if ((ms.positionMode == Mouse::MODE_ABSOLUTE && ms.x > 260) || ms.positionMode == Mouse::MODE_RELATIVE)
+        CameraMode->Events(mouse, ms, dt);
 }
 
-std::string Camera::to_string()
+std::string Camera::ToString()
 {
     std::ostringstream ss;
-    ss << "(" << m_cameraPos.x << ", " << m_cameraPos.y << ", " << m_cameraPos.z << ")";
+    ss << "(" << View.Translation().x << ", " << View.Translation().y << ", " << View.Translation().z << ")";
     return ss.str();
 }
 
 bool Camera::PixelFromWorldPoint(Vector3 worldPt, int& x, int& y)
 {
-    Matrix viewProj = m_view * m_proj;
+    Matrix viewProj = View * Proj;
     Vector3 viewportPt = Vector3::Transform(worldPt, viewProj);
 
     if(viewportPt.z < 0)
@@ -72,21 +45,21 @@ bool Camera::PixelFromWorldPoint(Vector3 worldPt, int& x, int& y)
     viewportPt.x /= viewportPt.z;
     viewportPt.y /= viewportPt.z;
 
-    x = static_cast<int>((viewportPt.x + 1.0f) * m_width  * 0.5f);
-    y = static_cast<int>((1.0f - viewportPt.y) * m_height * 0.5f);
+    x = static_cast<int>((viewportPt.x + 1.0f) * Width  * 0.5f);
+    y = static_cast<int>((1.0f - viewportPt.y) * Height * 0.5f);
 
     return true;
 }
 
 Vector3 Camera::WorldPointFromPixel(int x, int y)
 {
-    Matrix viewProj = m_view * m_proj;
+    Matrix viewProj = View * Proj;
     Vector4 Q;
 
-    Q.x = static_cast<float>(x) / (static_cast<float>(m_width) / 2.0f) - 1.0f;
-    Q.y = 1 - static_cast<float>(y) / (static_cast<float>(m_height) / 2.0f);
+    Q.x = static_cast<float>(x) / (static_cast<float>(Width) / 2.0f) - 1.0f;
+    Q.y = 1 - static_cast<float>(y) / (static_cast<float>(Height) / 2.0f);
     Q.z = 0.0f;
-    Q.w = m_near;
+    Q.w = NearPlane;
 
     Q.x *= Q.w;
     Q.y *= Q.w;
@@ -96,4 +69,30 @@ Vector3 Camera::WorldPointFromPixel(int x, int y)
 
     Q = Vector4::Transform(Q, invViewProj);
     return Vector3(Q);
+}
+
+void ArcballCameraMode::Update(float dt)
+{
+    float dx = Radius * cosf(Theta) * sinf(Phi);
+    float dy = Radius * cosf(Phi);
+    float dz = Radius * sinf(Theta) * sinf(Phi);
+
+    Position = Vector3(dx, -dy, dz);
+
+    View = Matrix::CreateLookAt(Position, Target, Vector3::UnitY);
+}
+
+void ArcballCameraMode::Events(DirectX::Mouse* mouse, DirectX::Mouse::State& ms, float dt)
+{
+    if (ms.positionMode == Mouse::MODE_RELATIVE)
+    {
+        Theta += static_cast<float>(ms.x) * 0.01f;
+        Phi   += static_cast<float>(ms.y) * 0.01f;
+    }
+    else
+    {
+        Radius = InitialRadius - ms.scrollWheelValue;
+    }
+
+    mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
 }

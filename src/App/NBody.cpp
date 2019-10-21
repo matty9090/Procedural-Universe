@@ -28,7 +28,7 @@ extern "C"
 // Entry point
 int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
-    bool showCmd = false;
+    bool showCmd = true;
 
 #ifdef _DEBUG
     showCmd = true;
@@ -72,11 +72,9 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     {
         AllocConsole();
 
-        FILE *stdOut, *stdErr, *stdIn;
-
-        freopen_s(&stdOut, "conin$", "r", stdin);
-        freopen_s(&stdErr, "conout$", "w", stdout);
-        freopen_s(&stdIn,  "conout$", "w", stderr);
+        FILE *fp;
+        freopen_s(&fp, "CONOUT$", "w", stdout);
+        std::cout.clear();
     }
 
     if(result.count("compute") > 0)

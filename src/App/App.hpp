@@ -75,7 +75,7 @@ private:
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
 
-    Camera                                          m_camera;
+    std::unique_ptr<Camera>                         m_camera;
 
     std::unique_ptr<DX::DeviceResources>            m_deviceResources;
     std::unique_ptr<DirectX::Mouse>                 m_mouse;

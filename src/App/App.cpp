@@ -91,7 +91,7 @@ void App::RegisterEvents()
 
     EventStream::Register(EEvent::TrackParticle, [this](const EventData& data) {
         auto p = static_cast<const ParticleEventData&>(data).Value;
-        m_camera.Track(p);
+        m_camera->Track(p);
         FLog::Get().Log("Tracking particle");
     });
 
@@ -259,8 +259,8 @@ void App::Update(float dt)
 
     CheckParticleSelected(mouse_state);
 
-    m_camera.Events(m_mouse.get(), mouse_state, dt);
-    m_camera.Update(dt);
+    m_camera->Events(m_mouse.get(), mouse_state, dt);
+    m_camera->Update(dt);
     m_ui->Update(dt);
 
     if(!m_isPaused)
@@ -300,7 +300,7 @@ void App::Render()
     context->GSSetShader(nullptr, 0, 0);
     
     if(m_drawDebug)
-        m_sim->RenderDebug(m_camera.GetViewMatrix(), m_camera.GetProjectionMatrix());
+        m_sim->RenderDebug(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
 
     m_postProcess->Render(renderTarget, dsv, m_deviceResources->GetSceneShaderResourceView());
 
@@ -325,8 +325,8 @@ void App::RenderParticles()
     context->IASetVertexBuffers(0, 1, m_particleBuffer.GetAddressOf(), &stride, &offset);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
     
-    DirectX::SimpleMath::Matrix view = m_camera.GetViewMatrix();
-    DirectX::SimpleMath::Matrix proj = m_camera.GetProjectionMatrix();
+    DirectX::SimpleMath::Matrix view = m_camera->GetViewMatrix();
+    DirectX::SimpleMath::Matrix proj = m_camera->GetProjectionMatrix();
 
     m_gsBuffer->SetData(context, Buffers::GS { view * proj, view.Invert() });
     context->GSSetConstantBuffers(0, 1, m_gsBuffer->GetBuffer());
@@ -397,7 +397,7 @@ void App::CheckParticleSelected(DirectX::Mouse::State& ms)
     {
         int x, y;
 
-        if(m_camera.PixelFromWorldPoint(particle.Position, x, y))
+        if(m_camera->PixelFromWorldPoint(particle.Position, x, y))
         {
             DirectX::SimpleMath::Vector2 screenPos(static_cast<float>(x), static_cast<float>(y));
             
@@ -507,7 +507,7 @@ void App::CreateWindowSizeDependentResources()
     int width, height;
     GetDefaultSize(width, height);
 
-    m_camera = Camera(width, height);
+    m_camera = std::make_unique<Camera>(width, height);
 
     m_postProcess = std::make_unique<PostProcess>(m_deviceResources->GetD3DDevice(),
                                                   m_deviceResources->GetD3DDeviceContext(),
