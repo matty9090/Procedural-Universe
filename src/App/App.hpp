@@ -43,7 +43,7 @@ public:
     void Initialize(HWND window, int width, int height);
     void Tick();
 
-    static void RunSimulation(float dt, int time, int numparticles);
+    static void RunSimulation(float dt, int time, int numparticles, std::string file);
 
     // IDeviceNotify
     virtual void OnDeviceLost() override;
@@ -58,11 +58,10 @@ public:
     void OnWindowSizeChanged(int width, int height);
 
     // Properties
-    void GetDefaultSize( int& width, int& height ) const;
+    void GetDefaultSize(int& width, int& height) const;
 
 private:
     void InitParticles();
-    void InitParticlesFromFile(std::string fname);
     void RegisterEvents();
 
     void Update(float dt);
@@ -74,6 +73,8 @@ private:
 
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
+
+    static bool InitParticlesFromFile(std::string fname, std::vector<Particle>& particles);
 
     std::unique_ptr<Camera>                         m_camera;
 

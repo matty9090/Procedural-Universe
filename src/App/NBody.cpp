@@ -51,12 +51,14 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     bool compute = false;
     int simtime = 10, particles = 4000;
     float timestep = 0.02f;
+    std::string file = "";
 
     options.add_options()
         ("c,compute", "Precompute a simulation", cxxopts::value<bool>(compute))
         ("t,simtime", "Time to run the precomputed simulation for", cxxopts::value<int>(simtime))
         ("s,timestep", "Timestep", cxxopts::value<float>(timestep))
-        ("p,particles", "Number of particles", cxxopts::value<int>(particles));
+        ("p,particles", "Number of particles", cxxopts::value<int>(particles))
+        ("f,file", "Load previous computation", cxxopts::value<std::string>(file));
     
     auto result = options.parse(num, argv);
 
@@ -79,7 +81,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
     if(result.count("compute") > 0)
     {
-        App::RunSimulation(timestep * (1.0f / 60.0f), simtime, particles);
+        App::RunSimulation(timestep * (1.0f / 60.0f), simtime, particles, file);
         return 0;
     }
 

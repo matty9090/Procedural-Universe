@@ -96,7 +96,25 @@ void App::RegisterEvents()
     });
 
     EventStream::Register(EEvent::LoadParticleFile, [this](const EventData& data) {
-        InitParticlesFromFile(static_cast<const StringEventData&>(data).Value);
+        if (InitParticlesFromFile(static_cast<const StringEventData&>(data).Value, m_particles))
+        {
+            m_numParticles = static_cast<unsigned int>(m_particles.size());
+
+            m_sim->Init(m_particles);
+            m_particleBuffer.Reset();
+
+            D3D11_BUFFER_DESC buffer;
+            buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+            buffer.Usage = D3D11_USAGE_DEFAULT;
+            buffer.ByteWidth = m_numParticles * sizeof(Particle);
+            buffer.CPUAccessFlags = 0;
+            buffer.MiscFlags = 0;
+
+            D3D11_SUBRESOURCE_DATA init;
+            init.pSysMem = &m_particles[0];
+
+            DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
+        }
     });
 
     EventStream::Register(EEvent::UseSplattingChanged, [this](const EventData& data) {
@@ -125,16 +143,17 @@ void App::InitParticles()
     DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
 }
 
-void App::InitParticlesFromFile(std::string fname)
+bool App::InitParticlesFromFile(std::string fname, std::vector<Particle>& particles)
 {
     std::ifstream infile("data/" + fname, std::ios::binary);
-    std::vector<Particle> particles;
 
     if(!infile.is_open())
     {
         FLog::Get().Log("Could not read particle file " + fname, FLog::Error);
-        return;
+        return false;
     }
+
+    particles.clear();
 
     while(true)
     {
@@ -149,15 +168,12 @@ void App::InitParticlesFromFile(std::string fname)
 
     infile.close();
 
-    m_numParticles = static_cast<unsigned int>(particles.size());
-    FLog::Get().Log("Read " + std::to_string(m_numParticles) + " particles from file");
+    FLog::Get().Log("Read " + std::to_string(particles.size()) + " particles from file");
     
-    m_particles = particles;
-
     long double TotalMass = 0.0;
     Vec3d CentreOfMass;
 
-    for(const auto& particle : m_particles)
+    for(const auto& particle : particles)
     {
         Vec3d pos(particle.Position.x, particle.Position.y, particle.Position.z);
 
@@ -171,28 +187,18 @@ void App::InitParticlesFromFile(std::string fname)
                                         static_cast<float>(CentreOfMass.y),
                                         static_cast<float>(CentreOfMass.z));
 
-    for(auto& particle : m_particles)
+    for(auto& particle : particles)
         particle.Position -= Centre;
 
-    m_sim->Init(m_particles);
-    m_particleBuffer.Reset();
-
-    D3D11_BUFFER_DESC buffer;
-    buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    buffer.Usage = D3D11_USAGE_DEFAULT;
-    buffer.ByteWidth = m_numParticles * sizeof(Particle);
-    buffer.CPUAccessFlags = 0;
-    buffer.MiscFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA init;
-    init.pSysMem = &m_particles[0];
-
-    DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
+    return true;
 }
 
-void App::RunSimulation(float dt, int time, int numparticles)
+void App::RunSimulation(float dt, int time, int numparticles, std::string fileName)
 {
     std::vector<Particle> particles(numparticles);
+
+    if (fileName.length() > 0)
+        InitParticlesFromFile(fileName, particles);
 
     auto sim = CreateNBodySim(nullptr, ENBodySim::BarnesHut);
     auto seeder = CreateParticleSeeder(particles, EParticleSeeder::StarSystem);
