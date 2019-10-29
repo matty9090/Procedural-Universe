@@ -27,6 +27,10 @@ add_library(imgui STATIC
     lib/imgui/imstb_textedit.h
     lib/imgui/imstb_truetype.h)
 
+# Assimp
+add_subdirectory(lib/assimp)
+include_directories(lib/assimp/include)
+
 # NBody
 add_definitions(-DUNICODE)
 include_directories(src)
@@ -35,7 +39,7 @@ file(GLOB_RECURSE SRC_FILES src/*.cpp)
 list(REMOVE_ITEM SRC_FILES src/App/NBody.cpp)
 
 add_library(nbody_lib STATIC ${SRC_FILES})
-target_link_libraries(nbody_lib directxtk d3d11 dxgi imgui)
+target_link_libraries(nbody_lib directxtk d3d11 dxgi imgui assimp)
 
 add_executable(nbody WIN32 src/App/NBody.cpp resources/Resource.rc)
 target_link_libraries(nbody nbody_lib)
