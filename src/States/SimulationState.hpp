@@ -18,15 +18,6 @@
 #include <SimpleMath.h>
 #include <CommonStates.h>
 
-namespace Buffers
-{
-    struct GS
-    {
-        DirectX::SimpleMath::Matrix ViewProj;
-        DirectX::SimpleMath::Matrix InvView;
-    };
-}
-
 class SimulationState final : public IState
 {
 public:
@@ -53,30 +44,36 @@ private:
     void RunBenchmark();
     void CheckParticleSelected(DirectX::Mouse::State& ms);
 
-    ID3D11Device*                                   Device;
-    ID3D11DeviceContext*                            Context;
-    DX::DeviceResources*                            DeviceResources;
+    struct GSConstantBuffer
+    {
+        DirectX::SimpleMath::Matrix ViewProj;
+        DirectX::SimpleMath::Matrix InvView;
+    };
 
-    DirectX::Mouse*                                 Mouse;
-    std::unique_ptr<CCamera>                        Camera;
-    std::unique_ptr<CUI>                            UI;
-    std::unique_ptr<CPostProcess>                   PostProcess;
-    std::unique_ptr<CSplatting>                     Splatting;
-    std::unique_ptr<DirectX::CommonStates>          CommonStates;
+    ID3D11Device*                                     Device;
+    ID3D11DeviceContext*                              Context;
+    DX::DeviceResources*                              DeviceResources;
+                                                      
+    DirectX::Mouse*                                   Mouse;
+    std::unique_ptr<CCamera>                          Camera;
+    std::unique_ptr<CUI>                              UI;
+    std::unique_ptr<CPostProcess>                     PostProcess;
+    std::unique_ptr<CSplatting>                       Splatting;
+    std::unique_ptr<DirectX::CommonStates>            CommonStates;
+                                                      
+    RenderPipeline                                    ParticlePipeline;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>              ParticleBuffer;
 
-    RenderPipeline                                  ParticlePipeline;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>            ParticleBuffer;
-
-    std::unique_ptr<ConstantBuffer<Buffers::GS>>    GSBuffer;
-    std::vector<Particle>                           Particles;
-    unsigned int                                    NumParticles = 10;
-    Particle* SelectedParticle = nullptr;
-
-    std::unique_ptr<INBodySim>                      Sim;
-    std::unique_ptr<IParticleSeeder>                Seeder;
-    float                                           SimSpeed = 0.02f;
-    bool                                            bIsPaused = false;
-    bool                                            bDrawDebug = false;
-    bool                                            bUseBloom = true;
-    bool                                            bUseSplatting = false;
+    std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
+    std::vector<Particle>                             Particles;
+    unsigned int                                      NumParticles = 10;
+    Particle* SelectedParticle = nullptr;             
+                                                      
+    std::unique_ptr<INBodySim>                        Sim;
+    std::unique_ptr<IParticleSeeder>                  Seeder;
+    float                                             SimSpeed = 0.02f;
+    bool                                              bIsPaused = false;
+    bool                                              bDrawDebug = false;
+    bool                                              bUseBloom = true;
+    bool                                              bUseSplatting = false;
 };

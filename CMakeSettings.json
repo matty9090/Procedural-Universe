@@ -72,6 +72,44 @@
                     "type": "BOOL"
                 }
             ]
+        },
+        {
+            "name": "x64-Tests",
+            "generator": "Ninja",
+            "configurationType": "Debug",
+            "buildRoot": "${projectDir}\\out\\build\\${name}",
+            "installRoot": "${projectDir}\\out\\install\\${name}",
+            "cmakeCommandArgs": "",
+            "buildCommandArgs": "-v",
+            "ctestCommandArgs": "",
+            "inheritEnvironments": [ "msvc_x64_x64" ],
+            "variables": [
+                {
+                    "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_TESTS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "BUILD_SHARED_LIBS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ENABLE_TESTING",
+                    "value": "True",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "gtest_force_shared_crt",
+                    "value": "True",
+                    "type": "BOOL"
+                }
+            ]
         }
     ]
 }

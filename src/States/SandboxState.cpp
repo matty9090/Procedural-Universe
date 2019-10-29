@@ -8,24 +8,19 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     DeviceResources = resources;
     Mouse = mouse;
 
-    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT   , 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
-    ModelPipeline.LoadVertex(Device, L"shaders/PositionTexture.vsh");
-    ModelPipeline.LoadPixel(Device, L"shaders/Texture.psh");
-    ModelPipeline.CreateInputLayout(Device, layout);
+    CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     
     auto vp = DeviceResources->GetScreenViewport();
     Camera = std::make_unique<CCamera>(vp.Width, vp.Height);
 
     auto sandboxData = static_cast<SandboxStateData&>(data);
-    sandboxData.Particles;
+    Particles = sandboxData.Particles;
+
+    CreateModelPipeline();
+    CreateParticlePipeline();
 
     auto ShipMesh = CMesh::Load(Device, "resources/Ship.obj");
     Ship = std::make_unique<CModel>(Device, ShipMesh.get());
-
     Meshes.push_back(std::move(ShipMesh));
 }
 
@@ -48,8 +43,21 @@ void SandboxState::Render()
     auto dsv = DeviceResources->GetDepthStencilView();
 
     Context->OMSetRenderTargets(1, &rtv, dsv);
+    
+    Matrix view = Camera->GetViewMatrix();
+    Matrix viewProj = view * Camera->GetProjectionMatrix();
 
-    auto viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
+    ParticlePipeline.SetState(Context, [&]() {
+        unsigned int offset = 0;
+        unsigned int stride = sizeof(Particle);
+
+        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
+        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert() });
+        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
+        Context->RSSetState(DeviceResources->GetRasterizerState());
+        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->Draw(Particles.size(), 0);
+    });
     
     Ship->Draw(Context, viewProj, ModelPipeline);
 }
@@ -71,3 +79,34 @@ void SandboxState::Clear()
 
     DeviceResources->PIXEndEvent();
 }
+
+void SandboxState::CreateModelPipeline()
+{
+    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT   , 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
+    ModelPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    ModelPipeline.LoadVertex(Device, L"shaders/PositionTexture.vsh");
+    ModelPipeline.LoadPixel(Device, L"shaders/Texture.psh");
+    ModelPipeline.CreateInputLayout(Device, layout);
+}
+
+void SandboxState::CreateParticlePipeline()
+{
+    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
+    ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+    ParticlePipeline.LoadVertex(Device, L"shaders/PassThruGS.vsh");
+    ParticlePipeline.LoadPixel(Device, L"shaders/PlainColour.psh");
+    ParticlePipeline.LoadGeometry(Device, L"shaders/DrawParticle.gsh");
+    ParticlePipeline.CreateInputLayout(Device, layout);
+
+    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
+    GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
+}
+

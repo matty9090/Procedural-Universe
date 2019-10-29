@@ -92,7 +92,7 @@ void SimulationState::RenderParticles()
         unsigned int stride = sizeof(Particle);
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-        GSBuffer->SetData(Context, Buffers::GS{ view * proj, view.Invert() });
+        GSBuffer->SetData(Context, GSConstantBuffer { view * proj, view.Invert() });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
         Context->RSSetState(DeviceResources->GetRasterizerState());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -106,19 +106,18 @@ void SimulationState::CreateDeviceDependentResources()
     UI = std::make_unique<CUI>(Context, DeviceResources->GetWindow());
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
+    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
+       { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+       { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(Device, L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(Device, L"shaders/PlainColour.psh");
     ParticlePipeline.LoadGeometry(Device, L"shaders/DrawParticle.gsh");
+    ParticlePipeline.CreateInputLayout(Device, layout);
 
-    std::vector<D3D11_INPUT_ELEMENT_DESC> Layout = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
-    ParticlePipeline.CreateInputLayout(Device, Layout);
-
-    GSBuffer = std::make_unique<ConstantBuffer<Buffers::GS>>(Device);
+    GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
 
     InitParticles();
 }
