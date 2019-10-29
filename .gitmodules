@@ -10,3 +10,6 @@
 [submodule "lib/CxxOpts"]
 	path = lib/CxxOpts
 	url = https://github.com/jarro2783/cxxopts.git
+[submodule "lib/assimp"]
+	path = lib/assimp
+	url = https://github.com/assimp/assimp.git

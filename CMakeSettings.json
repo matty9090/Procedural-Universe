@@ -34,7 +34,23 @@
             "buildCommandArgs": "-v",
             "ctestCommandArgs": "",
             "inheritEnvironments": [ "msvc_x64_x64" ],
-            "variables": []
+            "variables": [
+                {
+                    "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_TESTS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "BUILD_SHARED_LIBS",
+                    "value": "False",
+                    "type": "BOOL"
+                }
+            ]
         }
     ]
 }

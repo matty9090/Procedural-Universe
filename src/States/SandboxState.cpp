@@ -9,6 +9,8 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     auto sandboxData = static_cast<SandboxStateData&>(data);
     sandboxData.Particles;
+
+    Ship = Mesh::Load(Device, "resources/Ship.obj");
 }
 
 void SandboxState::Cleanup()
