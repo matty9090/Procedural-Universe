@@ -59,6 +59,9 @@ void SandboxState::Render()
         Context->Draw(Particles.size(), 0);
     });
     
+    auto sampler = CommonStates->AnisotropicWrap();
+    Context->PSSetSamplers(0, 1, &sampler);
+
     Ship->Draw(Context, viewProj, ModelPipeline);
 }
 

@@ -1,7 +1,10 @@
 #include "Mesh.hpp"
 #include "Services/Log.hpp"
 
-CMesh::CMesh(ID3D11Device* device, std::vector<MeshVertex> vertices, std::vector<unsigned int> indices) : NumIndices(indices.size())
+#include <WICTextureLoader.h>
+
+CMesh::CMesh(ID3D11Device* device, std::vector<MeshVertex> vertices, std::vector<unsigned int> indices, ID3D11ShaderResourceView* texture)
+    : NumIndices(indices.size()), Texture(texture)
 {
     D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_IMMUTABLE;
@@ -42,7 +45,7 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
     std::function<CMesh*(aiMesh*, const aiScene*)> ProcessMesh = [&](aiMesh* mesh, const aiScene* scene) {
         std::vector<MeshVertex> vertices;
         std::vector<unsigned int> indices;
-        std::vector<ID3D11ShaderResourceView*> textures;
+        ID3D11ShaderResourceView* texture = nullptr;
 
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
         {
@@ -70,7 +73,25 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
             }
         }
 
-        return new CMesh(device, vertices, indices);
+        if (mesh->mMaterialIndex >= 0)
+        {
+            auto material = scene->mMaterials[mesh->mMaterialIndex];
+            
+            if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+            {
+                aiString str;
+                material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
+
+                std::string file = std::string("resources/") + str.C_Str();
+                std::wstring filew(file.begin(), file.end());
+
+                DX::ThrowIfFailed(DirectX::CreateWICTextureFromFile(device, filew.c_str(), nullptr, &texture));
+
+                FLog::Get().Log("Loaded texture " + file);
+            }
+        }
+
+        return new CMesh(device, vertices, indices, texture);
     };
 
     CMesh* root = ProcessMesh(scene->mMeshes[0], scene);

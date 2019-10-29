@@ -4,10 +4,13 @@ struct PS_Input
     float2 TexCoord : TEXCOORD;
 };
 
+Texture2D Tex : t0;
+SamplerState Sampler : s0;
+
 float4 main(in PS_Input i) : SV_TARGET
 {
 	float4 Col;
-	Col.rgb = float3(1, 0, 0);
+	Col.rgb = Tex.Sample(Sampler, i.TexCoord);
 	Col.a = 1.0f;
 
 	return Col;

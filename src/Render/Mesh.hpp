@@ -22,12 +22,13 @@ struct MeshVertex
 class CMesh
 {
 public:
-    CMesh(ID3D11Device* device, std::vector<MeshVertex> vertices, std::vector<unsigned int> indices);
+    CMesh(ID3D11Device* device, std::vector<MeshVertex> vertices, std::vector<unsigned int> indices, ID3D11ShaderResourceView* texture);
 
     static std::unique_ptr<CMesh> Load(ID3D11Device* device, std::string file);
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Texture;
 
     unsigned int NumIndices = 0;
 };

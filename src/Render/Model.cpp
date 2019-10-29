@@ -39,6 +39,7 @@ void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix View
         context->IASetVertexBuffers(0, 1, Mesh->VertexBuffer.GetAddressOf(), &stride, &offset);
         context->IASetIndexBuffer(Mesh->IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
         context->VSSetConstantBuffers(0, 1, MatrixBuffer.GetBuffer());
+        context->PSSetShaderResources(0, 1, Mesh->Texture.GetAddressOf());
 
         context->DrawIndexed(Mesh->NumIndices, 0, 0);
     });
