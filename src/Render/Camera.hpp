@@ -7,6 +7,7 @@
 #include <SimpleMath.h>
 
 #include "Render/Particle.hpp"
+#include "Render/Model.hpp"
 
 using DirectX::SimpleMath::Quaternion;
 using DirectX::SimpleMath::Matrix;
@@ -87,11 +88,18 @@ class CCamera
         void Track(Particle* p) { TrackedParticle = p; }
 
         /**
+         * @brief Attach to a model
+         *
+         * @param p
+         */
+        void Attach(CModel* obj) { AttachedObject = obj; }
+
+        /**
          * @brief Get the view matrix
          * 
          * @return DirectX::XMMATRIX 
          */
-        DirectX::XMMATRIX GetViewMatrix() const { return View; }
+        DirectX::XMMATRIX GetViewMatrix() const;
 
         /**
          * @brief Get the projection matrix
@@ -134,11 +142,10 @@ class CCamera
     private:
         std::unique_ptr<ICameraMode> CameraMode;
 
+        Matrix View, Proj;
         size_t Width, Height;
         float NearPlane = 10.0f, FarPlane = 30000.0f;
 
-        Matrix View, Proj;
-
         Particle* TrackedParticle = nullptr;
-        Vector3 LastPosition;
+        CModel* AttachedObject = nullptr;
 };

@@ -21,7 +21,10 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     auto ShipMesh = CMesh::Load(Device, "resources/Ship.obj");
     Ship = std::make_unique<CModel>(Device, ShipMesh.get());
+    Ship->Scale(10.0f);
     Meshes.push_back(std::move(ShipMesh));
+
+    Camera->Attach(Ship.get());
 }
 
 void SandboxState::Cleanup()
@@ -31,6 +34,8 @@ void SandboxState::Cleanup()
 
 void SandboxState::Update(float dt)
 {
+    Ship->Move(Vector3(0.0f, 0.0f, 30.0f * dt));
+
     Camera->Update(dt);
     Camera->Events(Mouse, Mouse->GetState(), dt);
 }

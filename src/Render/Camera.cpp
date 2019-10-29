@@ -34,6 +34,19 @@ std::string CCamera::ToString()
     return ss.str();
 }
 
+DirectX::XMMATRIX CCamera::GetViewMatrix() const
+{
+    auto view = View;
+    auto inv = view.Invert();
+    
+    if (AttachedObject)
+    {
+        inv.Translation(inv.Translation() + AttachedObject->GetPosition());
+    }
+
+    return inv.Invert();
+}
+
 bool CCamera::PixelFromWorldPoint(Vector3 worldPt, int& x, int& y)
 {
     Matrix viewProj = View * Proj;
@@ -91,7 +104,7 @@ void ArcballCameraMode::Events(DirectX::Mouse* mouse, DirectX::Mouse::State& ms,
     }
     else
     {
-        Radius = InitialRadius - ms.scrollWheelValue;
+        Radius = InitialRadius - ms.scrollWheelValue * 0.4f;
     }
 
     mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);

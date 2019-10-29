@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 
 #include "Mesh.hpp"
 #include "ConstantBuffer.hpp"
@@ -12,6 +12,8 @@ class CModel
 {
 public:
     CModel(ID3D11Device* device, CMesh* mesh);
+
+    DirectX::SimpleMath::Vector3 GetPosition() const { return Position; }
 
     void Move(DirectX::SimpleMath::Vector3 v);
     void Rotate(DirectX::SimpleMath::Vector3 r);
