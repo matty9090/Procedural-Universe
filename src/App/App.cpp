@@ -22,8 +22,8 @@ using Microsoft::WRL::ComPtr;
 
 App::App() noexcept(false)
 {
-    m_deviceResources = std::make_unique<DX::DeviceResources>();
-    m_deviceResources->RegisterDeviceNotify(this);
+    DeviceResources = std::make_unique<DX::DeviceResources>();
+    DeviceResources->RegisterDeviceNotify(this);
 }
 
 // Initialize the Direct3D resources required to run.
@@ -31,21 +31,21 @@ void App::Initialize(HWND window, int width, int height)
 {
     FLog::Get().Log("Initializing...");
 
-    m_seeder = CreateParticleSeeder(m_particles, EParticleSeeder::Random);
+    Seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random);
 
-    m_mouse = std::make_unique<DirectX::Mouse>();
-    m_mouse->SetWindow(window);
+    Mouse = std::make_unique<DirectX::Mouse>();
+    Mouse->SetWindow(window);
 
-    m_deviceResources->SetWindow(window, width, height);
+    DeviceResources->SetWindow(window, width, height);
 
-    m_deviceResources->CreateDeviceResources();
+    DeviceResources->CreateDeviceResources();
     CreateDeviceDependentResources();
 
-    m_deviceResources->CreateWindowSizeDependentResources();
+    DeviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
 
-    m_timer.SetFixedTimeStep(true);
-    m_timer.SetTargetElapsedSeconds(1.0 / 60.0);
+    Timer.SetFixedTimeStep(true);
+    Timer.SetTargetElapsedSeconds(1.0 / 60.0);
 
     RegisterEvents();
 
@@ -55,32 +55,32 @@ void App::Initialize(HWND window, int width, int height)
 void App::RegisterEvents()
 {
     EventStream::Register(EEvent::SimSpeedChanged, [this](const EventData& data) {
-        m_simSpeed = static_cast<const FloatEventData&>(data).Value;
+        SimSpeed = static_cast<const FloatEventData&>(data).Value;
     });
 
     EventStream::Register(EEvent::NumParticlesChanged, [this](const EventData& data) {
-        m_numParticles = static_cast<const IntEventData&>(data).Value;
+        NumParticles = static_cast<const IntEventData&>(data).Value;
         InitParticles();
     });
 
     EventStream::Register(EEvent::SimTypeChanged, [this](const EventData& data) {
-        m_sim.reset();
-        m_sim = CreateNBodySim(m_deviceResources->GetD3DDeviceContext(), static_cast<const SimTypeEventData&>(data).Value);
-        m_sim->Init(m_particles);
+        Sim.reset();
+        Sim = CreateNBodySim(DeviceResources->GetD3DDeviceContext(), static_cast<const SimTypeEventData&>(data).Value);
+        Sim->Init(Particles);
     });
 
     EventStream::Register(EEvent::IsPausedChanged, [this](const EventData& data) {
-        m_isPaused = static_cast<const BoolEventData&>(data).Value;
+        bIsPaused = static_cast<const BoolEventData&>(data).Value;
     });
 
     EventStream::Register(EEvent::SeederChanged, [this](const EventData& data) {
-        m_seeder = CreateParticleSeeder(m_particles, static_cast<const SeederTypeEventData&>(data).Value);
+        Seeder = CreateParticleSeeder(Particles, static_cast<const SeederTypeEventData&>(data).Value);
         InitParticles();
     });
 
     EventStream::Register(EEvent::ForceFrame, [this](const EventData& data) {
         float dt = static_cast<const FloatEventData&>(data).Value;
-        m_sim->Update(dt * m_simSpeed);
+        Sim->Update(dt * SimSpeed);
     });
 
     EventStream::Register(EEvent::RunBenchmark, [this](const EventData& data) {
@@ -88,51 +88,51 @@ void App::RegisterEvents()
     });
 
     EventStream::Register(EEvent::DrawDebugChanged, [this](const EventData& data) {
-        m_drawDebug = static_cast<const BoolEventData&>(data).Value;
+        bDrawDebug = static_cast<const BoolEventData&>(data).Value;
     });
 
     EventStream::Register(EEvent::TrackParticle, [this](const EventData& data) {
         auto p = static_cast<const ParticleEventData&>(data).Value;
-        m_camera->Track(p);
+        Camera->Track(p);
         FLog::Get().Log("Tracking particle");
     });
 
     EventStream::Register(EEvent::LoadParticleFile, [this](const EventData& data) {
-        if (InitParticlesFromFile(static_cast<const StringEventData&>(data).Value, m_particles))
+        if (InitParticlesFromFile(static_cast<const StringEventData&>(data).Value, Particles))
         {
-            m_numParticles = static_cast<unsigned int>(m_particles.size());
+            NumParticles = static_cast<unsigned int>(Particles.size());
 
-            m_sim->Init(m_particles);
-            m_particleBuffer.Reset();
+            Sim->Init(Particles);
+            ParticleBuffer.Reset();
 
             D3D11_BUFFER_DESC buffer;
             buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
             buffer.Usage = D3D11_USAGE_DEFAULT;
-            buffer.ByteWidth = m_numParticles * sizeof(Particle);
+            buffer.ByteWidth = NumParticles * sizeof(Particle);
             buffer.CPUAccessFlags = 0;
             buffer.MiscFlags = 0;
 
             D3D11_SUBRESOURCE_DATA init;
-            init.pSysMem = &m_particles[0];
+            init.pSysMem = &Particles[0];
 
-            DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
+            DX::ThrowIfFailed(DeviceResources->GetD3DDevice()->CreateBuffer(&buffer, &init, ParticleBuffer.ReleaseAndGetAddressOf()));
         }
     });
 
     EventStream::Register(EEvent::UseSplattingChanged, [this](const EventData& data) {
-        m_useSplatting = static_cast<const BoolEventData&>(data).Value;
+        bUseSplatting = static_cast<const BoolEventData&>(data).Value;
     });
 }
 
 void App::InitParticles()
 {
-    m_ui->SetSelectedParticle(nullptr);
-    m_particles.resize(m_numParticles);
-    m_seeder->Seed();
-    m_sim->Init(m_particles);
-    m_particleBuffer.Reset();
+    UI->SetSelectedParticle(nullptr);
+    Particles.resize(NumParticles);
+    Seeder->Seed();
+    Sim->Init(Particles);
+    ParticleBuffer.Reset();
 
-    CreateParticleBuffer(m_deviceResources->GetD3DDevice(), m_particleBuffer.ReleaseAndGetAddressOf(), m_particles);
+    CreateParticleBuffer(DeviceResources->GetD3DDevice(), ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 }
 
 bool App::InitParticlesFromFile(std::string fname, std::vector<Particle>& particles)
@@ -242,9 +242,9 @@ void App::RunSimulation(float dt, int time, int numparticles, std::string fileNa
 // Executes the basic game loop.
 void App::Tick()
 {
-    m_timer.Tick([&]()
+    Timer.Tick([&]()
     {
-        Update(static_cast<float>(m_timer.GetElapsedSeconds()));
+        Update(static_cast<float>(Timer.GetElapsedSeconds()));
     });
 
     Render();
@@ -253,19 +253,19 @@ void App::Tick()
 // Updates the world.
 void App::Update(float dt)
 {
-    auto mouse_state = m_mouse->GetState();
+    auto mouse_state = Mouse->GetState();
 
     CheckParticleSelected(mouse_state);
 
-    m_camera->Events(m_mouse.get(), mouse_state, dt);
-    m_camera->Update(dt);
-    m_ui->Update(dt);
+    Camera->Events(Mouse.get(), mouse_state, dt);
+    Camera->Update(dt);
+    UI->Update(dt);
 
-    if(!m_isPaused)
-        m_sim->Update(dt * m_simSpeed);
+    if(!bIsPaused)
+        Sim->Update(dt * SimSpeed);
 
-    auto context = m_deviceResources->GetD3DDeviceContext();
-    context->UpdateSubresource(m_particleBuffer.Get(), 0, NULL, &m_particles[0], 0, 0);
+    auto context = DeviceResources->GetD3DDeviceContext();
+    context->UpdateSubresource(ParticleBuffer.Get(), 0, NULL, &Particles[0], 0, 0);
 }
 #pragma endregion
 
@@ -273,85 +273,85 @@ void App::Update(float dt)
 // Draws the scene.
 void App::Render()
 {
-    if (m_timer.GetFrameCount() == 0)
+    if (Timer.GetFrameCount() == 0)
         return;
 
-    m_deviceResources->PIXBeginEvent(L"Render");
+    DeviceResources->PIXBeginEvent(L"Render");
 
     Clear();
 
-    auto context = m_deviceResources->GetD3DDeviceContext();
-    auto sceneTarget = m_deviceResources->GetSceneRenderTargetView();
-    auto renderTarget = m_deviceResources->GetRenderTargetView();
-    auto dsv = m_deviceResources->GetDepthStencilView();
+    auto context = DeviceResources->GetD3DDeviceContext();
+    auto sceneTarget = DeviceResources->GetSceneRenderTargetView();
+    auto renderTarget = DeviceResources->GetRenderTargetView();
+    auto dsv = DeviceResources->GetDepthStencilView();
 
     context->OMSetRenderTargets(1, &sceneTarget, dsv);
     
     // HACK
     RenderParticles();
 
-    if(m_useSplatting)
-        m_splatting->Render(m_numParticles, m_deviceResources->GetSceneShaderResourceView());
+    if(bUseSplatting)
+        Splatting->Render(NumParticles, DeviceResources->GetSceneShaderResourceView());
     
     RenderParticles();
 
     context->GSSetShader(nullptr, 0, 0);
     
-    if(m_drawDebug)
-        m_sim->RenderDebug(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+    if(bDrawDebug)
+        Sim->RenderDebug(Camera->GetViewMatrix(), Camera->GetProjectionMatrix());
 
-    m_postProcess->Render(renderTarget, dsv, m_deviceResources->GetSceneShaderResourceView());
+    PostProcess->Render(renderTarget, dsv, DeviceResources->GetSceneShaderResourceView());
 
-    m_ui->Render();
+    UI->Render();
 
-    m_deviceResources->PIXEndEvent();
-    m_deviceResources->Present();
+    DeviceResources->PIXEndEvent();
+    DeviceResources->Present();
 }
 
 void App::RenderParticles()
 {
-    auto context = m_deviceResources->GetD3DDeviceContext();
+    auto context = DeviceResources->GetD3DDeviceContext();
 
-    context->VSSetShader(m_vertexShader.Get(), 0, 0);
-    context->GSSetShader(m_geometryShader.Get(), 0, 0);
-    context->PSSetShader(m_pixelShader.Get(), 0, 0);
+    context->VSSetShader(VertexShader.Get(), 0, 0);
+    context->GSSetShader(GeometryShader.Get(), 0, 0);
+    context->PSSetShader(PixelShader.Get(), 0, 0);
 
     unsigned int offset = 0;
     unsigned int stride = sizeof(Particle);
 
-    context->IASetInputLayout(m_inputLayout.Get());
-    context->IASetVertexBuffers(0, 1, m_particleBuffer.GetAddressOf(), &stride, &offset);
+    context->IASetInputLayout(InputLayout.Get());
+    context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
     context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
     
-    DirectX::SimpleMath::Matrix view = m_camera->GetViewMatrix();
-    DirectX::SimpleMath::Matrix proj = m_camera->GetProjectionMatrix();
+    DirectX::SimpleMath::Matrix view = Camera->GetViewMatrix();
+    DirectX::SimpleMath::Matrix proj = Camera->GetProjectionMatrix();
 
-    m_gsBuffer->SetData(context, Buffers::GS { view * proj, view.Invert() });
-    context->GSSetConstantBuffers(0, 1, m_gsBuffer->GetBuffer());
-    context->RSSetState(m_deviceResources->GetRasterizerState());
-    context->OMSetBlendState(m_commonStates->Additive(), Colors::Black, 0xFFFFFFFF);
-    context->Draw(m_numParticles, 0);
+    GSBuffer->SetData(context, Buffers::GS { view * proj, view.Invert() });
+    context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
+    context->RSSetState(DeviceResources->GetRasterizerState());
+    context->OMSetBlendState(CommonStates->Additive(), Colors::Black, 0xFFFFFFFF);
+    context->Draw(NumParticles, 0);
 }
 
 // Helper method to clear the back buffers.
 void App::Clear()
 {
-    m_deviceResources->PIXBeginEvent(L"Clear");
+    DeviceResources->PIXBeginEvent(L"Clear");
 
     // Clear the views.
-    auto context = m_deviceResources->GetD3DDeviceContext();
+    auto context = DeviceResources->GetD3DDeviceContext();
 
-    auto depthStencil = m_deviceResources->GetDepthStencilView();
-    auto renderTarget = m_deviceResources->GetSceneRenderTargetView();
+    auto depthStencil = DeviceResources->GetDepthStencilView();
+    auto renderTarget = DeviceResources->GetSceneRenderTargetView();
 
     context->ClearRenderTargetView(renderTarget, Colors::Black);
     context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     // Set the viewport.
-    auto viewport = m_deviceResources->GetScreenViewport();
+    auto viewport = DeviceResources->GetScreenViewport();
     context->RSSetViewports(1, &viewport);
 
-    m_deviceResources->PIXEndEvent();
+    DeviceResources->PIXEndEvent();
 }
 
 void App::RunBenchmark()
@@ -363,8 +363,8 @@ void App::RunBenchmark()
         LARGE_INTEGER startTime, endTime;
         const int numFrames = 10;
         
-        auto nbodySim = CreateNBodySim(m_deviceResources->GetD3DDeviceContext(), static_cast<ENBodySim>(sim));
-        nbodySim->Init(m_particles);
+        auto nbodySim = CreateNBodySim(DeviceResources->GetD3DDeviceContext(), static_cast<ENBodySim>(sim));
+        nbodySim->Init(Particles);
 
         QueryPerformanceCounter(&startTime);
 
@@ -391,11 +391,11 @@ void App::CheckParticleSelected(DirectX::Mouse::State& ms)
 
     bool found = false;
 
-    for(auto& particle : m_particles)
+    for(auto& particle : Particles)
     {
         int x, y;
 
-        if(m_camera->PixelFromWorldPoint(particle.Position, x, y))
+        if(Camera->PixelFromWorldPoint(particle.Position, x, y))
         {
             DirectX::SimpleMath::Vector2 screenPos(static_cast<float>(x), static_cast<float>(y));
             
@@ -406,8 +406,8 @@ void App::CheckParticleSelected(DirectX::Mouse::State& ms)
                 
                 if(ms.leftButton)
                 {
-                    m_selectedParticle = &particle;
-                    m_ui->SetSelectedParticle(m_selectedParticle);
+                    SelectedParticle = &particle;
+                    UI->SetSelectedParticle(SelectedParticle);
                 }
             }
             else
@@ -438,20 +438,20 @@ void App::OnSuspending()
 
 void App::OnResuming()
 {
-    m_timer.ResetElapsedTime();
+    Timer.ResetElapsedTime();
 
     // TODO: App is being power-resumed (or returning from minimize).
 }
 
 void App::OnWindowMoved()
 {
-    auto r = m_deviceResources->GetOutputSize();
-    m_deviceResources->WindowSizeChanged(r.right, r.bottom);
+    auto r = DeviceResources->GetOutputSize();
+    DeviceResources->WindowSizeChanged(r.right, r.bottom);
 }
 
 void App::OnWindowSizeChanged(int width, int height)
 {
-    if (!m_deviceResources->WindowSizeChanged(width, height))
+    if (!DeviceResources->WindowSizeChanged(width, height))
         return;
 
     CreateWindowSizeDependentResources();
@@ -469,18 +469,18 @@ void App::GetDefaultSize(int& width, int& height) const
 // These are the resources that depend on the device.
 void App::CreateDeviceDependentResources()
 {
-    auto device = m_deviceResources->GetD3DDevice();
-    auto context = m_deviceResources->GetD3DDeviceContext();
+    auto device = DeviceResources->GetD3DDevice();
+    auto context = DeviceResources->GetD3DDeviceContext();
 
-    m_sim = CreateNBodySim(context, ENBodySim::BarnesHut);
-    m_ui = std::make_unique<UI>(context, m_deviceResources->GetWindow());
-    m_commonStates = std::make_unique<DirectX::CommonStates>(device);
+    Sim = CreateNBodySim(context, ENBodySim::BarnesHut);
+    UI = std::make_unique<UI>(context, DeviceResources->GetWindow());
+    CommonStates = std::make_unique<DirectX::CommonStates>(device);
 
     ID3DBlob* VertexCode;
 
-    bool bVertex = LoadVertexShader(device, L"shaders/PassThruGS.vsh", m_vertexShader.ReleaseAndGetAddressOf(), &VertexCode);
-    bool bGeometry = LoadGeometryShader(device, L"shaders/DrawParticle.gsh", m_geometryShader.ReleaseAndGetAddressOf());
-    bool bPixel = LoadPixelShader(device, L"shaders/PlainColour.psh", m_pixelShader.ReleaseAndGetAddressOf());
+    bool bVertex = LoadVertexShader(device, L"shaders/PassThruGS.vsh", VertexShader.ReleaseAndGetAddressOf(), &VertexCode);
+    bool bGeometry = LoadGeometryShader(device, L"shaders/DrawParticle.gsh", GeometryShader.ReleaseAndGetAddressOf());
+    bool bPixel = LoadPixelShader(device, L"shaders/PlainColour.psh", PixelShader.ReleaseAndGetAddressOf());
 
     if(!(bVertex && bGeometry && bPixel))
         throw std::exception("Failed to load shader(s)");
@@ -491,10 +491,10 @@ void App::CreateDeviceDependentResources()
     };
     
     DX::ThrowIfFailed(
-        device->CreateInputLayout(Layout, 2, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), m_inputLayout.ReleaseAndGetAddressOf())
+        device->CreateInputLayout(Layout, 2, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf())
     );
 
-    m_gsBuffer = std::make_unique<ConstantBuffer<Buffers::GS>>(device);
+    GSBuffer = std::make_unique<ConstantBuffer<Buffers::GS>>(device);
 
     InitParticles();
 }
@@ -505,13 +505,13 @@ void App::CreateWindowSizeDependentResources()
     int width, height;
     GetDefaultSize(width, height);
 
-    m_camera = std::make_unique<Camera>(width, height);
+    Camera = std::make_unique<Camera>(width, height);
 
-    m_postProcess = std::make_unique<PostProcess>(m_deviceResources->GetD3DDevice(),
-                                                  m_deviceResources->GetD3DDeviceContext(),
+    PostProcess = std::make_unique<PostProcess>(DeviceResources->GetD3DDevice(),
+                                                  DeviceResources->GetD3DDeviceContext(),
                                                   width, height);
 
-    m_splatting = std::make_unique<Splatting>(m_deviceResources->GetD3DDeviceContext(), width, height);
+    Splatting = std::make_unique<Splatting>(DeviceResources->GetD3DDeviceContext(), width, height);
 }
 
 void App::OnDeviceLost()

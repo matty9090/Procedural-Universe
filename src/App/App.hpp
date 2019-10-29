@@ -76,32 +76,31 @@ private:
 
     static bool InitParticlesFromFile(std::string fname, std::vector<Particle>& particles);
 
-    std::unique_ptr<Camera>                         m_camera;
+    std::unique_ptr<Camera>                         Camera;
+    std::unique_ptr<DX::DeviceResources>            DeviceResources;
+    std::unique_ptr<DirectX::Mouse>                 Mouse;
+    DX::StepTimer                                   Timer;
+    std::unique_ptr<UI>                             UI;
+    std::unique_ptr<PostProcess>                    PostProcess;
+    std::unique_ptr<Splatting>                      Splatting;
+    std::unique_ptr<DirectX::CommonStates>          CommonStates;
 
-    std::unique_ptr<DX::DeviceResources>            m_deviceResources;
-    std::unique_ptr<DirectX::Mouse>                 m_mouse;
-    DX::StepTimer                                   m_timer;
-    std::unique_ptr<UI>                             m_ui;
-    std::unique_ptr<PostProcess>                    m_postProcess;
-    std::unique_ptr<Splatting>                      m_splatting;
-    std::unique_ptr<DirectX::CommonStates>          m_commonStates;
+    Microsoft::WRL::ComPtr<ID3D11VertexShader>      VertexShader;
+    Microsoft::WRL::ComPtr<ID3D11GeometryShader>    GeometryShader;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>       PixelShader;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout>       InputLayout;
+    Microsoft::WRL::ComPtr<ID3D11Buffer>            ParticleBuffer;
 
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>      m_vertexShader;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader>    m_geometryShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>       m_pixelShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout>       m_inputLayout;
-    Microsoft::WRL::ComPtr<ID3D11Buffer>            m_particleBuffer;
+    std::unique_ptr<ConstantBuffer<Buffers::GS>>    GSBuffer;
+    std::vector<Particle>                           Particles;
+    unsigned int                                    NumParticles = 10;
+    Particle*                                       SelectedParticle = nullptr;
 
-    std::unique_ptr<ConstantBuffer<Buffers::GS>>    m_gsBuffer;
-    std::vector<Particle>                           m_particles;
-    unsigned int                                    m_numParticles = 10;
-    Particle*                                       m_selectedParticle = nullptr;
-
-    std::unique_ptr<INBodySim>                      m_sim;
-    std::unique_ptr<IParticleSeeder>                m_seeder;
-    bool                                            m_isPaused = false;
-    float                                           m_simSpeed = 0.02f;
-    bool                                            m_drawDebug = false;
-    bool                                            m_useBloom = true;
-    bool                                            m_useSplatting = false;
+    std::unique_ptr<INBodySim>                      Sim;
+    std::unique_ptr<IParticleSeeder>                Seeder;
+    float                                           SimSpeed = 0.02f;
+    bool                                            bIsPaused = false;
+    bool                                            bDrawDebug = false;
+    bool                                            bUseBloom = true;
+    bool                                            bUseSplatting = false;
 };
