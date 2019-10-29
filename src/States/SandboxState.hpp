@@ -6,11 +6,14 @@
 #include "Render/Particle.hpp"
 #include "Render/ConstantBuffer.hpp"
 
+#include <list>
 #include <vector>
 #include <Mouse.h>
 #include <Keyboard.h>
 #include <SimpleMath.h>
 #include <CommonStates.h>
+
+#include "Render/Model.hpp"
 
 struct SandboxStateData : public StateData
 {
@@ -34,5 +37,16 @@ private:
 
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
+    DirectX::Mouse* Mouse;
+    RenderPipeline ModelPipeline;
     DX::DeviceResources* DeviceResources;
+
+    std::unique_ptr<CModel>            Ship;
+    std::unique_ptr<CCamera>           Camera;
+    std::list<std::unique_ptr<CMesh>>  Meshes;
+
+    enum class EState
+    {
+        
+    };
 };

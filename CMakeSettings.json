@@ -10,7 +10,23 @@
             "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
             "ctestCommandArgs": "",
-            "variables": []
+            "variables": [
+                {
+                    "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+                    "value": "True",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "BUILD_SHARED_LIBS",
+                    "value": "False",
+                    "type": "BOOL"
+                }
+            ]
         },
         {
             "name": "x64-Release",
@@ -48,6 +64,11 @@
                 {
                     "name": "BUILD_SHARED_LIBS",
                     "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+                    "value": "True",
                     "type": "BOOL"
                 }
             ]

@@ -1,8 +1,8 @@
 struct PS_Input
 {
-	float4 Position : SV_Position;
+    float4 Position : SV_Position;
     float4 Colour : COLOR;
-	float2 UV : TEXCOORD0;
+    float2 UV : TEXCOORD0;
 };
 
 float4 main(in PS_Input i) : SV_TARGET

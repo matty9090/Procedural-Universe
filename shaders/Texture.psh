@@ -1,0 +1,14 @@
+struct PS_Input
+{
+    float4 Position : SV_POSITION;
+    float2 TexCoord : TEXCOORD;
+};
+
+float4 main(in PS_Input i) : SV_TARGET
+{
+	float4 Col;
+	Col.rgb = float3(1, 0, 0);
+	Col.a = 1.0f;
+
+	return Col;
+}
