@@ -34,16 +34,31 @@ public:
 
 private:
     void Clear();
+    void CreateModelPipeline();
+    void CreateParticlePipeline();
+
+    struct GSConstantBuffer
+    {
+        DirectX::SimpleMath::Matrix ViewProj;
+        DirectX::SimpleMath::Matrix InvView;
+    };
 
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
     DirectX::Mouse* Mouse;
-    RenderPipeline ModelPipeline;
     DX::DeviceResources* DeviceResources;
+    
+    RenderPipeline ModelPipeline;
+    RenderPipeline ParticlePipeline;
 
-    std::unique_ptr<CModel>            Ship;
-    std::unique_ptr<CCamera>           Camera;
-    std::list<std::unique_ptr<CMesh>>  Meshes;
+    std::vector<Particle> Particles;
+    std::unique_ptr<DirectX::CommonStates> CommonStates;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
+    std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
+
+    std::unique_ptr<CModel>           Ship;
+    std::unique_ptr<CCamera>          Camera;
+    std::list<std::unique_ptr<CMesh>> Meshes;
 
     enum class EState
     {

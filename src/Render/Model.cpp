@@ -37,7 +37,7 @@ void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix View
         unsigned int stride = sizeof(MeshVertex);
 
         context->IASetVertexBuffers(0, 1, Mesh->VertexBuffer.GetAddressOf(), &stride, &offset);
-        context->IASetIndexBuffer(Mesh->IndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+        context->IASetIndexBuffer(Mesh->IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
         context->VSSetConstantBuffers(0, 1, MatrixBuffer.GetBuffer());
 
         context->DrawIndexed(Mesh->NumIndices, 0, 0);
