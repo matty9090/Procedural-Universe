@@ -8,11 +8,11 @@
 #include "Sim/INBodySim.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
-class UI
+class CUI
 {
 public:
-    UI(ID3D11DeviceContext* context, HWND hwnd);
-    ~UI();
+    CUI(ID3D11DeviceContext* context, HWND hwnd);
+    ~CUI();
 
     void Render();
     void Update(float dt);

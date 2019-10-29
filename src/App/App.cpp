@@ -473,7 +473,7 @@ void App::CreateDeviceDependentResources()
     auto context = DeviceResources->GetD3DDeviceContext();
 
     Sim = CreateNBodySim(context, ENBodySim::BarnesHut);
-    UI = std::make_unique<UI>(context, DeviceResources->GetWindow());
+    UI = std::make_unique<CUI>(context, DeviceResources->GetWindow());
     CommonStates = std::make_unique<DirectX::CommonStates>(device);
 
     ID3DBlob* VertexCode;
@@ -505,13 +505,13 @@ void App::CreateWindowSizeDependentResources()
     int width, height;
     GetDefaultSize(width, height);
 
-    Camera = std::make_unique<Camera>(width, height);
+    Camera = std::make_unique<CCamera>(width, height);
 
-    PostProcess = std::make_unique<PostProcess>(DeviceResources->GetD3DDevice(),
+    PostProcess = std::make_unique<CPostProcess>(DeviceResources->GetD3DDevice(),
                                                   DeviceResources->GetD3DDeviceContext(),
                                                   width, height);
 
-    Splatting = std::make_unique<Splatting>(DeviceResources->GetD3DDeviceContext(), width, height);
+    Splatting = std::make_unique<CSplatting>(DeviceResources->GetD3DDeviceContext(), width, height);
 }
 
 void App::OnDeviceLost()

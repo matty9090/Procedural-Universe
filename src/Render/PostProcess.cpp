@@ -4,7 +4,7 @@
 
 #include <DirectXColors.h>
 
-PostProcess::PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int width, int height)
+CPostProcess::CPostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int width, int height)
     : Device(device), Context(context), Width(width), Height(height)
 {
     DualPostProcess  = std::make_unique<DirectX::DualPostProcess>(device);
@@ -45,7 +45,7 @@ PostProcess::PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int
     });
 }
 
-void PostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex)
+void CPostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex)
 {
     if(UseBloom)
     {
@@ -122,7 +122,7 @@ void PostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* ds
     }
 }
 
-void PostProcess::RenderPP(RenderView target, std::function<void()> func)
+void CPostProcess::RenderPP(RenderView target, std::function<void()> func)
 {
     target.Clear(Context);
     SetViewport(target.Width, target.Height);
@@ -130,7 +130,7 @@ void PostProcess::RenderPP(RenderView target, std::function<void()> func)
     func();
 }
 
-void PostProcess::RenderPP(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, std::function<void()> func)
+void CPostProcess::RenderPP(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, std::function<void()> func)
 {
     SetViewport(Width, Height);
     Context->OMSetRenderTargets(1, &rtv, dsv);
@@ -140,7 +140,7 @@ void PostProcess::RenderPP(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* 
     Context->PSSetShaderResources(0, 2, nullSrv);
 }
 
-void PostProcess::SetViewport(int width, int height)
+void CPostProcess::SetViewport(int width, int height)
 {
     D3D11_VIEWPORT vp;
     vp.Width = static_cast<float>(width), vp.Height = static_cast<float>(height);

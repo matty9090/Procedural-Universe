@@ -9,10 +9,10 @@
 
 #include "RenderCommon.hpp"
 
-class Splatting
+class CSplatting
 {
 public:
-    Splatting(ID3D11DeviceContext* context, int width, int height);
+    CSplatting(ID3D11DeviceContext* context, int width, int height);
 
     void Render(unsigned int num, ID3D11ShaderResourceView *scene);
 

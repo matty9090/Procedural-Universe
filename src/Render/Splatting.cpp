@@ -3,7 +3,7 @@
 
 #include <DirectXColors.h>
 
-Splatting::Splatting(ID3D11DeviceContext* context, int width, int height) : Context(context)
+CSplatting::CSplatting(ID3D11DeviceContext* context, int width, int height) : Context(context)
 {
     ID3D11Device* device;
     context->GetDevice(&device);
@@ -19,7 +19,7 @@ Splatting::Splatting(ID3D11DeviceContext* context, int width, int height) : Cont
     Target1 = CreateTarget(device, width, height);
 }
 
-void Splatting::Render(unsigned int num, ID3D11ShaderResourceView *scene)
+void CSplatting::Render(unsigned int num, ID3D11ShaderResourceView *scene)
 {
     ID3D11RenderTargetView* OriginalTarget;
     ID3D11DepthStencilView* OriginalDepthView;

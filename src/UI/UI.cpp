@@ -14,7 +14,7 @@
         EventStream::Report(EEvent::##name##Changed, ##type##EventData(##name)); \
     } \
 
-UI::UI(ID3D11DeviceContext* context, HWND hwnd)
+CUI::CUI(ID3D11DeviceContext* context, HWND hwnd)
 {
     ID3D11Device* device = nullptr;
     context->GetDevice(&device);
@@ -38,14 +38,14 @@ UI::UI(ID3D11DeviceContext* context, HWND hwnd)
     memset(FileBuf, '\0', 200);
 }
 
-UI::~UI()
+CUI::~CUI()
 {
     ImGui_ImplDX11_Shutdown();
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 }
 
-void UI::Render()
+void CUI::Render()
 {
     float newSimSpeed = SimSpeed;
     int newNumParticles = NumParticles;
@@ -200,7 +200,7 @@ void UI::Render()
     }
 }
 
-void UI::Update(float dt)
+void CUI::Update(float dt)
 {
     ++Frames;
     FPSTimer -= dt;
@@ -212,12 +212,12 @@ void UI::Update(float dt)
     }
 }
 
-void UI::Reset()
+void CUI::Reset()
 {
 
 }
 
-void UI::SetSelectedParticle(Particle* particle)
+void CUI::SetSelectedParticle(Particle* particle)
 {
     SelectedParticle = particle;
 }

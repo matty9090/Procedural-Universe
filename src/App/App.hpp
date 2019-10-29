@@ -21,8 +21,8 @@
 #include <SimpleMath.h>
 #include <CommonStates.h>
 
-class UI;
-class Splatting;
+class CUI;
+class CSplatting;
 
 namespace Buffers
 {
@@ -76,13 +76,13 @@ private:
 
     static bool InitParticlesFromFile(std::string fname, std::vector<Particle>& particles);
 
-    std::unique_ptr<Camera>                         Camera;
+    std::unique_ptr<CCamera>                        Camera;
     std::unique_ptr<DX::DeviceResources>            DeviceResources;
     std::unique_ptr<DirectX::Mouse>                 Mouse;
     DX::StepTimer                                   Timer;
-    std::unique_ptr<UI>                             UI;
-    std::unique_ptr<PostProcess>                    PostProcess;
-    std::unique_ptr<Splatting>                      Splatting;
+    std::unique_ptr<CUI>                            UI;
+    std::unique_ptr<CPostProcess>                   PostProcess;
+    std::unique_ptr<CSplatting>                     Splatting;
     std::unique_ptr<DirectX::CommonStates>          CommonStates;
 
     Microsoft::WRL::ComPtr<ID3D11VertexShader>      VertexShader;

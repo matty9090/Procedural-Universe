@@ -7,7 +7,7 @@
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-Camera::Camera(size_t width, size_t height)
+CCamera::CCamera(size_t width, size_t height)
     : Width(width),
       Height(height),
       View(Matrix::CreateTranslation(0.0f, 0.0f, -1000.0f)),
@@ -16,25 +16,25 @@ Camera::Camera(size_t width, size_t height)
     Proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f, float(width) / float(height), NearPlane, FarPlane);
 }
 
-void Camera::Update(float dt)
+void CCamera::Update(float dt)
 {
     CameraMode->Update(dt);
 }
 
-void Camera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, float dt)
+void CCamera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, float dt)
 {
     if ((ms.positionMode == Mouse::MODE_ABSOLUTE && ms.x > 260) || ms.positionMode == Mouse::MODE_RELATIVE)
         CameraMode->Events(mouse, ms, dt);
 }
 
-std::string Camera::ToString()
+std::string CCamera::ToString()
 {
     std::ostringstream ss;
     ss << "(" << View.Translation().x << ", " << View.Translation().y << ", " << View.Translation().z << ")";
     return ss.str();
 }
 
-bool Camera::PixelFromWorldPoint(Vector3 worldPt, int& x, int& y)
+bool CCamera::PixelFromWorldPoint(Vector3 worldPt, int& x, int& y)
 {
     Matrix viewProj = View * Proj;
     Vector3 viewportPt = Vector3::Transform(worldPt, viewProj);
@@ -51,7 +51,7 @@ bool Camera::PixelFromWorldPoint(Vector3 worldPt, int& x, int& y)
     return true;
 }
 
-Vector3 Camera::WorldPointFromPixel(int x, int y)
+Vector3 CCamera::WorldPointFromPixel(int x, int y)
 {
     Matrix viewProj = View * Proj;
     Vector4 Q;

@@ -43,7 +43,7 @@ private:
  * @brief Camera class
  * 
  */
-class Camera
+class CCamera
 {
     public:
         enum class Mode { Arcball, Roam };
@@ -54,7 +54,7 @@ class Camera
          * @param width 
          * @param size_t 
          */
-        Camera(size_t width = 0, size_t height = 0);
+        CCamera(size_t width = 0, size_t height = 0);
 
         /**
          * @brief Frame update

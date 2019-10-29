@@ -9,10 +9,10 @@
 
 #include "RenderCommon.hpp"
 
-class PostProcess
+class CPostProcess
 {
 public:
-    PostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int width, int height);
+    CPostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int width, int height);
 
     void Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex);
 
