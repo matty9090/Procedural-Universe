@@ -13,4 +13,9 @@ Todo:
  - Blending / fading out particles < 1 pixel
  - Arrange in galaxy formation
  - Zoom into stars
+   - Bake stars into background skybox
+   - Planets
  - Dark energy
+ - Trace orbits
+ - Spaceship flying round
+   - Hyperspeed effect
