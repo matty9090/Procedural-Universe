@@ -23,6 +23,21 @@ RenderView CreateTarget(ID3D11Device* device, int width, int height)
     return t;
 }
 
+void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std::vector<Particle>& particles)
+{
+    D3D11_BUFFER_DESC desc;
+    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.ByteWidth = particles.size() * sizeof(Particle);
+    desc.CPUAccessFlags = 0;
+    desc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA init;
+    init.pSysMem = &particles[0];
+
+    DX::ThrowIfFailed(device->CreateBuffer(&desc, &init, buffer));
+}
+
 void RenderView::Clear(ID3D11DeviceContext* context)
 {
     context->ClearRenderTargetView(Rtv.Get(), DirectX::Colors::Black);

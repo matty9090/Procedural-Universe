@@ -1,10 +1,12 @@
 #pragma once
 
+#include <vector>
 #include <d3d11.h>
 #include <wrl/client.h>
 #include <DirectXColors.h>
 
 #include "Core/Except.hpp"
+#include "Render/Particle.hpp"
 
 struct RenderView
 {
@@ -20,3 +22,4 @@ struct RenderView
 };
 
 RenderView CreateTarget(ID3D11Device* device, int width, int height);
+void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std::vector<Particle>& particles);

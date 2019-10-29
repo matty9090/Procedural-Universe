@@ -9,6 +9,8 @@
 #include "Core/Except.hpp"
 
 #include "Render/Shader.hpp"
+#include "Render/RenderCommon.hpp"
+
 #include "Services/Log.hpp"
 
 #include <SimpleMath.h>
@@ -130,17 +132,7 @@ void App::InitParticles()
     m_sim->Init(m_particles);
     m_particleBuffer.Reset();
 
-    D3D11_BUFFER_DESC buffer;
-    buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    buffer.Usage = D3D11_USAGE_DEFAULT;
-    buffer.ByteWidth = m_numParticles * sizeof(Particle);
-    buffer.CPUAccessFlags = 0;
-    buffer.MiscFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA init;
-    init.pSysMem = &m_particles[0];
-
-    DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateBuffer(&buffer, &init, m_particleBuffer.ReleaseAndGetAddressOf()));
+    CreateParticleBuffer(m_deviceResources->GetD3DDevice(), m_particleBuffer.ReleaseAndGetAddressOf(), m_particles);
 }
 
 bool App::InitParticlesFromFile(std::string fname, std::vector<Particle>& particles)
