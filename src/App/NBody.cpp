@@ -10,6 +10,9 @@
 #include <cxxopts.hpp>
 #include <shellapi.h>
 
+#include <Mouse.h>
+#include <Keyboard.h>
+
 namespace
 {
     std::unique_ptr<App> g_app;
