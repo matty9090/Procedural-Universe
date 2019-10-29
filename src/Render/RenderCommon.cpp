@@ -70,7 +70,7 @@ void RenderPipeline::CreateInputLayout(ID3D11Device* device, std::vector<D3D11_I
     );
 }
 
-void RenderPipeline::SetState(ID3D11DeviceContext* context, std::function<void()> state)
+void RenderPipeline::SetState(ID3D11DeviceContext* context, std::function<void()> state) const
 {
     context->IASetInputLayout(InputLayout.Get());
     context->IASetPrimitiveTopology(Topology);

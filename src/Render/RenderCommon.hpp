@@ -37,7 +37,7 @@ struct RenderPipeline
     void LoadGeometry(ID3D11Device* device, std::wstring file);
     void CreateInputLayout(ID3D11Device* device, std::vector<D3D11_INPUT_ELEMENT_DESC> layout);
 
-    void SetState(ID3D11DeviceContext* context, std::function<void()> state);
+    void SetState(ID3D11DeviceContext* context, std::function<void()> state) const;
 
 private:
     ID3DBlob* VertexCode;

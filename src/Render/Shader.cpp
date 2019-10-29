@@ -5,7 +5,7 @@ using namespace std;
 
 bool LoadVertexShader(ID3D11Device* device, const wstring& fileName, ID3D11VertexShader** vertexShader, ID3DBlob** shaderCode )
 {
-	ID3DBlob* errors;
+	ID3DBlob* errors = nullptr;
 
 	HRESULT hr = 
 		D3DCompileFromFile( fileName.c_str(), // File containing pixel shader (HLSL)
@@ -41,8 +41,8 @@ bool LoadVertexShader(ID3D11Device* device, const wstring& fileName, ID3D11Verte
 
 bool LoadGeometryShader(ID3D11Device* device, const wstring& fileName, ID3D11GeometryShader** geometryShader )
 {
-	ID3DBlob* shaderCode;
-	ID3DBlob* errors;
+	ID3DBlob* shaderCode = nullptr;
+	ID3DBlob* errors = nullptr;
 
 	HRESULT hr = 
 		D3DCompileFromFile( fileName.c_str(), // File containing geometry shader (HLSL)
@@ -82,8 +82,8 @@ bool LoadGeometryShader(ID3D11Device* device, const wstring& fileName, ID3D11Geo
 bool LoadStreamOutGeometryShader(ID3D11Device* device, const wstring& fileName, D3D11_SO_DECLARATION_ENTRY* soDecl, unsigned int soNumEntries,
 								  unsigned int soStride, ID3D11GeometryShader** geometryShader )
 {
-	ID3DBlob* shaderCode;
-	ID3DBlob* errors;
+	ID3DBlob* shaderCode = nullptr;
+	ID3DBlob* errors = nullptr;
 
 	HRESULT hr = 
 		D3DCompileFromFile( fileName.c_str(), // File containing geometry shader (HLSL)
@@ -124,8 +124,8 @@ bool LoadStreamOutGeometryShader(ID3D11Device* device, const wstring& fileName, 
 
 bool LoadPixelShader(ID3D11Device* device, const wstring& fileName, ID3D11PixelShader** pixelShader )
 {
-	ID3DBlob* shaderCode;
-	ID3DBlob* errors;
+	ID3DBlob* shaderCode = nullptr;
+	ID3DBlob* errors = nullptr;
 
 	HRESULT hr = 
 		D3DCompileFromFile( fileName.c_str(), // File containing pixel shader (HLSL)
