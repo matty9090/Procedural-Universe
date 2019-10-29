@@ -54,10 +54,7 @@ public:
 private:
     void Update(float dt);
     void Render();
-    void SwitchState(EState state);
-
-    void CreateDeviceDependentResources();
-    void CreateWindowSizeDependentResources();
+    void SwitchState(EState state, StateData& data = StateData());
 
     std::vector<std::unique_ptr<IState>>    States;
     IState*                                 CurrentState = nullptr;

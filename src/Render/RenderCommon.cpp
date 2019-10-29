@@ -1,4 +1,5 @@
 #include "RenderCommon.hpp"
+#include "Render/Shader.hpp"
 
 RenderView CreateTarget(ID3D11Device* device, int width, int height)
 {
@@ -42,4 +43,40 @@ void RenderView::Clear(ID3D11DeviceContext* context)
 {
     context->ClearRenderTargetView(Rtv.Get(), DirectX::Colors::Black);
     context->ClearDepthStencilView(Dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+}
+
+void RenderPipeline::LoadVertex(ID3D11Device* device, std::wstring file)
+{
+    if(!LoadVertexShader(device, file, VertexShader.ReleaseAndGetAddressOf(), &VertexCode))
+        throw std::exception("Failed to load vertex shader");
+}
+
+void RenderPipeline::LoadPixel(ID3D11Device* device, std::wstring file)
+{
+    if (!LoadPixelShader(device, file, PixelShader.ReleaseAndGetAddressOf()))
+        throw std::exception("Failed to load pixel shader");
+}
+
+void RenderPipeline::LoadGeometry(ID3D11Device* device, std::wstring file)
+{
+    if(!LoadGeometryShader(device, file, GeometryShader.ReleaseAndGetAddressOf()))
+        throw std::exception("Failed to load geometry shader");
+}
+
+void RenderPipeline::CreateInputLayout(ID3D11Device* device, std::vector<D3D11_INPUT_ELEMENT_DESC> layout)
+{
+    DX::ThrowIfFailed(
+        device->CreateInputLayout(layout.data(), layout.size(), VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf())
+    );
+}
+
+void RenderPipeline::SetState(ID3D11DeviceContext* context, std::function<void()> state)
+{
+    context->IASetInputLayout(InputLayout.Get());
+    context->IASetPrimitiveTopology(Topology);
+    context->VSSetShader(VertexShader.Get(), 0, 0);
+    context->GSSetShader(GeometryShader.Get(), 0, 0);
+    context->PSSetShader(PixelShader.Get(), 0, 0);
+
+    state();
 }

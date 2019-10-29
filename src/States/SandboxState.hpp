@@ -6,10 +6,18 @@
 #include "Render/Particle.hpp"
 #include "Render/ConstantBuffer.hpp"
 
+#include <vector>
 #include <Mouse.h>
 #include <Keyboard.h>
 #include <SimpleMath.h>
 #include <CommonStates.h>
+
+struct SandboxStateData : public StateData
+{
+    std::vector<Particle> Particles;
+
+    SandboxStateData(std::vector<Particle> particles) : Particles(particles) {}
+};
 
 class SandboxState : public IState
 {

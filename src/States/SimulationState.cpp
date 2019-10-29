@@ -1,7 +1,5 @@
 #include "SimulationState.hpp"
 #include "Services/Log.hpp"
-#include "Render/Shader.hpp"
-#include "Render/RenderCommon.hpp"
 
 #include <fstream>
 #include <direct.h>
@@ -86,25 +84,20 @@ void SimulationState::Render()
 
 void SimulationState::RenderParticles()
 {
-    Context->VSSetShader(VertexShader.Get(), 0, 0);
-    Context->GSSetShader(GeometryShader.Get(), 0, 0);
-    Context->PSSetShader(PixelShader.Get(), 0, 0);
-
-    unsigned int offset = 0;
-    unsigned int stride = sizeof(Particle);
-
-    Context->IASetInputLayout(InputLayout.Get());
-    Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
-
     DirectX::SimpleMath::Matrix view = Camera->GetViewMatrix();
     DirectX::SimpleMath::Matrix proj = Camera->GetProjectionMatrix();
 
-    GSBuffer->SetData(Context, Buffers::GS{ view * proj, view.Invert() });
-    Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-    Context->RSSetState(DeviceResources->GetRasterizerState());
-    Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-    Context->Draw(NumParticles, 0);
+    ParticlePipeline.SetState(Context, [&]() {
+        unsigned int offset = 0;
+        unsigned int stride = sizeof(Particle);
+
+        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
+        GSBuffer->SetData(Context, Buffers::GS{ view * proj, view.Invert() });
+        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
+        Context->RSSetState(DeviceResources->GetRasterizerState());
+        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->Draw(NumParticles, 0);
+    });
 }
 
 void SimulationState::CreateDeviceDependentResources()
@@ -113,23 +106,17 @@ void SimulationState::CreateDeviceDependentResources()
     UI = std::make_unique<CUI>(Context, DeviceResources->GetWindow());
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
-    ID3DBlob* VertexCode;
+    ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+    ParticlePipeline.LoadVertex(Device, L"shaders/PassThruGS.vsh");
+    ParticlePipeline.LoadPixel(Device, L"shaders/PlainColour.psh");
+    ParticlePipeline.LoadGeometry(Device, L"shaders/DrawParticle.gsh");
 
-    bool bVertex = LoadVertexShader(Device, L"shaders/PassThruGS.vsh", VertexShader.ReleaseAndGetAddressOf(), &VertexCode);
-    bool bGeometry = LoadGeometryShader(Device, L"shaders/DrawParticle.gsh", GeometryShader.ReleaseAndGetAddressOf());
-    bool bPixel = LoadPixelShader(Device, L"shaders/PlainColour.psh", PixelShader.ReleaseAndGetAddressOf());
-
-    if (!(bVertex && bGeometry && bPixel))
-        throw std::exception("Failed to load shader(s)");
-
-    D3D11_INPUT_ELEMENT_DESC Layout[] = {
+    std::vector<D3D11_INPUT_ELEMENT_DESC> Layout = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
     };
 
-    DX::ThrowIfFailed(
-        Device->CreateInputLayout(Layout, 2, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf())
-    );
+    ParticlePipeline.CreateInputLayout(Device, Layout);
 
     GSBuffer = std::make_unique<ConstantBuffer<Buffers::GS>>(Device);
 

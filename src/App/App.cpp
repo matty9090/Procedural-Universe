@@ -33,10 +33,7 @@ void App::Initialize(HWND window, int width, int height)
     DeviceResources->SetWindow(window, width, height);
 
     DeviceResources->CreateDeviceResources();
-    CreateDeviceDependentResources();
-
     DeviceResources->CreateWindowSizeDependentResources();
-    CreateWindowSizeDependentResources();
 
     Timer.SetFixedTimeStep(true);
     Timer.SetTargetElapsedSeconds(1.0 / 60.0);
@@ -71,8 +68,15 @@ void App::Update(float dt)
 
     if (Tracker.IsKeyReleased(DirectX::Keyboard::X))
     {
-        FLog::Get().Log("Key pressed");
-        SwitchState(CurrentStateID == EState::Simulation ? EState::Sandbox : EState::Simulation);
+        if (CurrentStateID == EState::Simulation)
+        {
+            auto Sim = static_cast<SimulationState*>(CurrentState);
+            SwitchState(EState::Sandbox, SandboxStateData(Sim->GetParticles()));
+        }
+        else
+        {
+            SwitchState(EState::Simulation);
+        }
     }
 
     CurrentState->Update(dt);
@@ -94,7 +98,7 @@ void App::Render()
     DeviceResources->Present();
 }
 
-void App::SwitchState(EState state)
+void App::SwitchState(EState state, StateData& data)
 {
     FLog::Get().Log("Switching to state " + std::to_string(static_cast<int>(state)));
 
@@ -103,7 +107,7 @@ void App::SwitchState(EState state)
 
     CurrentStateID = state;
     CurrentState = States[static_cast<int>(state)].get();
-    CurrentState->Init(DeviceResources.get(), Mouse.get(), Keyboard.get());
+    CurrentState->Init(DeviceResources.get(), Mouse.get(), Keyboard.get(), data);
 }
 #pragma endregion
 
@@ -141,8 +145,6 @@ void App::OnWindowSizeChanged(int width, int height)
 {
     if (!DeviceResources->WindowSizeChanged(width, height))
         return;
-
-    CreateWindowSizeDependentResources();
 }
 
 // Properties
@@ -159,18 +161,6 @@ void App::RunSimulation(float dt, int time, int numparticles, std::string file)
 #pragma endregion
 
 #pragma region Direct3D Resources
-// These are the resources that depend on the device.
-void App::CreateDeviceDependentResources()
-{
-    
-}
-
-// Allocate all memory resources that change on a window SizeChanged event.
-void App::CreateWindowSizeDependentResources()
-{
-    
-}
-
 void App::OnDeviceLost()
 {
     
@@ -178,7 +168,6 @@ void App::OnDeviceLost()
 
 void App::OnDeviceRestored()
 {
-    CreateDeviceDependentResources();
-    CreateWindowSizeDependentResources();
+
 }
 #pragma endregion

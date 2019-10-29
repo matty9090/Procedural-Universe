@@ -10,6 +10,7 @@
 #include "Render/Particle.hpp"
 #include "Render/Splatting.hpp"
 #include "Render/PostProcess.hpp"
+#include "Render/RenderCommon.hpp"
 #include "Render/ConstantBuffer.hpp"
 
 #include <Mouse.h>
@@ -36,6 +37,8 @@ public:
     void Render() override;
     // End IState override
 
+    std::vector<Particle> GetParticles() const { return Particles; }
+
     static bool InitParticlesFromFile(std::string fname, std::vector<Particle>& particles);
     static void RunSimulation(float dt, int time, int numparticles, std::string file);
 
@@ -61,10 +64,7 @@ private:
     std::unique_ptr<CSplatting>                     Splatting;
     std::unique_ptr<DirectX::CommonStates>          CommonStates;
 
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>      VertexShader;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader>    GeometryShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>       PixelShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout>       InputLayout;
+    RenderPipeline                                  ParticlePipeline;
     Microsoft::WRL::ComPtr<ID3D11Buffer>            ParticleBuffer;
 
     std::unique_ptr<ConstantBuffer<Buffers::GS>>    GSBuffer;

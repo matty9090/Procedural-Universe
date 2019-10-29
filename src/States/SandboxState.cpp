@@ -6,6 +6,9 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     Device = resources->GetD3DDevice();
     Context = resources->GetD3DDeviceContext();
     DeviceResources = resources;
+
+    auto sandboxData = static_cast<SandboxStateData&>(data);
+    sandboxData.Particles;
 }
 
 void SandboxState::Cleanup()
