@@ -40,9 +40,7 @@ CUI::CUI(ID3D11DeviceContext* context, HWND hwnd)
 
 CUI::~CUI()
 {
-    ImGui_ImplDX11_Shutdown();
-    ImGui_ImplWin32_Shutdown();
-    ImGui::DestroyContext();
+    Reset();
 }
 
 void CUI::Render()
@@ -214,7 +212,9 @@ void CUI::Update(float dt)
 
 void CUI::Reset()
 {
-
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
 }
 
 void CUI::SetSelectedParticle(Particle* particle)

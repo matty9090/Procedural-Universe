@@ -12,8 +12,8 @@
 #include "Services/Log.hpp"
 
 #include "States/SimulationState.hpp"
+#include "States/SandboxState.hpp"
 
-using namespace DirectX;
 using Microsoft::WRL::ComPtr;
 
 App::App() noexcept(false)
@@ -22,7 +22,7 @@ App::App() noexcept(false)
     DeviceResources->RegisterDeviceNotify(this);
 
     States.push_back(std::make_unique<SimulationState>());
-    CurrentState = States[0].get();
+    States.push_back(std::make_unique<SandboxState>());
 }
 
 // Initialize the Direct3D resources required to run.
@@ -41,7 +41,12 @@ void App::Initialize(HWND window, int width, int height)
     Timer.SetFixedTimeStep(true);
     Timer.SetTargetElapsedSeconds(1.0 / 60.0);
 
-    CurrentState->Init(DeviceResources.get());
+    Mouse = std::make_unique<DirectX::Mouse>();
+    Keyboard = std::make_unique<DirectX::Keyboard>();
+
+    Mouse->SetWindow(DeviceResources->GetWindow());
+
+    SwitchState(EState::Simulation);
 
     FLog::Get().Log("Initialized");
 }
@@ -61,6 +66,15 @@ void App::Tick()
 // Updates the world.
 void App::Update(float dt)
 {
+    auto state = Keyboard->GetState();
+    Tracker.Update(state);
+
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::X))
+    {
+        FLog::Get().Log("Key pressed");
+        SwitchState(CurrentStateID == EState::Simulation ? EState::Sandbox : EState::Simulation);
+    }
+
     CurrentState->Update(dt);
 }
 #pragma endregion
@@ -80,10 +94,16 @@ void App::Render()
     DeviceResources->Present();
 }
 
-// Helper method to clear the back buffers.
-void App::Clear()
+void App::SwitchState(EState state)
 {
-    
+    FLog::Get().Log("Switching to state " + std::to_string(static_cast<int>(state)));
+
+    if (CurrentState)
+        CurrentState->Cleanup();
+
+    CurrentStateID = state;
+    CurrentState = States[static_cast<int>(state)].get();
+    CurrentState->Init(DeviceResources.get(), Mouse.get(), Keyboard.get());
 }
 #pragma endregion
 
@@ -133,6 +153,7 @@ void App::GetDefaultSize(int& width, int& height) const
 }
 void App::RunSimulation(float dt, int time, int numparticles, std::string file)
 {
+    // TODO: Move to own class?
     SimulationState::RunSimulation(dt, time, numparticles, file);
 }
 #pragma endregion

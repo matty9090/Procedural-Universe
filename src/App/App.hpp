@@ -12,10 +12,18 @@
 #include <string>
 #include <vector>
 #include <d3d11.h>
+#include <Mouse.h>
+#include <Keyboard.h>
 #include <SimpleMath.h>
 
 class CUI;
 class CSplatting;
+
+enum class EState
+{
+    Simulation,
+    Sandbox
+};
 
 class App final : public DX::IDeviceNotify
 {
@@ -46,14 +54,18 @@ public:
 private:
     void Update(float dt);
     void Render();
-    void Clear();
+    void SwitchState(EState state);
 
     void CreateDeviceDependentResources();
     void CreateWindowSizeDependentResources();
 
-    std::vector<std::unique_ptr<IState>>  States;
-    IState*                               CurrentState;
+    std::vector<std::unique_ptr<IState>>    States;
+    IState*                                 CurrentState = nullptr;
+    EState                                  CurrentStateID;
 
-    DX::StepTimer                         Timer;
-    std::unique_ptr<DX::DeviceResources>  DeviceResources;
+    DX::StepTimer                           Timer;
+    std::unique_ptr<DX::DeviceResources>    DeviceResources;
+    std::unique_ptr<DirectX::Mouse>         Mouse;
+    std::unique_ptr<DirectX::Keyboard>      Keyboard;
+    DirectX::Keyboard::KeyboardStateTracker Tracker;
 };

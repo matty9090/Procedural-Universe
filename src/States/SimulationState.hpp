@@ -30,7 +30,7 @@ class SimulationState final : public IState
 {
 public:
     // IState override
-    void Init(DX::DeviceResources* resources) override;
+    void Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, StateData& data) override;
     void Cleanup() override;
     void Update(float dt) override;
     void Render() override;
@@ -54,8 +54,8 @@ private:
     ID3D11DeviceContext*                            Context;
     DX::DeviceResources*                            DeviceResources;
 
+    DirectX::Mouse*                                 Mouse;
     std::unique_ptr<CCamera>                        Camera;
-    std::unique_ptr<DirectX::Mouse>                 Mouse;
     std::unique_ptr<CUI>                            UI;
     std::unique_ptr<CPostProcess>                   PostProcess;
     std::unique_ptr<CSplatting>                     Splatting;

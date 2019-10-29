@@ -279,6 +279,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
         DirectX::Mouse::ProcessMessage(message, wParam, lParam);
+        DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
         
         break;
 
@@ -336,6 +337,15 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
             s_fullscreen = !s_fullscreen;
         }
+
+        DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
+
+        break;
+
+    case WM_KEYDOWN:
+    case WM_KEYUP:
+    case WM_SYSKEYUP:
+        DirectX::Keyboard::ProcessMessage(message, wParam, lParam);
         break;
 
     case WM_MENUCHAR:

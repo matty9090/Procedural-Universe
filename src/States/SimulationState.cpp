@@ -6,18 +6,14 @@
 #include <fstream>
 #include <direct.h>
 
-using namespace DirectX;
-
-void SimulationState::Init(DX::DeviceResources* resources)
+void SimulationState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, StateData& data)
 {
     Device = resources->GetD3DDevice();
     Context = resources->GetD3DDeviceContext();
     DeviceResources = resources;
 
+    Mouse = mouse;
     Seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random);
-
-    Mouse = std::make_unique<DirectX::Mouse>();
-    Mouse->SetWindow(resources->GetWindow());
 
     RegisterEvents();
 
@@ -27,6 +23,8 @@ void SimulationState::Init(DX::DeviceResources* resources)
 
 void SimulationState::Cleanup()
 {
+    UI.reset();
+
     EventStream::UnregisterAll(EEvent::SimSpeedChanged);
     EventStream::UnregisterAll(EEvent::NumParticlesChanged);
     EventStream::UnregisterAll(EEvent::SimTypeChanged);
@@ -47,7 +45,7 @@ void SimulationState::Update(float dt)
 
     CheckParticleSelected(mouse_state);
 
-    Camera->Events(Mouse.get(), mouse_state, dt);
+    Camera->Events(Mouse, mouse_state, dt);
     Camera->Update(dt);
     UI->Update(dt);
 
@@ -105,7 +103,7 @@ void SimulationState::RenderParticles()
     GSBuffer->SetData(Context, Buffers::GS{ view * proj, view.Invert() });
     Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
     Context->RSSetState(DeviceResources->GetRasterizerState());
-    Context->OMSetBlendState(CommonStates->Additive(), Colors::Black, 0xFFFFFFFF);
+    Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
     Context->Draw(NumParticles, 0);
 }
 
@@ -161,7 +159,7 @@ void SimulationState::Clear()
     auto depthStencil = DeviceResources->GetDepthStencilView();
     auto renderTarget = DeviceResources->GetSceneRenderTargetView();
 
-    context->ClearRenderTargetView(renderTarget, Colors::Black);
+    context->ClearRenderTargetView(renderTarget, DirectX::Colors::Black);
     context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     auto viewport = DeviceResources->GetScreenViewport();
