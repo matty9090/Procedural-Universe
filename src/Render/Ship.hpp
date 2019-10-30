@@ -16,11 +16,15 @@ public:
 private:
     float Mass = 10.0f;
     float Accel = 0.0f;
-    float Thrust = 200.0f;
     float Friction = 40.0f;
     float MaxSpeed = 60.0f;
-    float RotationSpeed = 0.4f;
+    float Thrust = 0.0f;
+    float ThrustInc = 300.0f;
+    float MaxThrust = 200.0f;
+    float RotationSpeed = 0.8f;
 
     DirectX::SimpleMath::Vector3 Velocity;
     DirectX::SimpleMath::Vector3 Momentum;
+    
+    float Yaw = 0.0f, Pitch = 0.0f, Roll = 0.0f;
 };

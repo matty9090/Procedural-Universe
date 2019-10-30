@@ -14,7 +14,7 @@ void CModel::Move(DirectX::SimpleMath::Vector3 v)
 
 void CModel::Rotate(DirectX::SimpleMath::Vector3 r)
 {
-    Rotation += r;
+    Rotation *= DirectX::SimpleMath::Quaternion::CreateFromYawPitchRoll(r.y, r.x, r.z);
 }
 
 void CModel::Scale(float s)
@@ -24,10 +24,8 @@ void CModel::Scale(float s)
 
 void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline)
 {
-    World = Matrix::CreateScale(RelativeScale)*
-            Matrix::CreateRotationZ(Rotation.z) *
-            Matrix::CreateRotationX(Rotation.x) *
-            Matrix::CreateRotationY(Rotation.y) *
+    World = Matrix::CreateScale(RelativeScale) *
+            Matrix::CreateFromQuaternion(Rotation) *
             Matrix::CreateTranslation(Position);
 
     MatrixBuffer.SetData(context, { World * ViewProj });

@@ -1,10 +1,13 @@
 #include "Ship.hpp"
 #include "Services/Log.hpp"
 
+using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector3;
+using DirectX::SimpleMath::Quaternion;
 
 void CShip::Update(float dt)
 {
+    Accel = Thrust / Mass;
     Velocity += -GetForward() * Accel * dt;
 
     if (Velocity.Length() > MaxSpeed)
@@ -18,8 +21,6 @@ void CShip::Update(float dt)
         auto v = Velocity;
         v.Normalize();
         Velocity -= v * Friction * dt;
-
-        FLog::Get().Log(Velocity);
     }
 
     if (Velocity.Dot(GetForward()) > 0)
@@ -28,38 +29,29 @@ void CShip::Update(float dt)
     }
 
     Position += Velocity * dt;
+    // Rotation = Vector3(Quaternion::CreateFromYawPitchRoll(Yaw, Pitch, Roll));
 }
 
 void CShip::Control(DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, float dt)
 {
     auto state = keyboard->GetState();
 
-    Accel = 0.0f;
-
     if (state.IsKeyDown(DirectX::Keyboard::Space))
     {
-        Accel = Thrust / Mass;
+        Thrust += ThrustInc * dt;
     }
     else if (state.IsKeyDown(DirectX::Keyboard::LeftControl))
     {
-        Accel = -Thrust / Mass;
+        Thrust -= ThrustInc * dt;
     }
 
-    if (state.IsKeyDown(DirectX::Keyboard::W))
-    {
-        Rotate(Vector3(-RotationSpeed * dt, 0.0f, 0.0f));
-    }
-    if (state.IsKeyDown(DirectX::Keyboard::S))
-    {
-        Rotate(Vector3(RotationSpeed * dt, 0.0f, 0.0f));
-    }
+    if (Thrust > MaxThrust) Thrust = MaxThrust;
+    if (Thrust < 0.0f) Thrust = 0.0f;
 
-    if (state.IsKeyDown(DirectX::Keyboard::A))
-    {
-        Rotate(Vector3(0.0f, RotationSpeed * dt, 0.0f));
-    }
-    if (state.IsKeyDown(DirectX::Keyboard::D))
-    {
-        Rotate(Vector3(0.0f, -RotationSpeed * dt, 0.0f));
-    }
+    if (state.IsKeyDown(DirectX::Keyboard::W)) Rotation *= Quaternion::CreateFromAxisAngle(GetRight(), RotationSpeed * dt);
+    if (state.IsKeyDown(DirectX::Keyboard::S)) Rotation *= Quaternion::CreateFromAxisAngle(GetRight(), -RotationSpeed * dt);
+    if (state.IsKeyDown(DirectX::Keyboard::A)) Rotation *= Quaternion::CreateFromAxisAngle(GetUp(), RotationSpeed * dt);
+    if (state.IsKeyDown(DirectX::Keyboard::D)) Rotation *= Quaternion::CreateFromAxisAngle(GetUp(), -RotationSpeed * dt);
+    if (state.IsKeyDown(DirectX::Keyboard::Q)) Rotation *= Quaternion::CreateFromAxisAngle(GetForward(), RotationSpeed * dt);
+    if (state.IsKeyDown(DirectX::Keyboard::E)) Rotation *= Quaternion::CreateFromAxisAngle(GetForward(), -RotationSpeed * dt);
 }

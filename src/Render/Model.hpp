@@ -30,7 +30,7 @@ public:
 protected:
     DirectX::SimpleMath::Matrix World;
     DirectX::SimpleMath::Vector3 Position;
-    DirectX::SimpleMath::Vector3 Rotation;
+    DirectX::SimpleMath::Quaternion Rotation;
 
     float RelativeScale = 1.0f;
 

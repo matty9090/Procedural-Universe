@@ -2,7 +2,7 @@
 
 #include "Core/State.hpp"
 
-#include "Render/ArcballCamera.hpp"
+#include "Render/ShipCamera.hpp"
 #include "Render/Particle.hpp"
 #include "Render/ConstantBuffer.hpp"
 
@@ -58,7 +58,7 @@ private:
     std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
 
     std::unique_ptr<CShip>            Ship;
-    std::unique_ptr<CArcballCamera>          Camera;
+    std::unique_ptr<CShipCamera>      Camera;
     std::list<std::unique_ptr<CMesh>> Meshes;
 
     enum class EState

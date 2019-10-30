@@ -12,8 +12,8 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     
     auto vp = DeviceResources->GetScreenViewport();
-    Camera = std::make_unique<CArcballCamera>(vp.Width, vp.Height);
-    Camera->SetPosition(Vector3(0.0f, 30.0f, 180.0f));
+    Camera = std::make_unique<CShipCamera>(vp.Width, vp.Height);
+    Camera->SetPosition(Vector3(0.0f, 8.0f, -30.0f));
 
     auto sandboxData = static_cast<SandboxStateData&>(data);
     Particles = sandboxData.Particles;
