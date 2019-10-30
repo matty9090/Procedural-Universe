@@ -11,6 +11,7 @@
 #include <Mouse.h>
 #include <Keyboard.h>
 #include <SimpleMath.h>
+#include <PostProcess.h>
 #include <CommonStates.h>
 
 #include "Render/Ship.hpp"
@@ -49,11 +50,14 @@ private:
     DirectX::Keyboard* Keyboard;
     DX::DeviceResources* DeviceResources;
     
+    RenderView ParticleRenderTarget;
     RenderPipeline ModelPipeline;
     RenderPipeline ParticlePipeline;
 
     std::vector<Particle> Particles;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
+    std::unique_ptr<DirectX::DualPostProcess> DualPostProcess;
+    std::unique_ptr<DirectX::BasicPostProcess> BasicPostProcess;
     Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
     std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
 

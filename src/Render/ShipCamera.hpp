@@ -7,7 +7,7 @@
 #include <SimpleMath.h>
 
 #include "Render/Particle.hpp"
-#include "Render/Model.hpp"
+#include "Render/Ship.hpp"
 
 using DirectX::SimpleMath::Quaternion;
 using DirectX::SimpleMath::Matrix;
@@ -64,7 +64,7 @@ class CShipCamera
          *
          * @param p
          */
-        void Attach(CModel* obj) { AttachedObject = obj; }
+        void Attach(CShip* obj) { AttachedObject = obj; }
 
         /**
          * @brief Get the view matrix
@@ -117,11 +117,14 @@ class CShipCamera
         float NearPlane = 10.0f, FarPlane = 30000.0f;
 
         Particle* TrackedParticle = nullptr;
-        CModel* AttachedObject = nullptr;
+        CShip* AttachedObject = nullptr;
 
         Vector3 AbsPosition, RelPosition, Rotation;
         Matrix Orientation;
 
         float Radius, InitialRadius;
         float Theta = 4.6f, Phi = 1.6f;
+
+        float NormalFov = 45.0f * (DirectX::XM_PI / 180.0f);
+        float FastFov = 82.0f * (DirectX::XM_PI / 180.0f);
 };

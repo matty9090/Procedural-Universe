@@ -10,6 +10,8 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     Keyboard = keyboard;
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
+    DualPostProcess = std::make_unique<DirectX::DualPostProcess>(Device);
+    BasicPostProcess = std::make_unique<DirectX::BasicPostProcess>(Device);
     
     auto vp = DeviceResources->GetScreenViewport();
     Camera = std::make_unique<CShipCamera>(vp.Width, vp.Height);
@@ -50,7 +52,7 @@ void SandboxState::Render()
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
 
-    Context->OMSetRenderTargets(1, &rtv, dsv);
+    SetRenderTarget(Context, ParticleRenderTarget);
     
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
@@ -67,6 +69,9 @@ void SandboxState::Render()
         Context->Draw(Particles.size(), 0);
     });
     
+    auto sceneRenderTarget = DeviceResources->GetSceneRenderTargetView();
+    Context->OMSetRenderTargets(1, &sceneRenderTarget, dsv);
+
     auto sampler = CommonStates->AnisotropicWrap();
     Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
     Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
@@ -74,6 +79,13 @@ void SandboxState::Render()
     Context->PSSetSamplers(0, 1, &sampler);
 
     Ship->Draw(Context, viewProj, ModelPipeline);
+
+    Context->OMSetRenderTargets(1, &rtv, dsv);
+    DualPostProcess->SetEffect(DirectX::DualPostProcess::Merge);
+    DualPostProcess->SetSourceTexture(DeviceResources->GetSceneShaderResourceView());
+    DualPostProcess->SetSourceTexture2(ParticleRenderTarget.Srv.Get());
+    DualPostProcess->SetMergeParameters(1.0f, 1.0f);
+    DualPostProcess->Process(Context);
 }
 
 void SandboxState::Clear()
@@ -85,6 +97,14 @@ void SandboxState::Clear()
 
     Context->ClearRenderTargetView(renderTarget, DirectX::Colors::Black);
     Context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+    Context->ClearRenderTargetView(DeviceResources->GetSceneRenderTargetView(), DirectX::Colors::Black);
+
+    if (Ship->GetSpeedPercent() < 0.96f)
+    {
+        Context->ClearRenderTargetView(ParticleRenderTarget.Rtv.Get(), DirectX::Colors::Black);
+        Context->ClearDepthStencilView(ParticleRenderTarget.Dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    }
 
     auto viewport = DeviceResources->GetScreenViewport();
     Context->RSSetViewports(1, &viewport);
@@ -120,5 +140,8 @@ void SandboxState::CreateParticlePipeline()
 
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
+
+    auto vp = DeviceResources->GetScreenViewport();
+    ParticleRenderTarget = CreateTarget(Device, vp.Width, vp.Height);
 }
 

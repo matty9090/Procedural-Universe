@@ -1,5 +1,6 @@
 #include "Render/ShipCamera.hpp"
 #include "Services/Log.hpp"
+#include "Core/Math.hpp"
 
 #include <algorithm>
 #include <sstream>
@@ -33,6 +34,9 @@ void CShipCamera::Update(float dt)
         Orientation = AttachedObject->GetMatrix();
         Orientation = Matrix::CreateTranslation(RelPosition) * Orientation;
         View = Matrix::CreateLookAt(Orientation.Translation(), AttachedObject->GetPosition(), AttachedObject->GetUp());
+
+        auto fov = Maths::Lerp(NormalFov, FastFov, AttachedObject->GetSpeedPercent());
+        Proj = Matrix::CreatePerspectiveFieldOfView(fov, float(Width) / float(Height), NearPlane, FarPlane);
     }
 }
 

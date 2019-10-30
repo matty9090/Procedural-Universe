@@ -12,6 +12,7 @@ public:
 
     void Update(float dt);
     void Control(DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, float dt);
+    float GetSpeedPercent() const { return Velocity.Length() / MaxSpeed; }
 
 private:
     float Mass = 10.0f;
@@ -19,8 +20,8 @@ private:
     float Friction = 40.0f;
     float MaxSpeed = 60.0f;
     float Thrust = 0.0f;
-    float ThrustInc = 300.0f;
-    float MaxThrust = 200.0f;
+    float ThrustInc = 500.0f;
+    float MaxThrust = 220.0f;
     float RotationSpeed = 0.8f;
 
     DirectX::SimpleMath::Vector3 Velocity;

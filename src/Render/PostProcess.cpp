@@ -126,7 +126,7 @@ void CPostProcess::RenderPP(RenderView target, std::function<void()> func)
 {
     target.Clear(Context);
     SetViewport(target.Width, target.Height);
-    Context->OMSetRenderTargets(1, target.Rtv.GetAddressOf(), target.Dsv.Get());
+    SetRenderTarget(Context, target);
     func();
 }
 

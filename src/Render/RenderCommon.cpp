@@ -24,6 +24,11 @@ RenderView CreateTarget(ID3D11Device* device, int width, int height)
     return t;
 }
 
+void SetRenderTarget(ID3D11DeviceContext* context, RenderView& view)
+{
+    context->OMSetRenderTargets(1, view.Rtv.GetAddressOf(), view.Dsv.Get());
+}
+
 void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std::vector<Particle>& particles)
 {
     D3D11_BUFFER_DESC desc;
