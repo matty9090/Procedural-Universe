@@ -14,48 +14,20 @@ using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector2;
 using DirectX::SimpleMath::Vector3;
 
-class ICameraMode
-{
-public:
-    virtual void Update(float dt) = 0;
-    virtual void Events(DirectX::Mouse* mouse, DirectX::Mouse::State& ms, float dt) = 0;
-};
-
-class ArcballCameraMode : public ICameraMode
-{
-public:
-    ArcballCameraMode(size_t width, size_t height, Matrix& view)
-        : Width(width), Height(height), View(view), Radius(1400.0f),
-          InitialRadius(1400.0f), Position(0.0f, 0.0f, -1400.0f)
-    {}
-
-    void Update(float dt);
-    void Events(DirectX::Mouse* mouse, DirectX::Mouse::State& ms, float dt);
-
-private:
-    float Radius, InitialRadius;
-    float Theta = 4.6f, Phi = 1.6f;
-    size_t Width, Height;
-    Matrix& View;
-    Vector3 Position, Target;
-};
-
 /**
  * @brief Camera class
  * 
  */
-class CCamera
+class CArcballCamera
 {
     public:
-        enum class Mode { Arcball, Roam };
-
         /**
          * @brief Construct a new Camera object
          * 
          * @param width 
          * @param size_t 
          */
-        CCamera(size_t width = 0, size_t height = 0);
+        CArcballCamera(size_t width = 0, size_t height = 0);
 
         /**
          * @brief Frame update
@@ -78,7 +50,7 @@ class CCamera
          * 
          * @param p 
          */
-        void SetPosition(Vector3 p) { View(3, 0) = p.x, View(3, 1) = p.y, View(3, 2) = p.z; }
+        void SetPosition(Vector3 p);
 
         /**
          * @brief Track a particle
@@ -140,12 +112,14 @@ class CCamera
         size_t GetHeight() const { return Height; }
 
     private:
-        std::unique_ptr<ICameraMode> CameraMode;
-
         Matrix View, Proj;
         size_t Width, Height;
         float NearPlane = 10.0f, FarPlane = 30000.0f;
 
         Particle* TrackedParticle = nullptr;
         CModel* AttachedObject = nullptr;
+
+        float Radius, InitialRadius;
+        float Theta = 4.6f, Phi = 1.6f;
+        Vector3 Position, Target;
 };

@@ -7,11 +7,13 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     Context = resources->GetD3DDeviceContext();
     DeviceResources = resources;
     Mouse = mouse;
+    Keyboard = keyboard;
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     
     auto vp = DeviceResources->GetScreenViewport();
-    Camera = std::make_unique<CCamera>(vp.Width, vp.Height);
+    Camera = std::make_unique<CArcballCamera>(vp.Width, vp.Height);
+    Camera->SetPosition(Vector3(0.0f, 30.0f, 180.0f));
 
     auto sandboxData = static_cast<SandboxStateData&>(data);
     Particles = sandboxData.Particles;
@@ -20,8 +22,8 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     CreateParticlePipeline();
 
     auto ShipMesh = CMesh::Load(Device, "resources/Ship.obj");
-    Ship = std::make_unique<CModel>(Device, ShipMesh.get());
-    Ship->Scale(10.0f);
+    Ship = std::make_unique<CShip>(Device, ShipMesh.get());
+    Ship->Scale(6.0f);
     Meshes.push_back(std::move(ShipMesh));
 
     Camera->Attach(Ship.get());
@@ -34,10 +36,11 @@ void SandboxState::Cleanup()
 
 void SandboxState::Update(float dt)
 {
-    Ship->Move(Vector3(0.0f, 0.0f, 30.0f * dt));
-
     Camera->Update(dt);
     Camera->Events(Mouse, Mouse->GetState(), dt);
+
+    Ship->Control(Mouse, Keyboard, dt);
+    Ship->Update(dt);
 }
 
 void SandboxState::Render()
@@ -59,12 +62,15 @@ void SandboxState::Render()
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
         GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert() });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-        Context->RSSetState(DeviceResources->GetRasterizerState());
+        Context->RSSetState(CommonStates->CullNone());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
         Context->Draw(Particles.size(), 0);
     });
     
     auto sampler = CommonStates->AnisotropicWrap();
+    Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
+    Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
+    Context->RSSetState(CommonStates->CullClockwise());
     Context->PSSetSamplers(0, 1, &sampler);
 
     Ship->Draw(Context, viewProj, ModelPipeline);
@@ -74,16 +80,14 @@ void SandboxState::Clear()
 {
     DeviceResources->PIXBeginEvent(L"Clear");
 
-    auto context = DeviceResources->GetD3DDeviceContext();
-
     auto depthStencil = DeviceResources->GetDepthStencilView();
     auto renderTarget = DeviceResources->GetRenderTargetView();
 
-    context->ClearRenderTargetView(renderTarget, DirectX::Colors::Black);
-    context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    Context->ClearRenderTargetView(renderTarget, DirectX::Colors::Black);
+    Context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     auto viewport = DeviceResources->GetScreenViewport();
-    context->RSSetViewports(1, &viewport);
+    Context->RSSetViewports(1, &viewport);
 
     DeviceResources->PIXEndEvent();
 }

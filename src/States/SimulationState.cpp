@@ -127,7 +127,7 @@ void SimulationState::CreateWindowSizeDependentResources()
     auto width = DeviceResources->GetScreenViewport().Width;
     auto height = DeviceResources->GetScreenViewport().Height;
 
-    Camera = std::make_unique<CCamera>(width, height);
+    Camera = std::make_unique<CArcballCamera>(width, height);
 
     PostProcess = std::make_unique<CPostProcess>(DeviceResources->GetD3DDevice(),
         DeviceResources->GetD3DDeviceContext(),

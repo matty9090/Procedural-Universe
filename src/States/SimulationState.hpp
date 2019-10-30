@@ -6,7 +6,7 @@
 #include "Sim/INBodySim.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
-#include "Render/Camera.hpp"
+#include "Render/ArcballCamera.hpp"
 #include "Render/Particle.hpp"
 #include "Render/Splatting.hpp"
 #include "Render/PostProcess.hpp"
@@ -55,7 +55,7 @@ private:
     DX::DeviceResources*                              DeviceResources;
                                                       
     DirectX::Mouse*                                   Mouse;
-    std::unique_ptr<CCamera>                          Camera;
+    std::unique_ptr<CArcballCamera>                          Camera;
     std::unique_ptr<CUI>                              UI;
     std::unique_ptr<CPostProcess>                     PostProcess;
     std::unique_ptr<CSplatting>                       Splatting;

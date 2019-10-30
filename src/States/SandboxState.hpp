@@ -2,7 +2,7 @@
 
 #include "Core/State.hpp"
 
-#include "Render/Camera.hpp"
+#include "Render/ArcballCamera.hpp"
 #include "Render/Particle.hpp"
 #include "Render/ConstantBuffer.hpp"
 
@@ -13,7 +13,7 @@
 #include <SimpleMath.h>
 #include <CommonStates.h>
 
-#include "Render/Model.hpp"
+#include "Render/Ship.hpp"
 
 struct SandboxStateData : public StateData
 {
@@ -46,6 +46,7 @@ private:
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
     DirectX::Mouse* Mouse;
+    DirectX::Keyboard* Keyboard;
     DX::DeviceResources* DeviceResources;
     
     RenderPipeline ModelPipeline;
@@ -56,8 +57,8 @@ private:
     Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
     std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
 
-    std::unique_ptr<CModel>           Ship;
-    std::unique_ptr<CCamera>          Camera;
+    std::unique_ptr<CShip>            Ship;
+    std::unique_ptr<CArcballCamera>          Camera;
     std::list<std::unique_ptr<CMesh>> Meshes;
 
     enum class EState
