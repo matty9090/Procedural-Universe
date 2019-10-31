@@ -16,6 +16,11 @@ public:
 
     void Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex);
 
+    bool UseBloom = true;
+    float GaussianBlur = 2.0f;
+    float BloomAmount = 1.0f, BloomBase = 1.4f;
+    float BloomSat = 1.0f, BloomBaseSat = 1.0f;
+
 private:
     void RenderPP(RenderView target, std::function<void()> func);
     void RenderPP(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, std::function<void()> func);
@@ -43,9 +48,4 @@ private:
     };
 
     std::map<int, RenderView> Targets;
-
-    bool UseBloom = true;
-    float GaussianBlur = 2.0f;
-    float BloomAmount = 1.0f, BloomBase = 1.4f;
-    float BloomSat = 1.0f, BloomBaseSat = 1.0f;
 };

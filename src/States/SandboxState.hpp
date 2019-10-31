@@ -4,6 +4,7 @@
 
 #include "Render/ShipCamera.hpp"
 #include "Render/Particle.hpp"
+#include "Render/PostProcess.hpp"
 #include "Render/ConstantBuffer.hpp"
 
 #include <list>
@@ -55,6 +56,7 @@ private:
     RenderPipeline ParticlePipeline;
 
     std::vector<Particle> Particles;
+    std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
     std::unique_ptr<DirectX::DualPostProcess> DualPostProcess;
     std::unique_ptr<DirectX::BasicPostProcess> BasicPostProcess;
