@@ -114,7 +114,7 @@ class CShipCamera
     private:
         Matrix View, Proj;
         size_t Width, Height;
-        float NearPlane = 10.0f, FarPlane = 30000.0f;
+        float NearPlane = 0.001f, FarPlane = 20000.0f;
 
         Particle* TrackedParticle = nullptr;
         CShip* AttachedObject = nullptr;
@@ -126,5 +126,5 @@ class CShipCamera
         float Theta = 4.6f, Phi = 1.6f;
 
         float NormalFov = 45.0f * (DirectX::XM_PI / 180.0f);
-        float FastFov = 82.0f * (DirectX::XM_PI / 180.0f);
+        float FastFov = 62.0f * (DirectX::XM_PI / 180.0f);
 };

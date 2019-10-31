@@ -1,4 +1,7 @@
 #include "SandboxState.hpp"
+#include "Services/Log.hpp"
+#include "Core/Maths.hpp"
+
 #include <DirectXColors.h>
 
 void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, StateData& data)
@@ -20,12 +23,17 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     auto sandboxData = static_cast<SandboxStateData&>(data);
     Particles = sandboxData.Particles;
 
+    for (auto& p : Particles)
+    {
+        p.Position *= 4.0f;
+    }
+
     CreateModelPipeline();
     CreateParticlePipeline();
 
     auto ShipMesh = CMesh::Load(Device, "resources/Ship.obj");
     Ship = std::make_unique<CShip>(Device, ShipMesh.get());
-    Ship->Scale(6.0f);
+    Ship->Scale(0.01f);
     Meshes.push_back(std::move(ShipMesh));
 
     Camera->Attach(Ship.get());
@@ -43,6 +51,9 @@ void SandboxState::Update(float dt)
 
     Ship->Control(Mouse, Keyboard, dt);
     Ship->Update(dt);
+
+    // auto closest = Maths::ClosestParticle(Ship->GetPosition(), Particles);
+    // FLog::Get().Log(Vector3::Distance(Ship->GetPosition(), closest.Position));
 }
 
 void SandboxState::Render()
@@ -52,6 +63,7 @@ void SandboxState::Render()
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
 
+    //Context->OMSetRenderTargets(1, &rtv, dsv);
     SetRenderTarget(Context, ParticleRenderTarget);
     
     Matrix view = Camera->GetViewMatrix();

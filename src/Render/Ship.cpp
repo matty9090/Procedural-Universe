@@ -7,8 +7,11 @@ using DirectX::SimpleMath::Quaternion;
 
 void CShip::Update(float dt)
 {
+    auto forward = GetForward();
+    forward.Normalize();
+
     Accel = Thrust / Mass;
-    Velocity += -GetForward() * Accel * dt;
+    Velocity += -forward * Accel * dt;
 
     if (Velocity.Length() > MaxSpeed)
     {
@@ -29,7 +32,6 @@ void CShip::Update(float dt)
     }
 
     Position += Velocity * dt;
-    // Rotation = Vector3(Quaternion::CreateFromYawPitchRoll(Yaw, Pitch, Roll));
 }
 
 void CShip::Control(DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, float dt)

@@ -67,6 +67,9 @@ private:
 
     enum class EState
     {
-        
+        Universal,
+        Galactic,
+        Stellar,
+        Planetary
     };
 };

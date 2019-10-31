@@ -1,6 +1,6 @@
 #include "Render/ShipCamera.hpp"
 #include "Services/Log.hpp"
-#include "Core/Math.hpp"
+#include "Core/Maths.hpp"
 
 #include <algorithm>
 #include <sstream>
