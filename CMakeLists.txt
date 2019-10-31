@@ -69,37 +69,3 @@ if (ENABLE_TESTING)
 
     add_test(UnitTests nbody_tests)
 endif ()
-
-# Packagine
-install(
-    TARGETS nbody_lib
-    ARCHIVE
-    DESTINATION lib
-    COMPONENT libraries
-    )
-
-install(
-    TARGETS nbody
-    RUNTIME
-    DESTINATION bin
-    COMPONENT applications
-    )
-
-install(
-    FILES ${SRC_FILES}
-    DESTINATION include
-    COMPONENT headers
-    )
-
-set(CPACK_GENERATOR ZIP)
-set(CPACK_PACKAGE_NAME "NBody")
-set(CPACK_PACKAGE_VENDOR "CMake.org")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "NBody simulator")
-set(CPACK_PACKAGE_VERSION "1.0.0")
-set(CPACK_PACKAGE_VERSION_MAJOR "1")
-set(CPACK_PACKAGE_VERSION_MINOR "0")
-set(CPACK_PACKAGE_VERSION_PATCH "0")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "Packaged")
-SET(CPACK_NSIS_MODIFY_PATH ON)
-
-include(CPack)

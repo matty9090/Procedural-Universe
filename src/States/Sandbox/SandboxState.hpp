@@ -1,11 +1,13 @@
 #pragma once
 
 #include "Core/State.hpp"
+#include "SandboxTarget.hpp"
 
 #include "Render/ShipCamera.hpp"
 #include "Render/Particle.hpp"
 #include "Render/PostProcess.hpp"
 #include "Render/ConstantBuffer.hpp"
+#include "Render/Ship.hpp"
 
 #include <list>
 #include <vector>
@@ -15,7 +17,6 @@
 #include <PostProcess.h>
 #include <CommonStates.h>
 
-#include "Render/Ship.hpp"
 
 struct SandboxStateData : public StateData
 {
@@ -37,44 +38,22 @@ public:
 private:
     void Clear();
     void CreateModelPipeline();
-    void CreateParticlePipeline();
-
-    struct GSConstantBuffer
-    {
-        DirectX::SimpleMath::Matrix ViewProj;
-        DirectX::SimpleMath::Matrix InvView;
-    };
+    void SetupTargets(const std::vector<Particle>& seedData);
 
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
     DirectX::Mouse* Mouse;
     DirectX::Keyboard* Keyboard;
     DX::DeviceResources* DeviceResources;
-    
-    RenderView ParticleRenderTarget;
-    RenderPipeline ModelPipeline;
-    RenderPipeline ParticlePipeline;
 
-    std::vector<Particle> Particles;
     std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
-    std::unique_ptr<DirectX::DualPostProcess> DualPostProcess;
-    std::unique_ptr<DirectX::BasicPostProcess> BasicPostProcess;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
-    std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
 
     std::unique_ptr<CShip>            Ship;
     std::unique_ptr<CShipCamera>      Camera;
     std::list<std::unique_ptr<CMesh>> Meshes;
 
-    enum class EState
-    {
-        Universal,
-        Galactic,
-        Stellar,
-        Planetary
-    };
-
-    float GalacticSpeed = 1.0f;
-    float StellarSpeed = 0.02f;
+    std::unique_ptr<SandboxTarget> RootTarget;
+    SandboxTarget* CurrentTarget;
+    RenderPipeline ModelPipeline;
 };
