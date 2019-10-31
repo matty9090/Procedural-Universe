@@ -44,6 +44,14 @@ target_link_libraries(nbody_lib directxtk d3d11 dxgi imgui assimp)
 add_executable(nbody WIN32 src/App/NBody.cpp resources/Resource.rc)
 target_link_libraries(nbody nbody_lib)
 
+add_custom_command(TARGET nbody POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   ${CMAKE_SOURCE_DIR}/shaders/ $<TARGET_FILE_DIR:nbody>/shaders)
+
+add_custom_command(TARGET nbody POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                   ${CMAKE_SOURCE_DIR}/resources/ $<TARGET_FILE_DIR:nbody>/resources)
+
 # Tests
 if (ENABLE_TESTING)
     enable_testing()
