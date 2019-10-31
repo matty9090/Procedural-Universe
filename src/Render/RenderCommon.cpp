@@ -34,7 +34,7 @@ void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std
     D3D11_BUFFER_DESC desc;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     desc.Usage = D3D11_USAGE_DEFAULT;
-    desc.ByteWidth = particles.size() * sizeof(Particle);
+    desc.ByteWidth = static_cast<unsigned int>(particles.size()) * sizeof(Particle);
     desc.CPUAccessFlags = 0;
     desc.MiscFlags = 0;
 
@@ -71,7 +71,13 @@ void RenderPipeline::LoadGeometry(ID3D11Device* device, std::wstring file)
 void RenderPipeline::CreateInputLayout(ID3D11Device* device, std::vector<D3D11_INPUT_ELEMENT_DESC> layout)
 {
     DX::ThrowIfFailed(
-        device->CreateInputLayout(layout.data(), layout.size(), VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf())
+        device->CreateInputLayout(
+            layout.data(),
+            static_cast<unsigned int>(layout.size()),
+            VertexCode->GetBufferPointer(),
+            VertexCode->GetBufferSize(),
+            InputLayout.ReleaseAndGetAddressOf()
+        )
     );
 }
 

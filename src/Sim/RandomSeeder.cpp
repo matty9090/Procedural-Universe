@@ -12,7 +12,7 @@ void RandomSeeder::Seed()
 {
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist(-500.0f, 500.0);
-    std::uniform_real_distribution<double> dist_col(0.2f, 1.0f);
+    std::uniform_real_distribution<float>  dist_col(0.2f, 1.0f);
     std::uniform_real_distribution<double> dist_vel(0.0f, 0.2f);
     std::uniform_real_distribution<double> dist_mass(1e20, 1e30);
 

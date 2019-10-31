@@ -27,7 +27,7 @@ class CArcballCamera
          * @param width 
          * @param size_t 
          */
-        CArcballCamera(size_t width = 0, size_t height = 0);
+        CArcballCamera(unsigned int width = 0, unsigned int height = 0);
 
         /**
          * @brief Frame update
@@ -113,7 +113,7 @@ class CArcballCamera
 
     private:
         Matrix View, Proj;
-        size_t Width, Height;
+        unsigned int Width, Height;
         float NearPlane = 10.0f, FarPlane = 30000.0f;
 
         Particle* TrackedParticle = nullptr;

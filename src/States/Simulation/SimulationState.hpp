@@ -54,7 +54,7 @@ private:
     ID3D11DeviceContext*                              Context;
     DX::DeviceResources*                              DeviceResources;
                                                       
-    DirectX::Mouse*                                   Mouse;
+    DirectX::Mouse*                                   Mouse = nullptr;
     std::unique_ptr<CArcballCamera>                   Camera;
     std::unique_ptr<CUI>                              UI;
     std::unique_ptr<CPostProcess>                     PostProcess;
@@ -67,7 +67,7 @@ private:
     std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
     std::vector<Particle>                             Particles;
     unsigned int                                      NumParticles = 1000;
-    Particle* SelectedParticle = nullptr;             
+    Particle*                                         SelectedParticle = nullptr;             
                                                       
     std::unique_ptr<INBodySim>                        Sim;
     std::unique_ptr<IParticleSeeder>                  Seeder;

@@ -7,7 +7,7 @@
 using namespace DirectX;
 using namespace DirectX::SimpleMath;
 
-CArcballCamera::CArcballCamera(size_t width, size_t height)
+CArcballCamera::CArcballCamera(unsigned int width, unsigned int height)
     : Width(width),
       Height(height),
       View(Matrix::CreateTranslation(0.0f, 0.0f, -1000.0f)),

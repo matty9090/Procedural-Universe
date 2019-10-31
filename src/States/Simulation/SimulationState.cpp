@@ -124,8 +124,8 @@ void SimulationState::CreateDeviceDependentResources()
 
 void SimulationState::CreateWindowSizeDependentResources()
 {
-    auto width = DeviceResources->GetScreenViewport().Width;
-    auto height = DeviceResources->GetScreenViewport().Height;
+    auto width = static_cast<unsigned int>(DeviceResources->GetScreenViewport().Width);
+    auto height = static_cast<unsigned int>(DeviceResources->GetScreenViewport().Height);
 
     Camera = std::make_unique<CArcballCamera>(width, height);
 
@@ -315,7 +315,9 @@ void SimulationState::RunSimulation(float dt, int time, int numparticles, std::s
         sim->Update(dt);
     }
 
-    _mkdir("data");
+    if (!_mkdir("data"))
+        FLog::Get().Log("Failed to create data directory", FLog::Error);
+
     auto filename = "data/" + std::to_string(endTime.QuadPart) + ".nbody";
     std::ofstream file(filename, std::ios::binary);
 

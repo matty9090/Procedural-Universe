@@ -11,8 +11,8 @@
 #include "Render/Shader.hpp"
 #include "Services/Log.hpp"
 
-#include "States/SimulationState.hpp"
-#include "States/SandboxState.hpp"
+#include "States/Simulation/SimulationState.hpp"
+#include "States/Sandbox/SandboxState.hpp"
 
 using Microsoft::WRL::ComPtr;
 

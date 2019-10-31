@@ -6,14 +6,14 @@ set(CMAKE_CXX_STANDARD 14)
 option(ENABLE_TESTING "Turns on testing" OFF)
 
 # CxxOpts
-include_directories(lib/CxxOpts/include)
+include_directories(SYSTEM lib/CxxOpts/include)
 
 # DirectXTK
 add_subdirectory(lib/DirectXTK)
-include_directories(lib/DirectXTK/Inc)
+include_directories(SYSTEM lib/DirectXTK/Inc)
 
-# ImGUI
-include_directories(lib/imgui)
+# ImGui
+include_directories(SYSTEM lib/imgui)
 
 add_library(imgui STATIC
 	lib/imgui/imgui.cpp
@@ -29,7 +29,7 @@ add_library(imgui STATIC
 
 # Assimp
 add_subdirectory(lib/assimp)
-include_directories(lib/assimp/include)
+include_directories(SYSTEM lib/assimp/include)
 
 # NBody
 add_definitions(-DUNICODE)
@@ -39,10 +39,12 @@ file(GLOB_RECURSE SRC_FILES src/*.cpp)
 list(REMOVE_ITEM SRC_FILES src/App/NBody.cpp)
 
 add_library(nbody_lib STATIC ${SRC_FILES})
+target_compile_options(nbody_lib PRIVATE /WX)
 target_link_libraries(nbody_lib directxtk d3d11 dxgi imgui assimp)
 
 add_executable(nbody WIN32 src/App/NBody.cpp resources/Resource.rc)
 target_link_libraries(nbody nbody_lib)
+target_compile_options(nbody PRIVATE /WX)
 
 add_custom_command(TARGET nbody POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -51,6 +53,7 @@ add_custom_command(TARGET nbody POST_BUILD
 add_custom_command(TARGET nbody POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
                    ${CMAKE_SOURCE_DIR}/resources/ $<TARGET_FILE_DIR:nbody>/resources)
+
 
 # Tests
 if (ENABLE_TESTING)

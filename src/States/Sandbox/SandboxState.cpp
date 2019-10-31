@@ -83,7 +83,7 @@ void SandboxState::Render()
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
         Context->RSSetState(CommonStates->CullNone());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Context->Draw(Particles.size(), 0);
+        Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
     });
 
     Context->GSSetShader(nullptr, 0, 0);
