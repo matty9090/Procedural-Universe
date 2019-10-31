@@ -72,4 +72,7 @@ private:
         Stellar,
         Planetary
     };
+
+    float GalacticSpeed = 1.0f;
+    float StellarSpeed = 0.02f;
 };

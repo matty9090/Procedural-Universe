@@ -35,8 +35,8 @@ void App::Initialize(HWND window, int width, int height)
     DeviceResources->CreateDeviceResources();
     DeviceResources->CreateWindowSizeDependentResources();
 
-    Timer.SetFixedTimeStep(true);
-    Timer.SetTargetElapsedSeconds(1.0 / 60.0);
+    //Timer.SetFixedTimeStep(true);
+    //Timer.SetTargetElapsedSeconds(1.0 / 60.0);
 
     Mouse = std::make_unique<DirectX::Mouse>();
     Keyboard = std::make_unique<DirectX::Keyboard>();

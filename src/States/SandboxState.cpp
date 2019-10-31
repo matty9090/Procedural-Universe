@@ -25,7 +25,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     for (auto& p : Particles)
     {
-        p.Position *= 4.0f;
+        p.Position *= 340.0f;
     }
 
     CreateModelPipeline();
@@ -33,7 +33,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     auto ShipMesh = CMesh::Load(Device, "resources/Ship.obj");
     Ship = std::make_unique<CShip>(Device, ShipMesh.get());
-    Ship->Scale(0.01f);
+    Ship->Scale(1.0f);
     Meshes.push_back(std::move(ShipMesh));
 
     Camera->Attach(Ship.get());
@@ -52,8 +52,11 @@ void SandboxState::Update(float dt)
     Ship->Control(Mouse, Keyboard, dt);
     Ship->Update(dt);
 
-    // auto closest = Maths::ClosestParticle(Ship->GetPosition(), Particles);
-    // FLog::Get().Log(Vector3::Distance(Ship->GetPosition(), closest.Position));
+    auto closest = Maths::ClosestParticle(Ship->GetPosition(), Particles);
+    float d = Vector3::Distance(Ship->GetPosition(), closest.Position);
+
+    float scaledDist = Maths::Clamp((d - 400.0f) / 1800.0f, 0.0f, 1.0f);
+    Ship->VelocityScale = Maths::Lerp(StellarSpeed, GalacticSpeed, scaledDist);
 }
 
 void SandboxState::Render()
@@ -63,8 +66,8 @@ void SandboxState::Render()
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
 
-    //Context->OMSetRenderTargets(1, &rtv, dsv);
-    SetRenderTarget(Context, ParticleRenderTarget);
+    Context->OMSetRenderTargets(1, &rtv, dsv);
+    //SetRenderTarget(Context, ParticleRenderTarget);
     
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
@@ -81,8 +84,8 @@ void SandboxState::Render()
         Context->Draw(Particles.size(), 0);
     });
     
-    auto sceneRenderTarget = DeviceResources->GetSceneRenderTargetView();
-    Context->OMSetRenderTargets(1, &sceneRenderTarget, dsv);
+    //auto sceneRenderTarget = DeviceResources->GetSceneRenderTargetView();
+    //Context->OMSetRenderTargets(1, &sceneRenderTarget, dsv);
 
     auto sampler = CommonStates->AnisotropicWrap();
     Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -92,12 +95,12 @@ void SandboxState::Render()
 
     Ship->Draw(Context, viewProj, ModelPipeline);
 
-    Context->OMSetRenderTargets(1, &rtv, dsv);
+    /*Context->OMSetRenderTargets(1, &rtv, dsv);
     DualPostProcess->SetEffect(DirectX::DualPostProcess::Merge);
     DualPostProcess->SetSourceTexture(DeviceResources->GetSceneShaderResourceView());
     DualPostProcess->SetSourceTexture2(ParticleRenderTarget.Srv.Get());
     DualPostProcess->SetMergeParameters(1.0f, 1.0f);
-    DualPostProcess->Process(Context);
+    DualPostProcess->Process(Context);*/
 }
 
 void SandboxState::Clear()
@@ -112,11 +115,11 @@ void SandboxState::Clear()
 
     Context->ClearRenderTargetView(DeviceResources->GetSceneRenderTargetView(), DirectX::Colors::Black);
 
-    if (Ship->GetSpeedPercent() < 0.96f)
+    /*if (Ship->GetSpeedPercent() < 0.96f)
     {
         Context->ClearRenderTargetView(ParticleRenderTarget.Rtv.Get(), DirectX::Colors::Black);
         Context->ClearDepthStencilView(ParticleRenderTarget.Dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-    }
+    }*/
 
     auto viewport = DeviceResources->GetScreenViewport();
     Context->RSSetViewports(1, &viewport);
@@ -147,7 +150,7 @@ void SandboxState::CreateParticlePipeline()
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(Device, L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(Device, L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(Device, L"shaders/DrawParticle.gsh");
+    ParticlePipeline.LoadGeometry(Device, L"shaders/Splat.gsh");
     ParticlePipeline.CreateInputLayout(Device, layout);
 
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);

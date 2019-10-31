@@ -22,8 +22,7 @@ void CShip::Update(float dt)
     if (Velocity.Length() > 0)
     {
         auto v = Velocity;
-        v.Normalize();
-        Velocity -= v * Friction * dt;
+        Velocity -= Velocity * Friction * dt;
     }
 
     if (Velocity.Dot(GetForward()) > 0)
@@ -31,7 +30,7 @@ void CShip::Update(float dt)
         Velocity = Vector3::Zero;
     }
 
-    Position += Velocity * dt;
+    Position += Velocity * VelocityScale * dt;
 }
 
 void CShip::Control(DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, float dt)
