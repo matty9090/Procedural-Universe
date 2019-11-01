@@ -51,7 +51,11 @@ void SimulationState::Update(float dt)
         Sim->Update(dt * SimSpeed);
 
     auto context = DeviceResources->GetD3DDeviceContext();
-    context->UpdateSubresource(ParticleBuffer.Get(), 0, NULL, &Particles[0], 0, 0);
+
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
+    context->Unmap(ParticleBuffer.Get(), 0);
 }
 
 void SimulationState::Render()

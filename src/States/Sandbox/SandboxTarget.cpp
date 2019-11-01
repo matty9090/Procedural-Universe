@@ -23,7 +23,6 @@ void SandboxTarget::BeginTransition()
 {
     State = EState::Transitioning;
     OnBeginTransition();
-
 }
 
 void SandboxTarget::EndTransition()

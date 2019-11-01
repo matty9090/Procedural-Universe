@@ -33,9 +33,9 @@ void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std
 {
     D3D11_BUFFER_DESC desc;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.Usage = D3D11_USAGE_DYNAMIC;
     desc.ByteWidth = static_cast<unsigned int>(particles.size()) * sizeof(Particle);
-    desc.CPUAccessFlags = 0;
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     desc.MiscFlags = 0;
 
     D3D11_SUBRESOURCE_DATA init;

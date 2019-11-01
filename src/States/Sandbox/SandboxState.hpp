@@ -56,4 +56,6 @@ private:
     std::unique_ptr<SandboxTarget> RootTarget;
     SandboxTarget* CurrentTarget;
     RenderPipeline ModelPipeline;
+
+    float CamLengthThreshold = 5000.0f;
 };

@@ -31,6 +31,7 @@ void CShip::Update(float dt)
     }
 
     Position += Velocity * VelocityScale * dt;
+    UpdateMatrices();
 }
 
 void CShip::Control(DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, float dt)
@@ -53,6 +54,6 @@ void CShip::Control(DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, float dt
     if (state.IsKeyDown(DirectX::Keyboard::S)) Rotation *= Quaternion::CreateFromAxisAngle(GetRight(), -RotationSpeed * dt);
     if (state.IsKeyDown(DirectX::Keyboard::A)) Rotation *= Quaternion::CreateFromAxisAngle(GetUp(), RotationSpeed * dt);
     if (state.IsKeyDown(DirectX::Keyboard::D)) Rotation *= Quaternion::CreateFromAxisAngle(GetUp(), -RotationSpeed * dt);
-    if (state.IsKeyDown(DirectX::Keyboard::Q)) Rotation *= Quaternion::CreateFromAxisAngle(GetForward(), RotationSpeed * dt);
-    if (state.IsKeyDown(DirectX::Keyboard::E)) Rotation *= Quaternion::CreateFromAxisAngle(GetForward(), -RotationSpeed * dt);
+    if (state.IsKeyDown(DirectX::Keyboard::Q)) Rotation *= Quaternion::CreateFromAxisAngle(GetForward(), ZRotationSpeed * dt);
+    if (state.IsKeyDown(DirectX::Keyboard::E)) Rotation *= Quaternion::CreateFromAxisAngle(GetForward(), -ZRotationSpeed * dt);
 }

@@ -126,5 +126,5 @@ class CShipCamera
         float Theta = 4.6f, Phi = 1.6f;
 
         float NormalFov = 45.0f * (DirectX::XM_PI / 180.0f);
-        float FastFov = 62.0f * (DirectX::XM_PI / 180.0f);
+        float FastFov = 100.0f * (DirectX::XM_PI / 180.0f);
 };

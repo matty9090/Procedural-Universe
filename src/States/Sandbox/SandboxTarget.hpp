@@ -22,8 +22,9 @@ public:
     SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera);
 
     void Update(float dt);
-    virtual void Render() = 0;
 
+    virtual void Render() = 0;
+    virtual void MoveObjects(Vector3 v) {}
     virtual Vector3 GetClosestObject(Vector3 pos) const = 0;
 
     void BeginTransition();

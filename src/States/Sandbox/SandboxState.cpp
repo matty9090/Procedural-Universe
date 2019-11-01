@@ -21,7 +21,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     unsigned int height = static_cast<size_t>(vp.Height);
 
     Camera = std::make_unique<CShipCamera>(width, height);
-    Camera->SetPosition(Vector3(0.0f, 8.0f, -30.0f));
+    Camera->SetPosition(Vector3(0.0f, 4.0f, -30.0f));
 
     auto sandboxData = static_cast<SandboxStateData&>(data);
 
@@ -46,23 +46,31 @@ void SandboxState::Cleanup()
 
 void SandboxState::Update(float dt)
 {
-    Camera->Update(dt);
-    Camera->Events(Mouse, Mouse->GetState(), dt);
+    auto shipPos = Ship->GetPosition();
 
+    if (shipPos.Length() > CamLengthThreshold)
+    {
+        Ship->SetPosition(Vector3::Zero);
+        CurrentTarget->MoveObjects(-shipPos);
+    }
+
+    Camera->Events(Mouse, Mouse->GetState(), dt);
     CurrentTarget->Update(dt);
 
     Ship->Control(Mouse, Keyboard, dt);
     Ship->Update(dt);
+    Camera->Update(dt);
 }
 
 void SandboxState::Render()
 {
     Clear();
-
     CurrentTarget->Render();
 
     auto rtv = DeviceResources->GetRenderTargetView();
-    auto dsv = DeviceResources->GetDepthStencilView();
+    auto dsv = DeviceResources->GetDepthStencilView(); 
+
+    Context->OMSetRenderTargets(1, &rtv, dsv);
     
     Matrix viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
 
