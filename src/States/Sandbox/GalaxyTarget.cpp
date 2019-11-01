@@ -54,16 +54,12 @@ void GalaxyTarget::MoveObjects(Vector3 v)
 
 Vector3 GalaxyTarget::GetClosestObject(Vector3 pos) const
 {
-    return Vector3();
+    return Maths::ClosestParticle(pos, Particles).Position;
 }
 
 void GalaxyTarget::StateIdle()
 {
-    /*auto closest = Maths::ClosestParticle(Ship->GetPosition(), Particles);
-    float d = Vector3::Distance(Ship->GetPosition(), closest.Position);
-
-    float scaledDist = Maths::Clamp((d - 400.0f) / 1800.0f, 0.0f, 1.0f);
-    Ship->VelocityScale = Maths::Lerp(StellarSpeed, GalacticSpeed, scaledDist);*/
+    
 }
 
 void GalaxyTarget::CreateParticlePipeline()

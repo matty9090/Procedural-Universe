@@ -1,3 +1,5 @@
+#include "Common.hlsl"
+
 cbuffer cb0
 {
     row_major float4x4 ViewProjMatrix;
@@ -49,6 +51,8 @@ void main
         float3 worldPosition = inParticle[0].Position + mul( corner, (float3x3)InvViewMatrix );
         
 		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
+        outVert.ViewportPosition.z = LogDepthBuffer(outVert.ViewportPosition.w);
+
         outVert.Colour = inParticle[0].Colour;
         outVert.UV = UVs[i];
 		outStrip.Append( outVert );

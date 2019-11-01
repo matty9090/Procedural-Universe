@@ -114,7 +114,7 @@ class CShipCamera
     private:
         Matrix View, Proj;
         size_t Width, Height;
-        float NearPlane = 0.1f, FarPlane = 2000000.0f;
+        float NearPlane = 0.01f, FarPlane = 2000.0f;
 
         Particle* TrackedParticle = nullptr;
         CShip* AttachedObject = nullptr;

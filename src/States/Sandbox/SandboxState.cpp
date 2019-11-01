@@ -31,9 +31,9 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     CreateModelPipeline();
     SetupTargets(sandboxData.Particles);
 
-    auto ShipMesh = CMesh::Load(Device, "resources/Ship.obj");
+    auto ShipMesh = CMesh::Load(Device, "assets/Ship.obj");
     Ship = std::make_unique<CShip>(Device, ShipMesh.get());
-    Ship->Scale(1.0f);
+    Ship->Scale(0.1f);
     Meshes.push_back(std::move(ShipMesh));
 
     Camera->Attach(Ship.get());
@@ -53,6 +53,12 @@ void SandboxState::Update(float dt)
         Ship->SetPosition(Vector3::Zero);
         CurrentTarget->MoveObjects(-shipPos);
     }
+
+    auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
+    float d = Vector3::Distance(Ship->GetPosition(), closest);
+
+    //float scaledDist = Maths::Clamp((d - 400.0f) / 1800.0f, 0.0f, 1.0f);
+    //Ship->VelocityScale = Maths::Lerp(StellarSpeed, GalacticSpeed, scaledDist);
 
     Camera->Events(Mouse, Mouse->GetState(), dt);
     CurrentTarget->Update(dt);

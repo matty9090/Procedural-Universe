@@ -8,14 +8,12 @@ bool LoadVertexShader(ID3D11Device* device, const wstring& fileName, ID3D11Verte
 	ID3DBlob* errors = nullptr;
 
 	HRESULT hr = 
-		D3DCompileFromFile( fileName.c_str(), // File containing pixel shader (HLSL)
-		                       NULL, NULL,       // Advanced compilation options - not needed here
-		                       "main",           // Name of entry point in the shader
-		                       "vs_5_0",         // Target vertex shader hardware - vs_1_1 is lowest level
-		                                         // vs_2_0 works on most modern video cards, vs_4_0 required for DX10
-		                       0,                // Additional compilation flags (such as debug flags)
-		                       0,                // More compilation flags (added in DX10)
-		                       shaderCode,       // Ptr to variable to hold compiled shader code
+		D3DCompileFromFile( fileName.c_str(),
+		                       NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		                       "main",
+		                       "vs_5_0",
+		                       0, 0,
+		                       shaderCode, 
 		                       &errors);
 	if (FAILED(hr))
 	{
@@ -45,14 +43,12 @@ bool LoadGeometryShader(ID3D11Device* device, const wstring& fileName, ID3D11Geo
 	ID3DBlob* errors = nullptr;
 
 	HRESULT hr = 
-		D3DCompileFromFile( fileName.c_str(), // File containing geometry shader (HLSL)
-		                       NULL, NULL,       // Advanced compilation options - not needed here
-		                       "main",           // Name of entry point in the shader
-		                       "gs_5_0",         // Target geometry shader hardware - ps_1_1 is lowest level
-		                                         // ps_2_0 works on most modern video cards, ps_4_0 required for DX10
-		                       0,                // Additional compilation flags (such as debug flags)
-		                       0,                // More compilation flags (added in DX10)
-		                       &shaderCode,      // Ptr to variable to hold compiled shader code
+		D3DCompileFromFile( fileName.c_str(),
+		                       NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		                       "main",
+		                       "gs_5_0",
+		                       0, 0,
+		                       &shaderCode,  
 		                       &errors);
 	if (FAILED(hr))
 	{
