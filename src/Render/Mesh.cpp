@@ -38,7 +38,7 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
 
     if (!scene)
     {
-        FLog::Get().Log("Failed to load mesh " + file);
+        LOGM("Failed to load mesh " + file)
         return nullptr;
     }
 
@@ -87,7 +87,7 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
 
                 DX::ThrowIfFailed(DirectX::CreateWICTextureFromFile(device, filew.c_str(), nullptr, &texture));
 
-                FLog::Get().Log("Loaded texture " + file);
+                LOGM("Loaded texture " + file)
             }
         }
 
@@ -96,7 +96,7 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
 
     CMesh* root = ProcessMesh(scene->mMeshes[0], scene);
 
-    FLog::Get().Log("Loaded mesh " + file);
+    LOGM("Loaded mesh " + file)
 
     return std::unique_ptr<CMesh>(root);
 }

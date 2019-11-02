@@ -20,7 +20,7 @@ bool LoadVertexShader(ID3D11Device* device, const wstring& fileName, ID3D11Verte
 		if (errors)
 		{
 			void* errorMsg = errors->GetBufferPointer();
-            FLog::Get().Log((char*)errorMsg);
+            LOGE((char*)errorMsg)
 			errors->Release();
 		}
 
@@ -55,7 +55,7 @@ bool LoadGeometryShader(ID3D11Device* device, const wstring& fileName, ID3D11Geo
 		if (errors)
 		{
 			void* errorMsg = errors->GetBufferPointer();
-            FLog::Get().Log((char*)errorMsg);
+            LOGE((char*)errorMsg)
 			errors->Release();
 		}
 
@@ -98,7 +98,7 @@ bool LoadStreamOutGeometryShader(ID3D11Device* device, const wstring& fileName, 
 		if (errors)
 		{
 			void* errorMsg = errors->GetBufferPointer();
-            FLog::Get().Log((char*)errorMsg);
+            LOGE((char*)errorMsg)
 			errors->Release();
 		}
 
@@ -138,7 +138,7 @@ bool LoadPixelShader(ID3D11Device* device, const wstring& fileName, ID3D11PixelS
 		if (errors)
 		{
 			void* errorMsg = errors->GetBufferPointer();
-			FLog::Get().Log((char*)errorMsg);
+            LOGE((char*)errorMsg)
 			errors->Release();
 		}
 
@@ -173,7 +173,7 @@ bool LoadComputeShader(ID3D11Device* device, const std::wstring& fileName, ID3D1
 		if(errorBlob)
 		{
 			void* errorMsg = errorBlob->GetBufferPointer();
-			FLog::Get().Log((char*)errorMsg);
+            LOGE((char*)errorMsg)
 			errorBlob->Release();
 		}
 
@@ -185,7 +185,7 @@ bool LoadComputeShader(ID3D11Device* device, const std::wstring& fileName, ID3D1
 
 	if(FAILED(device->CreateComputeShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, computeShader)))
 	{
-		FLog::Get().Log("Failed to create compute shader");
+		LOGM("Failed to create compute shader")
 		return false;
 	}
 

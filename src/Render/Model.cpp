@@ -33,10 +33,6 @@ void CModel::Scale(float s)
 
 void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline)
 {
-    World = Matrix::CreateScale(RelativeScale) *
-            Matrix::CreateFromQuaternion(Rotation) *
-            Matrix::CreateTranslation(Position);
-
     MatrixBuffer.SetData(context, { World * ViewProj });
 
     Pipeline.SetState(context, [&]() {

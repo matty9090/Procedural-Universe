@@ -5,6 +5,11 @@
 
 #include "Core/Vec3.hpp"
 
+#define LOGV(str) FLog::Get().Log(str, FLog::Verbose);
+#define LOGM(str) FLog::Get().Log(str, FLog::Info);
+#define LOGW(str) FLog::Get().Log(str, FLog::Warning);
+#define LOGE(str) FLog::Get().Log(str, FLog::Error);
+
 namespace DirectX
 {
     namespace SimpleMath

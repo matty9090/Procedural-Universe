@@ -46,7 +46,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         int size = WideCharToMultiByte(CP_ACP, 0, cmd[i], -1, NULL, 0, NULL, NULL);
         argv[i] = new char[size];
         WideCharToMultiByte(CP_ACP, 0, cmd[i], -1, argv[i], size, NULL, NULL);
-        FLog::Get().Log(argv[i]);
+        LOGM(argv[i])
     }
 
     cxxopts::Options options("NBody Simulator", "Simulate gravitational physics");

@@ -28,7 +28,7 @@ App::App() noexcept(false)
 // Initialize the Direct3D resources required to run.
 void App::Initialize(HWND window, int width, int height)
 {
-    FLog::Get().Log("Initializing...");
+    LOGM("Initializing...")
 
     DeviceResources->SetWindow(window, width, height);
 
@@ -45,7 +45,7 @@ void App::Initialize(HWND window, int width, int height)
 
     SwitchState(EState::Simulation);
 
-    FLog::Get().Log("Initialized");
+    LOGM("Initialized")
 }
 
 #pragma region Frame Update
@@ -100,7 +100,7 @@ void App::Render()
 
 void App::SwitchState(EState state, StateData& data)
 {
-    FLog::Get().Log("Switching to state " + std::to_string(static_cast<int>(state)));
+    LOGM("Switching to state " + std::to_string(static_cast<int>(state)))
 
     if (CurrentState)
         CurrentState->Cleanup();
