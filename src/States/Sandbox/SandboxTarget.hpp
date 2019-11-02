@@ -22,6 +22,7 @@ public:
     SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera);
 
     void Update(float dt);
+    bool IsTransitioning() const { return State == EState::Transitioning; }
 
     virtual void Render() = 0;
     virtual void MoveObjects(Vector3 v) {}
@@ -31,6 +32,7 @@ public:
     void EndTransition();
 
     std::string Name;
+    float Scale = 1.0f;
     SandboxTarget* Parent = nullptr;
     std::unique_ptr<SandboxTarget> Child = nullptr;
 

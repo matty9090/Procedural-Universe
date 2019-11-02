@@ -200,7 +200,7 @@ void SimulationState::RegisterEvents()
     EventStream::Register(EEvent::TrackParticle, [this](const EventData& data) {
         auto p = static_cast<const ParticleEventData&>(data).Value;
         Camera->Track(p);
-        FLog::Get().Log("Tracking particle");
+        LOGM("Tracking particle")
     });
 
     EventStream::Register(EEvent::LoadParticleFile, [this](const EventData& data) {
@@ -237,7 +237,7 @@ bool SimulationState::InitParticlesFromFile(std::string fname, std::vector<Parti
 
     if (!infile.is_open())
     {
-        FLog::Get().Log("Could not read particle file " + fname, FLog::Error);
+        LOGE("Could not read particle file " + fname)
         return false;
     }
 
@@ -256,7 +256,7 @@ bool SimulationState::InitParticlesFromFile(std::string fname, std::vector<Parti
 
     infile.close();
 
-    FLog::Get().Log("Read " + std::to_string(particles.size()) + " particles from file");
+    LOGM("Read " + std::to_string(particles.size()) + " particles from file")
 
     long double TotalMass = 0.0;
     Vec3d CentreOfMass;
@@ -313,14 +313,14 @@ void SimulationState::RunSimulation(float dt, int time, int numparticles, std::s
         if (static_cast<int>(((timer.QuadPart - tstart.QuadPart) / 10000000) >= 1))
         {
             QueryPerformanceCounter(&tstart);
-            FLog::Get().Log("Running... (" + std::to_string(iterations) + " iterations)");
+            LOGM("Running... (" + std::to_string(iterations) + " iterations)")
         }
 
         sim->Update(dt);
     }
 
     if (!_mkdir("data"))
-        FLog::Get().Log("Failed to create data directory", FLog::Error);
+        LOGE("Failed to create data directory")
 
     auto filename = "data/" + std::to_string(endTime.QuadPart) + ".nbody";
     std::ofstream file(filename, std::ios::binary);
@@ -338,7 +338,7 @@ void SimulationState::RunSimulation(float dt, int time, int numparticles, std::s
 
 void SimulationState::RunBenchmark()
 {
-    FLog::Get().Log("Running benchmark");
+    LOGM("Running benchmark")
 
     for (int sim = 0; sim < static_cast<int>(ENBodySim::NumSims); ++sim)
     {
@@ -363,7 +363,7 @@ void SimulationState::RunBenchmark()
         Render();
     }
 
-    FLog::Get().Log("Benchmark finished");
+    LOGM("Benchmark finished")
 }
 
 void SimulationState::CheckParticleSelected(DirectX::Mouse::State& ms)

@@ -54,11 +54,30 @@ void SandboxState::Update(float dt)
         CurrentTarget->MoveObjects(-shipPos);
     }
 
-    auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
-    float d = Vector3::Distance(Ship->GetPosition(), closest);
+    if (CurrentTarget->Child)
+    {
+        auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
+        float d = Vector3::Distance(Ship->GetPosition(), closest);
 
-    //float scaledDist = Maths::Clamp((d - 400.0f) / 1800.0f, 0.0f, 1.0f);
-    //Ship->VelocityScale = Maths::Lerp(StellarSpeed, GalacticSpeed, scaledDist);
+        float scaledDist = (d - CurrentTarget->EndTransitionDist) / CurrentTarget->BeginTransitionDist;
+
+        if (scaledDist < 0.0f)
+        {
+            if (CurrentTarget->IsTransitioning())
+            {
+                CurrentTarget->EndTransition();
+                CurrentTarget = CurrentTarget->Child.get();
+            }
+        }
+        else if (scaledDist < 1.0f)
+        {
+            if(!CurrentTarget->IsTransitioning())
+                CurrentTarget->BeginTransition();
+        }
+
+        scaledDist = Maths::Clamp(scaledDist, 0.0f, 1.0f);
+        Ship->VelocityScale = Maths::Lerp(CurrentTarget->Child->Scale, CurrentTarget->Scale, scaledDist);
+    }
 
     Camera->Events(Mouse, Mouse->GetState(), dt);
     CurrentTarget->Update(dt);
