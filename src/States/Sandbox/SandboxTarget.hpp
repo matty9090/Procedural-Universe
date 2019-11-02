@@ -25,14 +25,17 @@ public:
     bool IsTransitioning() const { return State == EState::Transitioning; }
 
     virtual void Render() = 0;
+    virtual void RenderTransition(float t) = 0;
     virtual void MoveObjects(Vector3 v) {}
+    virtual void ScaleObjects(float scale) {}
     virtual Vector3 GetClosestObject(Vector3 pos) const = 0;
 
-    void BeginTransition();
+    void BeginTransition(Vector3 position);
     void EndTransition();
 
     std::string Name;
     float Scale = 1.0f;
+    Vector3 Location;
     SandboxTarget* Parent = nullptr;
     std::unique_ptr<SandboxTarget> Child = nullptr;
 
@@ -43,14 +46,10 @@ protected:
     virtual void StateIdle() {}
     virtual void StateTransitioning() {}
 
-    virtual void OnBeginTransition() {}
-    virtual void OnEndTransition() {}
-
     CShipCamera* Camera = nullptr;
     ID3D11Device* Device = nullptr;
     ID3D11DeviceContext* Context = nullptr;
     DX::DeviceResources* Resources = nullptr;
-
 private:
     enum class EState
     {

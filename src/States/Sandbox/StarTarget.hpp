@@ -3,14 +3,15 @@
 #include <memory>
 #include <CommonStates.h>
 
-class GalaxyTarget : public SandboxTarget
+class StarTarget : public SandboxTarget
 {
 public:
-    GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData);
+    StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData);
 
     void Render() override;
     void RenderTransition(float t) override;
     void MoveObjects(Vector3 v) override;
+    void ScaleObjects(float scale) override;
     Vector3 GetClosestObject(Vector3 pos) const override;
 
 private:
@@ -21,7 +22,7 @@ private:
     {
         DirectX::SimpleMath::Matrix ViewProj;
         DirectX::SimpleMath::Matrix InvView;
-        Vector3 Translation;
+        DirectX::SimpleMath::Vector3 Translation;
         float Custom;
     };
 

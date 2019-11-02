@@ -20,16 +20,18 @@ void SandboxTarget::Update(float dt)
     }
 }
 
-void SandboxTarget::BeginTransition()
+void SandboxTarget::RenderTransition(float t)
 {
-    LOGM("Starting transition from " + Name + " to " + Child->Name)
+
+}
+
+void SandboxTarget::BeginTransition(Vector3 position)
+{
+    Location = position;
     State = EState::Transitioning;
-    OnBeginTransition();
 }
 
 void SandboxTarget::EndTransition()
 {
-    LOGM("Transitioned from " + Name + " to " + Child->Name)
     State = EState::Idle;
-    OnEndTransition();
 }

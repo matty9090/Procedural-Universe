@@ -1,9 +1,11 @@
-#include "GalaxyTarget.hpp"
+#include "StarTarget.hpp"
 
-GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData)
-    : SandboxTarget(context, "Galactic", resources, camera),
+StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData)
+    : SandboxTarget(context, "Stellar", resources, camera),
       Particles(seedData)
 {
+    Scale = 0.1f;
+
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
     unsigned int height = static_cast<size_t>(vp.Height);
@@ -14,7 +16,7 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     CreateParticlePipeline();
 }
 
-void GalaxyTarget::Render()
+void StarTarget::Render()
 {
     auto rtv = Resources->GetRenderTargetView();
     auto dsv = Resources->GetDepthStencilView();
@@ -31,7 +33,7 @@ void GalaxyTarget::Render()
         unsigned int stride = sizeof(Particle);
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-        GSBuffer->SetData(Context, GSConstantBuffer{ viewProj, view.Invert(), Vector3::Zero });
+        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
         Context->RSSetState(CommonStates->CullNone());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -42,12 +44,35 @@ void GalaxyTarget::Render()
     //PostProcess->Render(rtv, dsv, ParticleRenderTarget.Srv.Get());
 }
 
-void GalaxyTarget::RenderTransition(float t)
+void StarTarget::RenderTransition(float t)
 {
-    Render();
+    auto rtv = Resources->GetRenderTargetView();
+    auto dsv = Resources->GetDepthStencilView();
+
+    //ParticleRenderTarget.Clear(Context);
+    //SetRenderTarget(Context, ParticleRenderTarget);
+    Context->OMSetRenderTargets(1, &rtv, dsv);
+
+    Matrix view = Camera->GetViewMatrix();
+    Matrix viewProj = view * Camera->GetProjectionMatrix();
+
+    ParticlePipeline.SetState(Context, [&]() {
+        unsigned int offset = 0;
+        unsigned int stride = sizeof(Particle);
+
+        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
+        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Location });
+        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
+        Context->RSSetState(CommonStates->CullNone());
+        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
+    });
+
+    Context->GSSetShader(nullptr, 0, 0);
+    //PostProcess->Render(rtv, dsv, ParticleRenderTarget.Srv.Get());
 }
 
-void GalaxyTarget::MoveObjects(Vector3 v)
+void StarTarget::MoveObjects(Vector3 v)
 {
     for (auto& particle : Particles)
         particle.Position += v;
@@ -58,17 +83,28 @@ void GalaxyTarget::MoveObjects(Vector3 v)
     Context->Unmap(ParticleBuffer.Get(), 0);
 }
 
-Vector3 GalaxyTarget::GetClosestObject(Vector3 pos) const
+void StarTarget::ScaleObjects(float scale)
+{
+    for (auto& particle : Particles)
+        particle.Position /= scale;
+
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
+    Context->Unmap(ParticleBuffer.Get(), 0);
+}
+
+Vector3 StarTarget::GetClosestObject(Vector3 pos) const
 {
     return Maths::ClosestParticle(pos, Particles).Position;
 }
 
-void GalaxyTarget::StateIdle()
+void StarTarget::StateIdle()
 {
     
 }
 
-void GalaxyTarget::CreateParticlePipeline()
+void StarTarget::CreateParticlePipeline()
 {
     std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },

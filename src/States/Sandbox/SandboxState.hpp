@@ -57,5 +57,6 @@ private:
     SandboxTarget* CurrentTarget;
     RenderPipeline ModelPipeline;
 
-    float CamLengthThreshold = 5000.0f;
+    float CamOriginSnapThreshold = 5000.0f;
+    float CurrentTransitionT = 0.0f;
 };

@@ -3,6 +3,7 @@
 #include "Core/Maths.hpp"
 
 #include "GalaxyTarget.hpp"
+#include "StarTarget.hpp"
 
 #include <DirectXColors.h>
 
@@ -48,7 +49,7 @@ void SandboxState::Update(float dt)
 {
     auto shipPos = Ship->GetPosition();
 
-    if (shipPos.Length() > CamLengthThreshold)
+    if (!CurrentTarget->IsTransitioning() && shipPos.Length() > CamOriginSnapThreshold)
     {
         Ship->SetPosition(Vector3::Zero);
         CurrentTarget->MoveObjects(-shipPos);
@@ -66,17 +67,34 @@ void SandboxState::Update(float dt)
             if (CurrentTarget->IsTransitioning())
             {
                 CurrentTarget->EndTransition();
+                CurrentTarget->Child->EndTransition();
                 CurrentTarget = CurrentTarget->Child.get();
+                  
+                Ship->Move(-CurrentTarget->Location);
+                CurrentTarget->ScaleObjects(CurrentTarget->Scale);
+                Ship->SetPosition(Ship->GetPosition() / CurrentTarget->Scale);
+                Ship->VelocityScale = 1.0f;
+                LOGM("Transitioned from " + CurrentTarget->Parent->Name + " to " + CurrentTarget->Name)
             }
         }
         else if (scaledDist < 1.0f)
         {
-            if(!CurrentTarget->IsTransitioning())
-                CurrentTarget->BeginTransition();
-        }
+            if (!CurrentTarget->IsTransitioning())
+            {
+                LOGM("Starting transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
+                CurrentTarget->BeginTransition(Vector3::Zero);
+                CurrentTarget->Child->BeginTransition(closest);
+            }
 
-        scaledDist = Maths::Clamp(scaledDist, 0.0f, 1.0f);
-        Ship->VelocityScale = Maths::Lerp(CurrentTarget->Child->Scale, CurrentTarget->Scale, scaledDist);
+            CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, CurrentTarget->Scale, scaledDist);
+            Ship->VelocityScale = CurrentTransitionT;
+        }
+        else if (CurrentTarget->IsTransitioning())
+        {
+            LOGM("Cancelling transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
+            CurrentTarget->EndTransition();
+            CurrentTarget->Child->EndTransition();
+        }
     }
 
     Camera->Events(Mouse, Mouse->GetState(), dt);
@@ -90,7 +108,16 @@ void SandboxState::Update(float dt)
 void SandboxState::Render()
 {
     Clear();
-    CurrentTarget->Render();
+
+    if (CurrentTarget->IsTransitioning())
+    {
+        CurrentTarget->RenderTransition(1.0f - CurrentTransitionT);
+        CurrentTarget->Child->RenderTransition(CurrentTransitionT);
+    }
+    else
+    {
+        CurrentTarget->Render();
+    }
 
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView(); 
@@ -139,7 +166,17 @@ void SandboxState::CreateModelPipeline()
 
 void SandboxState::SetupTargets(const std::vector<Particle>& seedData)
 {
-    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, "Galactic", DeviceResources, Camera.get(), seedData);
+    std::vector<Particle> seedData2 = seedData;
+    seedData2.erase(seedData2.end() - seedData2.size() + 60, seedData2.end());
+
+    for (auto& p : seedData2)
+        p.Position /= 500;
+
+    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), seedData);
+    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
+
+    Star->Parent = Galaxy.get();
+    Galaxy->Child = std::move(Star);
 
     CurrentTarget = Galaxy.get();
     RootTarget = std::move(Galaxy);
