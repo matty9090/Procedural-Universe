@@ -31,8 +31,11 @@ bool LoadVertexShader(ID3D11Device* device, const wstring& fileName, ID3D11Verte
 
 	if (FAILED(hr))
 	{
+        LOGE("Failed to load vertex shader")
 		return false;
 	}
+
+    LOGV("Loaded shader " + wstrtostr(fileName))
 
 	return true;
 }
@@ -69,8 +72,11 @@ bool LoadGeometryShader(ID3D11Device* device, const wstring& fileName, ID3D11Geo
 
 	if (FAILED(hr))
 	{
+        LOGE("Failed to load geometry shader")
 		return false;
 	}
+
+    LOGV("Loaded shader " + wstrtostr(fileName))
 
 	return true;
 }
@@ -112,8 +118,11 @@ bool LoadStreamOutGeometryShader(ID3D11Device* device, const wstring& fileName, 
 
 	if (FAILED(hr))
 	{
+        LOGE("Failed to load geometry shader with stream output")
 		return false;
 	}
+
+    LOGV("Loaded shader " + wstrtostr(fileName))
 
 	return true;
 }
@@ -152,8 +161,11 @@ bool LoadPixelShader(ID3D11Device* device, const wstring& fileName, ID3D11PixelS
 
 	if (FAILED(hr))
 	{
+        LOGE("Failed to load pixel shader")
 		return false;
 	}
+
+    LOGV("Loaded shader " + wstrtostr(fileName))
 
 	return true;
 }
@@ -185,9 +197,11 @@ bool LoadComputeShader(ID3D11Device* device, const std::wstring& fileName, ID3D1
 
 	if(FAILED(device->CreateComputeShader(shaderBlob->GetBufferPointer(), shaderBlob->GetBufferSize(), NULL, computeShader)))
 	{
-		LOGM("Failed to create compute shader")
+		LOGE("Failed to load compute shader")
 		return false;
 	}
+
+    LOGV("Loaded shader " + wstrtostr(fileName))
 
 	return true;
 }
