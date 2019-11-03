@@ -15,23 +15,54 @@ void SandboxTarget::Update(float dt)
 {
     switch (State)
     {
-        case EState::Idle: StateIdle(); break;
-        case EState::Transitioning: StateTransitioning(); break;
+        case EState::Idle:
+            StateIdle();
+            break;
+
+        case EState::TransitioningParent:
+        case EState::TransitioningChild:
+            StateTransitioning();
+            break;
     }
 }
 
 void SandboxTarget::RenderTransition(float t)
 {
-
+    
 }
 
-void SandboxTarget::BeginTransition(Vector3 position)
+void SandboxTarget::StartTransitionParent()
 {
-    Location = position;
-    State = EState::Transitioning;
+    State = EState::TransitioningParent;
 }
 
-void SandboxTarget::EndTransition()
+void SandboxTarget::EndTransitionParent()
 {
     State = EState::Idle;
+}
+
+void SandboxTarget::StartTransitionUpChild()
+{
+    State = EState::TransitioningChild;
+    ResetObjectPositions();
+    ScaleObjects(1.0f / Scale);
+}
+
+void SandboxTarget::StartTransitionDownChild(Vector3 location)
+{
+    State = EState::TransitioningChild;
+    ParentLocationSpace = location;
+    ScaleObjects(1.0f / Scale);
+}
+
+void SandboxTarget::EndTransitionUpChild()
+{
+    State = EState::Idle;
+    ScaleObjects(Scale);
+}
+
+void SandboxTarget::EndTransitionDownChild()
+{
+    State = EState::Idle;
+    ScaleObjects(Scale);
 }

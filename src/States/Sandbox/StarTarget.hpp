@@ -12,7 +12,10 @@ public:
     void RenderTransition(float t) override;
     void MoveObjects(Vector3 v) override;
     void ScaleObjects(float scale) override;
+    void ResetObjectPositions() override;
+
     Vector3 GetClosestObject(Vector3 pos) const override;
+    Vector3 GetMainObject() const override;
 
 private:
     void StateIdle() override;
@@ -25,6 +28,8 @@ private:
         DirectX::SimpleMath::Vector3 Translation;
         float Custom;
     };
+
+    Vector3 StarPosition;
 
     RenderView ParticleRenderTarget;
     RenderPipeline ParticlePipeline;

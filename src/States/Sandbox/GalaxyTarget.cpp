@@ -52,6 +52,8 @@ void GalaxyTarget::MoveObjects(Vector3 v)
     for (auto& particle : Particles)
         particle.Position += v;
 
+    GalaxyPosition += v;
+
     D3D11_MAPPED_SUBRESOURCE mapped;
     Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
     memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
@@ -61,6 +63,11 @@ void GalaxyTarget::MoveObjects(Vector3 v)
 Vector3 GalaxyTarget::GetClosestObject(Vector3 pos) const
 {
     return Maths::ClosestParticle(pos, Particles).Position;
+}
+
+Vector3 GalaxyTarget::GetMainObject() const
+{
+    return GalaxyPosition;
 }
 
 void GalaxyTarget::StateIdle()

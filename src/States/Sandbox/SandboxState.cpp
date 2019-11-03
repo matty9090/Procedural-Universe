@@ -14,8 +14,6 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     DeviceResources = resources;
     Mouse = mouse;
     Keyboard = keyboard;
-
-    CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     
     auto vp = DeviceResources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -32,17 +30,34 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     CreateModelPipeline();
     SetupTargets(sandboxData.Particles);
 
-    auto ShipMesh = CMesh::Load(Device, "assets/Ship.obj");
-    Ship = std::make_unique<CShip>(Device, ShipMesh.get());
+    Meshes.push_back(CMesh::Load(Device, "assets/Ship.obj"));
+    Ship = std::make_unique<CShip>(Device, Meshes.back().get());
     Ship->Scale(0.1f);
-    Meshes.push_back(std::move(ShipMesh));
+    Ship->Move(Vector3(0.0f, 0.0f, 5000.0f));
 
     Camera->Attach(Ship.get());
+
+    CommonStates = std::make_unique<DirectX::CommonStates>(Device);
+    PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
 }
 
 void SandboxState::Cleanup()
 {
+    PostProcess.reset();
+    CommonStates.reset();
+    Ship.reset();
+    Camera.reset();
+    Meshes.clear();
+    
+    auto t = &RootTarget;
 
+    while(*t)
+    {
+        t = &t->get()->Child;
+
+        if(*t)
+            t->reset();
+    }
 }
 
 void SandboxState::Update(float dt)
@@ -53,47 +68,93 @@ void SandboxState::Update(float dt)
     {
         Ship->SetPosition(Vector3::Zero);
         CurrentTarget->MoveObjects(-shipPos);
+
+        LOGM("Moving to origin")
     }
-
-    if (CurrentTarget->Child)
+    
+    if (CurrentTarget)
     {
-        auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
-        float d = Vector3::Distance(Ship->GetPosition(), closest);
+        // Transition down calculations
+        auto object = CurrentTarget->GetClosestObject(Ship->GetPosition());
+        float objectDist = Vector3::Distance(Ship->GetPosition(), object);
+        float scaledDistToObject = (objectDist - CurrentTarget->EndTransitionDist) / CurrentTarget->BeginTransitionDist;
 
-        float scaledDist = (d - CurrentTarget->EndTransitionDist) / CurrentTarget->BeginTransitionDist;
+        // Transition up calculations
+        float parentDist = Vector3::Distance(Ship->GetPosition(), CurrentTarget->GetMainObject()) * CurrentTarget->Scale;
+        float scaledDistToParent = (parentDist - CurrentTarget->EndTransitionDist) / CurrentTarget->BeginTransitionDist;
 
-        if (scaledDist < 0.0f)
+        if (!CurrentTarget->IsTransitioning())
         {
-            if (CurrentTarget->IsTransitioning())
+            bool isTransitioningUp = scaledDistToParent > 0.0f && CurrentTarget->Parent;
+            bool isTransitioningDown = scaledDistToObject < 1.0f && CurrentTarget->Child;
+
+            // Begin transition
+            if (isTransitioningUp || isTransitioningDown)
             {
-                CurrentTarget->EndTransition();
-                CurrentTarget->Child->EndTransition();
+                // Parent starts rendering and lerping any visuals
+                // Child starts rendering in the parent's world space
+                // Correct the ships posititon
+
+                if (isTransitioningUp)
+                {
+                    LOGM("Starting transition from " + CurrentTarget->Name + " to " + CurrentTarget->Parent->Name)
+                    
+                    CurrentTarget = CurrentTarget->Parent;
+                    scaledDistToObject = scaledDistToParent;
+
+                    Ship->Move(-CurrentTarget->Child->GetMainObject());
+                    Ship->SetPosition(Ship->GetPosition() * CurrentTarget->Child->Scale);
+                    Ship->Move(CurrentTarget->Child->ParentLocationSpace);
+
+                    CurrentTarget->Child->StartTransitionUpChild();
+                }
+                else
+                {
+                    LOGM("Starting transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
+
+                    CurrentTarget->Child->StartTransitionDownChild(object);
+                }
+
+                CurrentTarget->StartTransitionParent();
+            }
+        }
+        else
+        {
+            // End transition up
+            if (scaledDistToObject > 1.0f)
+            {
+                // Child stops rendering
+                // Parent stops lerping visuals
+
+                CurrentTarget->EndTransitionParent();
+                CurrentTarget->Child->EndTransitionUpChild();
+                Ship->VelocityScale = 1.0f;
+
+                LOGM("Ending transition from " + CurrentTarget->Child->Name + " to " + CurrentTarget->Name)
+            }
+            // End transition down
+            else if (scaledDistToObject < 0.0f)
+            {
+                // Parent stops rendering
+                // Current target becomes child and starts rendering normally
+                // Ship to child space
+
+                CurrentTarget->EndTransitionParent();
+                CurrentTarget->Child->EndTransitionDownChild();
                 CurrentTarget = CurrentTarget->Child.get();
-                  
-                Ship->Move(-CurrentTarget->Location);
-                CurrentTarget->ScaleObjects(CurrentTarget->Scale);
+
+                Ship->Move(-CurrentTarget->ParentLocationSpace);
                 Ship->SetPosition(Ship->GetPosition() / CurrentTarget->Scale);
                 Ship->VelocityScale = 1.0f;
-                LOGM("Transitioned from " + CurrentTarget->Parent->Name + " to " + CurrentTarget->Name)
-            }
-        }
-        else if (scaledDist < 1.0f)
-        {
-            if (!CurrentTarget->IsTransitioning())
-            {
-                LOGM("Starting transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
-                CurrentTarget->BeginTransition(Vector3::Zero);
-                CurrentTarget->Child->BeginTransition(closest);
-            }
 
-            CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, CurrentTarget->Scale, scaledDist);
-            Ship->VelocityScale = CurrentTransitionT;
-        }
-        else if (CurrentTarget->IsTransitioning())
-        {
-            LOGM("Cancelling transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
-            CurrentTarget->EndTransition();
-            CurrentTarget->Child->EndTransition();
+                LOGM("Ending transition from " + CurrentTarget->Parent->Name + " to " + CurrentTarget->Name)
+            }
+            // In transition
+            else
+            {
+                CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, CurrentTarget->Scale, scaledDistToObject);
+                Ship->VelocityScale = CurrentTransitionT;
+            }
         }
     }
 
@@ -170,7 +231,7 @@ void SandboxState::SetupTargets(const std::vector<Particle>& seedData)
     seedData2.erase(seedData2.end() - seedData2.size() + 60, seedData2.end());
 
     for (auto& p : seedData2)
-        p.Position /= 500;
+        p.Position /= 50;
 
     std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), seedData);
     std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);

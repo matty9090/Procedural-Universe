@@ -1,10 +1,11 @@
 #include "StarTarget.hpp"
+#include "Services/Log.hpp"
 
 StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData)
     : SandboxTarget(context, "Stellar", resources, camera),
       Particles(seedData)
 {
-    Scale = 0.1f;
+    Scale = 0.04f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -55,13 +56,15 @@ void StarTarget::RenderTransition(float t)
 
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
+    view = view.Invert();
+    view *= Matrix::CreateScale(Scale);
 
     ParticlePipeline.SetState(Context, [&]() {
         unsigned int offset = 0;
         unsigned int stride = sizeof(Particle);
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Location });
+        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, ParentLocationSpace });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
         Context->RSSetState(CommonStates->CullNone());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -76,6 +79,8 @@ void StarTarget::MoveObjects(Vector3 v)
 {
     for (auto& particle : Particles)
         particle.Position += v;
+
+    StarPosition += v;
 
     D3D11_MAPPED_SUBRESOURCE mapped;
     Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
@@ -99,9 +104,20 @@ Vector3 StarTarget::GetClosestObject(Vector3 pos) const
     return Maths::ClosestParticle(pos, Particles).Position;
 }
 
+Vector3 StarTarget::GetMainObject() const
+{
+    return StarPosition;
+}
+
 void StarTarget::StateIdle()
 {
     
+}
+
+void StarTarget::ResetObjectPositions()
+{
+    MoveObjects(-StarPosition);
+    StarPosition = Vector3::Zero;
 }
 
 void StarTarget::CreateParticlePipeline()

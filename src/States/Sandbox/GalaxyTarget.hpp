@@ -11,7 +11,9 @@ public:
     void Render() override;
     void RenderTransition(float t) override;
     void MoveObjects(Vector3 v) override;
+
     Vector3 GetClosestObject(Vector3 pos) const override;
+    Vector3 GetMainObject() const override;
 
 private:
     void StateIdle() override;
@@ -24,6 +26,8 @@ private:
         Vector3 Translation;
         float Custom;
     };
+
+    Vector3 GalaxyPosition;
 
     RenderView ParticleRenderTarget;
     RenderPipeline ParticlePipeline;
