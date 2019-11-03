@@ -15,6 +15,7 @@ public:
     CPostProcess(ID3D11Device* device, ID3D11DeviceContext* context, int width, int height);
 
     void Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex);
+    void RenderDepth(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* depthTex);
 
     bool UseBloom = true;
     float GaussianBlur = 2.0f;
@@ -33,6 +34,7 @@ private:
 
     std::unique_ptr<DirectX::DualPostProcess>  DualPostProcess;
     std::unique_ptr<DirectX::BasicPostProcess> BasicPostProcess;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader>  DepthShader;
 
     enum ETargets
     {
