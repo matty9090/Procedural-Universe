@@ -25,16 +25,16 @@ struct RenderView
 
 struct RenderPipeline
 {
-    Microsoft::WRL::ComPtr<ID3D11InputLayout>     InputLayout;
-    Microsoft::WRL::ComPtr<ID3D11VertexShader>    VertexShader;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader>  GeometryShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>     PixelShader;
+    ID3D11VertexShader*    VertexShader = nullptr;
+    ID3D11GeometryShader*  GeometryShader = nullptr;
+    ID3D11PixelShader*     PixelShader = nullptr;
+    Microsoft::WRL::ComPtr<ID3D11InputLayout> InputLayout;
 
     D3D_PRIMITIVE_TOPOLOGY Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-    void LoadVertex(ID3D11Device* device, std::wstring file);
-    void LoadPixel(ID3D11Device* device, std::wstring file);
-    void LoadGeometry(ID3D11Device* device, std::wstring file);
+    void LoadVertex(std::wstring file);
+    void LoadPixel(std::wstring file);
+    void LoadGeometry(std::wstring file);
     void CreateInputLayout(ID3D11Device* device, std::vector<D3D11_INPUT_ELEMENT_DESC> layout);
 
     void SetState(ID3D11DeviceContext* context, std::function<void()> state) const;
@@ -46,3 +46,7 @@ private:
 RenderView CreateTarget(ID3D11Device* device, int width, int height);
 void SetRenderTarget(ID3D11DeviceContext* context, RenderView& view);
 void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std::vector<Particle>& particles);
+
+std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPosition();
+std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionColour();
+std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionTexture();

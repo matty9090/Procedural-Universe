@@ -1,6 +1,8 @@
 #include "SandboxState.hpp"
-#include "Services/Log.hpp"
 #include "Core/Maths.hpp"
+
+#include "Services/Log.hpp"
+#include "Services/ResourceManager.hpp"
 
 #include "GalaxyTarget.hpp"
 #include "StarTarget.hpp"
@@ -30,8 +32,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     CreateModelPipeline();
     SetupTargets(sandboxData.Particles);
 
-    Meshes.push_back(CMesh::Load(Device, "assets/Ship.obj"));
-    Ship = std::make_unique<CShip>(Device, Meshes.back().get());
+    Ship = std::make_unique<CShip>(Device, RESM.GetMesh("assets/Ship.obj"));
     Ship->Scale(0.1f);
     Ship->Move(Vector3(0.0f, 0.0f, 5000.0f));
 
@@ -47,7 +48,6 @@ void SandboxState::Cleanup()
     CommonStates.reset();
     Ship.reset();
     Camera.reset();
-    Meshes.clear();
     
     auto t = &RootTarget;
 
@@ -220,8 +220,8 @@ void SandboxState::CreateModelPipeline()
     };
 
     ModelPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    ModelPipeline.LoadVertex(Device, L"shaders/PositionTexture.vsh");
-    ModelPipeline.LoadPixel(Device, L"shaders/Texture.psh");
+    ModelPipeline.LoadVertex(L"shaders/PositionTexture.vsh");
+    ModelPipeline.LoadPixel(L"shaders/Texture.psh");
     ModelPipeline.CreateInputLayout(Device, layout);
 }
 

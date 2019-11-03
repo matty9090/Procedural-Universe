@@ -110,16 +110,11 @@ void SimulationState::CreateDeviceDependentResources()
     UI = std::make_unique<CUI>(Context, DeviceResources->GetWindow());
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
-    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
-       { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-       { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-    ParticlePipeline.LoadVertex(Device, L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(Device, L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(Device, L"shaders/DrawParticle.gsh");
-    ParticlePipeline.CreateInputLayout(Device, layout);
+    ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
+    ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
+    ParticlePipeline.LoadGeometry(L"shaders/DrawParticle.gsh");
+    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
 
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
 

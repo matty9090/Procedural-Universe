@@ -9,7 +9,9 @@
 #include "Core/Except.hpp"
 
 #include "Render/Shader.hpp"
+
 #include "Services/Log.hpp"
+#include "Services/ResourceManager.hpp"
 
 #include "States/Simulation/SimulationState.hpp"
 #include "States/Sandbox/SandboxState.hpp"
@@ -34,6 +36,8 @@ void App::Initialize(HWND window, int width, int height)
 
     DeviceResources->CreateDeviceResources();
     DeviceResources->CreateWindowSizeDependentResources();
+
+    RESM.SetDevice(DeviceResources->GetD3DDevice());
 
     //Timer.SetFixedTimeStep(true);
     //Timer.SetTargetElapsedSeconds(1.0 / 60.0);

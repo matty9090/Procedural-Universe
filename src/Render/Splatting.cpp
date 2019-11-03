@@ -1,5 +1,6 @@
 #include "Splatting.hpp"
-#include "render/Shader.hpp"
+#include "Render/Shader.hpp"
+#include "Services/ResourceManager.hpp"
 
 #include <DirectXColors.h>
 
@@ -12,8 +13,8 @@ CSplatting::CSplatting(ID3D11DeviceContext* context, int width, int height) : Co
     DualPostProcess  = std::make_unique<DirectX::DualPostProcess>(device);
     BasicPostProcess = std::make_unique<DirectX::BasicPostProcess>(device);
 
-    LoadPixelShader(device, L"shaders/Splat.psh", PixelShader.ReleaseAndGetAddressOf());
-    LoadGeometryShader(device, L"shaders/Splat.gsh", GeometryShader.ReleaseAndGetAddressOf());
+    PixelShader = RESM.GetPixelShader(L"shaders/Splat.psh");
+    GeometryShader = RESM.GetGeometryShader(L"shaders/Splat.gsh");
 
     Target0 = CreateTarget(device, width, height);
     Target1 = CreateTarget(device, width, height);
@@ -27,8 +28,8 @@ void CSplatting::Render(unsigned int num, ID3D11ShaderResourceView *scene)
     
     /////
     Target0.Clear(Context);
-    Context->GSSetShader(GeometryShader.Get(), 0, 0);
-    Context->PSSetShader(PixelShader.Get(), 0, 0);
+    Context->GSSetShader(GeometryShader, 0, 0);
+    Context->PSSetShader(PixelShader, 0, 0);
     Context->OMSetBlendState(States->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
     Context->OMSetRenderTargets(1, Target0.Rtv.GetAddressOf(), Target0.Dsv.Get());
     Context->Draw(num, 0);

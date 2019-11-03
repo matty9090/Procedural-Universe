@@ -14,6 +14,7 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
+    CreateStarPipeline();
     CreateParticlePipeline();
 }
 
@@ -120,6 +121,17 @@ void StarTarget::ResetObjectPositions()
     StarPosition = Vector3::Zero;
 }
 
+void StarTarget::CreateStarPipeline()
+{
+    ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+    ParticlePipeline.LoadVertex(L"shaders/Position.vsh");
+    ParticlePipeline.LoadPixel(L"shaders/Star.psh");
+    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
+
+    auto vp = Resources->GetScreenViewport();
+    ParticleRenderTarget = CreateTarget(Device, static_cast<int>(vp.Width), static_cast<int>(vp.Height));
+}
+
 void StarTarget::CreateParticlePipeline()
 {
     std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
@@ -128,9 +140,9 @@ void StarTarget::CreateParticlePipeline()
     };
 
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-    ParticlePipeline.LoadVertex(Device, L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(Device, L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(Device, L"shaders/SandboxParticle.gsh");
+    ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
+    ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
+    ParticlePipeline.LoadGeometry(L"shaders/SandboxParticle.gsh");
     ParticlePipeline.CreateInputLayout(Device, layout);
 
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
