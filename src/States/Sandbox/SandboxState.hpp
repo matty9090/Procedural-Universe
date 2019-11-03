@@ -51,7 +51,6 @@ private:
 
     std::unique_ptr<CShip>            Ship;
     std::unique_ptr<CShipCamera>      Camera;
-    std::list<std::unique_ptr<CMesh>> Meshes;
 
     std::unique_ptr<SandboxTarget> RootTarget;
     SandboxTarget* CurrentTarget;

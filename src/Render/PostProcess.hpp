@@ -34,7 +34,7 @@ private:
 
     std::unique_ptr<DirectX::DualPostProcess>  DualPostProcess;
     std::unique_ptr<DirectX::BasicPostProcess> BasicPostProcess;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader>  DepthShader;
+    ID3D11PixelShader*  DepthShader;
 
     enum ETargets
     {

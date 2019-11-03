@@ -1,5 +1,7 @@
 #include "Mesh.hpp"
+
 #include "Services/Log.hpp"
+#include "Services/ResourceManager.hpp"
 
 #include <WICTextureLoader.h>
 
@@ -85,9 +87,7 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
                 std::string file = std::string("resources/") + str.C_Str();
                 std::wstring filew(file.begin(), file.end());
 
-                DX::ThrowIfFailed(DirectX::CreateWICTextureFromFile(device, filew.c_str(), nullptr, &texture));
-
-                LOGM("Loaded texture " + file)
+                texture = RESM.GetTexture(filew.c_str());
             }
         }
 

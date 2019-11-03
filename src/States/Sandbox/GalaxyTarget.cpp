@@ -83,9 +83,9 @@ void GalaxyTarget::CreateParticlePipeline()
     };
 
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-    ParticlePipeline.LoadVertex(Device, L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(Device, L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(Device, L"shaders/SandboxParticle.gsh");
+    ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
+    ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
+    ParticlePipeline.LoadGeometry(L"shaders/SandboxParticle.gsh");
     ParticlePipeline.CreateInputLayout(Device, layout);
 
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);

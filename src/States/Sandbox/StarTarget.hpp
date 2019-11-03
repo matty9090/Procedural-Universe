@@ -19,6 +19,7 @@ public:
 
 private:
     void StateIdle() override;
+    void CreateStarPipeline();
     void CreateParticlePipeline();
 
     struct GSConstantBuffer

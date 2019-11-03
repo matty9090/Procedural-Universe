@@ -23,8 +23,8 @@ private:
     std::unique_ptr<DirectX::DualPostProcess>  DualPostProcess;
     std::unique_ptr<DirectX::BasicPostProcess> BasicPostProcess;
 
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> PixelShader;
-    Microsoft::WRL::ComPtr<ID3D11GeometryShader> GeometryShader;
+    ID3D11PixelShader* PixelShader;
+    ID3D11GeometryShader* GeometryShader;
 
     RenderView Target0;
     RenderView Target1;

@@ -1,8 +1,11 @@
 #include "Render/PostProcess.hpp"
+#include "Render/Shader.hpp"
+
 #include "Services/Log.hpp"
+#include "Services/ResourceManager.hpp"
+
 #include "Core/Except.hpp"
 #include "Core/Event.hpp"
-#include "Render/Shader.hpp"
 
 #include <DirectXColors.h>
 
@@ -22,8 +25,7 @@ CPostProcess::CPostProcess(ID3D11Device* device, ID3D11DeviceContext* context, i
     Targets[BloomTarget5] = CreateTarget(Device, Width, Height);
     Targets[BloomCombine] = CreateTarget(Device, Width, Height);
 
-    if (!LoadPixelShader(Device, L"shaders/Depth.psh", DepthShader.ReleaseAndGetAddressOf()))
-        LOGE("Error loading depth shader")
+    DepthShader = RESM.GetPixelShader(L"shaders/Depth.psh");
 
     EventStream::Register(EEvent::UseBloomChanged, [this](const EventData& data) {
         UseBloom = static_cast<const BoolEventData&>(data).Value;
@@ -133,7 +135,7 @@ void CPostProcess::RenderDepth(ID3D11RenderTargetView* rtv, ID3D11DepthStencilVi
         BasicPostProcess->SetEffect(DirectX::BasicPostProcess::Copy);
         BasicPostProcess->SetSourceTexture(depthTex);
         BasicPostProcess->Process(Context, [&]() {
-            Context->PSSetShader(DepthShader.Get(), 0, 0);
+            Context->PSSetShader(DepthShader, 0, 0);
         });
     });
 }
