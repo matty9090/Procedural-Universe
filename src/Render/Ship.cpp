@@ -25,11 +25,6 @@ void CShip::Update(float dt)
         Velocity -= Velocity * Friction * dt;
     }
 
-    if (Velocity.Dot(GetForward()) > 0)
-    {
-        Velocity = Vector3::Zero;
-    }
-
     Position += Velocity * VelocityScale * dt;
     UpdateMatrices();
 }
@@ -47,8 +42,8 @@ void CShip::Control(DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, float dt
         Thrust -= ThrustInc * dt;
     }
 
-    if (Thrust > MaxThrust) Thrust = MaxThrust;
-    if (Thrust < 0.0f) Thrust = 0.0f;
+    if (Thrust >  MaxThrust) Thrust =  MaxThrust;
+    if (Thrust < -MaxThrust) Thrust = -MaxThrust;
 
     if (state.IsKeyDown(DirectX::Keyboard::W)) Rotation *= Quaternion::CreateFromAxisAngle(GetRight(), RotationSpeed * dt);
     if (state.IsKeyDown(DirectX::Keyboard::S)) Rotation *= Quaternion::CreateFromAxisAngle(GetRight(), -RotationSpeed * dt);

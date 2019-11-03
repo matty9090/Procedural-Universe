@@ -79,6 +79,11 @@ void App::Update(float dt)
         }
     }
 
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::Escape))
+    {
+        PostQuitMessage(0);
+    }
+
     CurrentState->Update(dt);
 }
 #pragma endregion
