@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "Services/Log.hpp"
 
-TEST(IndependentMethod, LogInfoImplicit)
+TEST(IndependentMethod, LogInfo)
 {
     testing::internal::CaptureStdout();
     LOGM("Testing")
@@ -10,19 +10,10 @@ TEST(IndependentMethod, LogInfoImplicit)
     ASSERT_EQ(output, "[Info] Testing\n") << "Log output format unexpected";
 }
 
-TEST(IndependentMethod, LogInfoExplicit)
-{
-    testing::internal::CaptureStdout();
-    LOGM("Testing", FLog::Info)
-    std::string output = testing::internal::GetCapturedStdout();
-
-    ASSERT_EQ(output, "[Info] Testing\n") << "Log output format unexpected";
-}
-
 TEST(IndependentMethod, LogWarning)
 {
     testing::internal::CaptureStdout();
-    LOGM("Testing", FLog::Warning)
+    LOGW("Testing")
     std::string output = testing::internal::GetCapturedStdout();
 
     ASSERT_EQ(output, "[Warning] Testing\n") << "Log output format unexpected";
@@ -31,7 +22,7 @@ TEST(IndependentMethod, LogWarning)
 TEST(IndependentMethod, LogError)
 {
     testing::internal::CaptureStdout();
-    LOGM("Testing", FLog::Error)
+    LOGE("Testing")
     std::string output = testing::internal::GetCapturedStdout();
 
     ASSERT_EQ(output, "[Error] Testing\n") << "Log output format unexpected";
