@@ -57,6 +57,7 @@ namespace DX
         ID3D11RenderTargetView*     GetSceneRenderTargetView() const    { return m_sceneRtv.Get(); }
         ID3D11DepthStencilView*     GetDepthStencilView() const         { return m_d3dDepthStencilView.Get(); }
         ID3D11ShaderResourceView*   GetSceneShaderResourceView() const  { return m_sceneSrv.Get(); }
+        ID3D11ShaderResourceView*   GetDepthShaderResourceView() const  { return m_depthSrv.Get(); }
         ID3D11RasterizerState*      GetRasterizerState() const          { return m_raster.Get(); }
         DXGI_FORMAT                 GetBackBufferFormat() const         { return m_backBufferFormat; }
         DXGI_FORMAT                 GetDepthBufferFormat() const        { return m_depthBufferFormat; }
@@ -103,6 +104,7 @@ namespace DX
         Microsoft::WRL::ComPtr<ID3D11RenderTargetView>      m_sceneRtv;
         Microsoft::WRL::ComPtr<ID3D11DepthStencilView>      m_d3dDepthStencilView;
         Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>    m_sceneSrv;
+        Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>    m_depthSrv;
         D3D11_VIEWPORT                                      m_screenViewport;
 
         // Direct3D properties.

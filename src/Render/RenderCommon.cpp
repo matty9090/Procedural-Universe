@@ -1,6 +1,8 @@
 #include "RenderCommon.hpp"
 #include "Render/Shader.hpp"
 
+#include "Services/ResourceManager.hpp"
+
 RenderView CreateTarget(ID3D11Device* device, int width, int height)
 {
     RenderView t;
@@ -33,9 +35,9 @@ void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std
 {
     D3D11_BUFFER_DESC desc;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc.Usage = D3D11_USAGE_DEFAULT;
-    desc.ByteWidth = particles.size() * sizeof(Particle);
-    desc.CPUAccessFlags = 0;
+    desc.Usage = D3D11_USAGE_DYNAMIC;
+    desc.ByteWidth = static_cast<unsigned int>(particles.size()) * sizeof(Particle);
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
     desc.MiscFlags = 0;
 
     D3D11_SUBRESOURCE_DATA init;
@@ -44,34 +46,67 @@ void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std
     DX::ThrowIfFailed(device->CreateBuffer(&desc, &init, buffer));
 }
 
+std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPosition()
+{
+    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
+    return layout;
+}
+
+std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionColour()
+{
+    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
+    return layout;
+}
+
+std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionTexture()
+{
+    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT   , 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
+    return layout;
+}
+
 void RenderView::Clear(ID3D11DeviceContext* context)
 {
     context->ClearRenderTargetView(Rtv.Get(), DirectX::Colors::Black);
     context->ClearDepthStencilView(Dsv.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 }
 
-void RenderPipeline::LoadVertex(ID3D11Device* device, std::wstring file)
+void RenderPipeline::LoadVertex(std::wstring file)
 {
-    if(!LoadVertexShader(device, file, VertexShader.ReleaseAndGetAddressOf(), &VertexCode))
-        throw std::exception("Failed to load vertex shader");
+    VertexShader = RESM.GetVertexShader(file);
+    VertexCode = RESM.GetVertexCode(file);
 }
 
-void RenderPipeline::LoadPixel(ID3D11Device* device, std::wstring file)
+void RenderPipeline::LoadPixel(std::wstring file)
 {
-    if (!LoadPixelShader(device, file, PixelShader.ReleaseAndGetAddressOf()))
-        throw std::exception("Failed to load pixel shader");
+    PixelShader = RESM.GetPixelShader(file);
 }
 
-void RenderPipeline::LoadGeometry(ID3D11Device* device, std::wstring file)
+void RenderPipeline::LoadGeometry(std::wstring file)
 {
-    if(!LoadGeometryShader(device, file, GeometryShader.ReleaseAndGetAddressOf()))
-        throw std::exception("Failed to load geometry shader");
+    GeometryShader = RESM.GetGeometryShader(file);
 }
 
 void RenderPipeline::CreateInputLayout(ID3D11Device* device, std::vector<D3D11_INPUT_ELEMENT_DESC> layout)
 {
     DX::ThrowIfFailed(
-        device->CreateInputLayout(layout.data(), layout.size(), VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), InputLayout.ReleaseAndGetAddressOf())
+        device->CreateInputLayout(
+            layout.data(),
+            static_cast<unsigned int>(layout.size()),
+            VertexCode->GetBufferPointer(),
+            VertexCode->GetBufferSize(),
+            InputLayout.ReleaseAndGetAddressOf()
+        )
     );
 }
 
@@ -79,9 +114,9 @@ void RenderPipeline::SetState(ID3D11DeviceContext* context, std::function<void()
 {
     context->IASetInputLayout(InputLayout.Get());
     context->IASetPrimitiveTopology(Topology);
-    context->VSSetShader(VertexShader.Get(), 0, 0);
-    context->GSSetShader(GeometryShader.Get(), 0, 0);
-    context->PSSetShader(PixelShader.Get(), 0, 0);
+    context->VSSetShader(VertexShader, 0, 0);
+    context->GSSetShader(GeometryShader, 0, 0);
+    context->PSSetShader(PixelShader, 0, 0);
 
     state();
 }

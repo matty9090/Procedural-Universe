@@ -10,24 +10,29 @@ CModel::CModel(ID3D11Device* device, CMesh* mesh) : MatrixBuffer(device), Mesh(m
 void CModel::Move(DirectX::SimpleMath::Vector3 v)
 {
     Position += v;
+    UpdateMatrices();
+}
+
+void CModel::SetPosition(DirectX::SimpleMath::Vector3 p)
+{
+    Position = p;
+    UpdateMatrices();
 }
 
 void CModel::Rotate(DirectX::SimpleMath::Vector3 r)
 {
     Rotation *= DirectX::SimpleMath::Quaternion::CreateFromYawPitchRoll(r.y, r.x, r.z);
+    UpdateMatrices();
 }
 
 void CModel::Scale(float s)
 {
     RelativeScale *= s;
+    UpdateMatrices();
 }
 
 void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline)
 {
-    World = Matrix::CreateScale(RelativeScale) *
-            Matrix::CreateFromQuaternion(Rotation) *
-            Matrix::CreateTranslation(Position);
-
     MatrixBuffer.SetData(context, { World * ViewProj });
 
     Pipeline.SetState(context, [&]() {
@@ -41,4 +46,11 @@ void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix View
 
         context->DrawIndexed(Mesh->NumIndices, 0, 0);
     });
+}
+
+void CModel::UpdateMatrices()
+{
+    World = Matrix::CreateScale(RelativeScale) *
+            Matrix::CreateFromQuaternion(Rotation) *
+            Matrix::CreateTranslation(Position);
 }

@@ -79,7 +79,7 @@ void GalaxySeeder::CreateSpiralArm(float offset, float dist)
     std::uniform_real_distribution<float> disty(0.5f, 0.2f);
 
     float maxAngle = 6.0f;
-    int loops = floor(maxAngle / 0.1f);
+    int loops = static_cast<int>(floor(maxAngle / 0.1f));
     float numPerLoop = floor((static_cast<float>(Particles.size()) * dist) / loops);
 
     for(float angle = 0.0f, r = 2.0f; angle < 6.0f; angle += 0.1f, r += 7.2f)
@@ -102,7 +102,7 @@ void GalaxySeeder::CreateSpiralArm(float offset, float dist)
         for (int i = 0; i < numPerLoop; ++i)
         {
             auto position = Vector3::Lerp(sx, ex, distx(Gen)) + Vector3::Lerp(sy, ey, disty(Gen));
-            auto velocity = normal * 2e16 * (1000.0f / mag);
+            auto velocity = normal * 2e16f * (1000.0f / mag);
             position.z = static_cast<float>(DistZ(Gen));
 
             AddParticle(position, Vec3d(velocity.x, velocity.y, velocity.z));

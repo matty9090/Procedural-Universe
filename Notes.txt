@@ -19,3 +19,4 @@ Todo:
  - Trace orbits
  - Spaceship flying round
    - Hyperspeed effect
+ - Logarithmic depth buffer

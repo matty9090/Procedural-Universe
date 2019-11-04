@@ -54,8 +54,8 @@ private:
     ID3D11DeviceContext*                              Context;
     DX::DeviceResources*                              DeviceResources;
                                                       
-    DirectX::Mouse*                                   Mouse;
-    std::unique_ptr<CArcballCamera>                          Camera;
+    DirectX::Mouse*                                   Mouse = nullptr;
+    std::unique_ptr<CArcballCamera>                   Camera;
     std::unique_ptr<CUI>                              UI;
     std::unique_ptr<CPostProcess>                     PostProcess;
     std::unique_ptr<CSplatting>                       Splatting;
@@ -66,13 +66,13 @@ private:
 
     std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
     std::vector<Particle>                             Particles;
-    unsigned int                                      NumParticles = 10;
-    Particle* SelectedParticle = nullptr;             
+    unsigned int                                      NumParticles = 1000;
+    Particle*                                         SelectedParticle = nullptr;             
                                                       
     std::unique_ptr<INBodySim>                        Sim;
     std::unique_ptr<IParticleSeeder>                  Seeder;
     float                                             SimSpeed = 0.02f;
-    bool                                              bIsPaused = false;
+    bool                                              bIsPaused = true;
     bool                                              bDrawDebug = false;
     bool                                              bUseBloom = true;
     bool                                              bUseSplatting = false;

@@ -21,14 +21,6 @@ CShipCamera::CShipCamera(size_t width, size_t height)
 
 void CShipCamera::Update(float dt)
 {
-    /*float dx = Radius * cosf(Theta) * sinf(Phi);
-    float dy = Radius * cosf(Phi);
-    float dz = Radius * sinf(Theta) * sinf(Phi);
-
-    Position = Vector3(dx, -dy, dz);
-
-    View = Matrix::CreateLookAt(Position, Target, Vector3::UnitY);*/
-
     if (AttachedObject)
     {
         Orientation = AttachedObject->GetMatrix();
@@ -42,20 +34,7 @@ void CShipCamera::Update(float dt)
 
 void CShipCamera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, float dt)
 {
-    /*if ((ms.positionMode == Mouse::MODE_ABSOLUTE && ms.x > 260) || ms.positionMode == Mouse::MODE_RELATIVE)
-    {
-        if (ms.positionMode == Mouse::MODE_RELATIVE)
-        {
-            Theta += static_cast<float>(ms.x) * 0.01f;
-            Phi += static_cast<float>(ms.y) * 0.01f;
-        }
-        else
-        {
-            Radius = InitialRadius - ms.scrollWheelValue * 0.4f;
-        }
-
-        mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
-    }*/
+    
 }
 
 void CShipCamera::SetPosition(Vector3 p)

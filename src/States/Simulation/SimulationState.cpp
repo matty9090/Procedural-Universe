@@ -51,7 +51,11 @@ void SimulationState::Update(float dt)
         Sim->Update(dt * SimSpeed);
 
     auto context = DeviceResources->GetD3DDeviceContext();
-    context->UpdateSubresource(ParticleBuffer.Get(), 0, NULL, &Particles[0], 0, 0);
+
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
+    context->Unmap(ParticleBuffer.Get(), 0);
 }
 
 void SimulationState::Render()
@@ -106,16 +110,11 @@ void SimulationState::CreateDeviceDependentResources()
     UI = std::make_unique<CUI>(Context, DeviceResources->GetWindow());
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
-    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
-       { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-       { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-    ParticlePipeline.LoadVertex(Device, L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(Device, L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(Device, L"shaders/DrawParticle.gsh");
-    ParticlePipeline.CreateInputLayout(Device, layout);
+    ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
+    ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
+    ParticlePipeline.LoadGeometry(L"shaders/DrawParticle.gsh");
+    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
 
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
 
@@ -124,8 +123,8 @@ void SimulationState::CreateDeviceDependentResources()
 
 void SimulationState::CreateWindowSizeDependentResources()
 {
-    auto width = DeviceResources->GetScreenViewport().Width;
-    auto height = DeviceResources->GetScreenViewport().Height;
+    auto width = static_cast<unsigned int>(DeviceResources->GetScreenViewport().Width);
+    auto height = static_cast<unsigned int>(DeviceResources->GetScreenViewport().Height);
 
     Camera = std::make_unique<CArcballCamera>(width, height);
 
@@ -196,7 +195,7 @@ void SimulationState::RegisterEvents()
     EventStream::Register(EEvent::TrackParticle, [this](const EventData& data) {
         auto p = static_cast<const ParticleEventData&>(data).Value;
         Camera->Track(p);
-        FLog::Get().Log("Tracking particle");
+        LOGM("Tracking particle")
     });
 
     EventStream::Register(EEvent::LoadParticleFile, [this](const EventData& data) {
@@ -233,7 +232,7 @@ bool SimulationState::InitParticlesFromFile(std::string fname, std::vector<Parti
 
     if (!infile.is_open())
     {
-        FLog::Get().Log("Could not read particle file " + fname, FLog::Error);
+        LOGE("Could not read particle file " + fname)
         return false;
     }
 
@@ -252,7 +251,7 @@ bool SimulationState::InitParticlesFromFile(std::string fname, std::vector<Parti
 
     infile.close();
 
-    FLog::Get().Log("Read " + std::to_string(particles.size()) + " particles from file");
+    LOGM("Read " + std::to_string(particles.size()) + " particles from file")
 
     long double TotalMass = 0.0;
     Vec3d CentreOfMass;
@@ -309,13 +308,15 @@ void SimulationState::RunSimulation(float dt, int time, int numparticles, std::s
         if (static_cast<int>(((timer.QuadPart - tstart.QuadPart) / 10000000) >= 1))
         {
             QueryPerformanceCounter(&tstart);
-            FLog::Get().Log("Running... (" + std::to_string(iterations) + " iterations)");
+            LOGM("Running... (" + std::to_string(iterations) + " iterations)")
         }
 
         sim->Update(dt);
     }
 
-    _mkdir("data");
+    if (!_mkdir("data"))
+        LOGE("Failed to create data directory")
+
     auto filename = "data/" + std::to_string(endTime.QuadPart) + ".nbody";
     std::ofstream file(filename, std::ios::binary);
 
@@ -332,7 +333,7 @@ void SimulationState::RunSimulation(float dt, int time, int numparticles, std::s
 
 void SimulationState::RunBenchmark()
 {
-    FLog::Get().Log("Running benchmark");
+    LOGM("Running benchmark")
 
     for (int sim = 0; sim < static_cast<int>(ENBodySim::NumSims); ++sim)
     {
@@ -357,7 +358,7 @@ void SimulationState::RunBenchmark()
         Render();
     }
 
-    FLog::Get().Log("Benchmark finished");
+    LOGM("Benchmark finished")
 }
 
 void SimulationState::CheckParticleSelected(DirectX::Mouse::State& ms)

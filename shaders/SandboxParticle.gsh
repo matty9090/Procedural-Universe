@@ -4,6 +4,7 @@ cbuffer cb0
 {
     row_major float4x4 ViewProjMatrix;
     row_major float4x4 InvViewMatrix;
+    float3 Translation;
 };
 
 struct GS_VertIn
@@ -46,9 +47,9 @@ void main
 
 	for (int i = 0; i < 4; ++i)
 	{
-		const float scale = 1.2f;
+		const float scale = 62.0f;
         float3 corner = Corners[i] * scale;
-        float3 worldPosition = inParticle[0].Position + mul( corner, (float3x3)InvViewMatrix );
+        float3 worldPosition = inParticle[0].Position + mul( corner, (float3x3)InvViewMatrix ) + Translation;
         
 		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
         outVert.ViewportPosition.z = LogDepthBuffer(outVert.ViewportPosition.w);

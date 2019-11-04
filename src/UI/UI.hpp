@@ -29,10 +29,10 @@ private:
     float BloomAmount = 1.0f, BloomBase = 1.4f;
     float BloomSat = 1.0f, BloomBaseSat = 1.0f;
 
-    bool Paused = false, DrawDebug;
+    bool Paused = true, DrawDebug = false;
     float SimSpeed = 0.02f;
     float BHTheta = 3.0f;
-    int NumParticles = 10;
+    int NumParticles = 1000;
     int SelectedSeeder = 0;
     bool UseBloom = true;
     bool UseSplatting = false;

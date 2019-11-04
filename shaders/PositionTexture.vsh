@@ -1,3 +1,5 @@
+#include "Common.hlsl"
+
 cbuffer cb0
 {
     row_major matrix worldViewProj;
@@ -19,4 +21,5 @@ void main(in VS_Input v_in, out VS_Output v_out)
 {
     v_out.Position = mul(float4(v_in.Position, 1.0f), worldViewProj);
     v_out.TexCoord = v_in.TexCoord;
+    v_out.Position.z = LogDepthBuffer(v_out.Position.w);
 }

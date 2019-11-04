@@ -1,4 +1,9 @@
 #include "Render/PostProcess.hpp"
+#include "Render/Shader.hpp"
+
+#include "Services/Log.hpp"
+#include "Services/ResourceManager.hpp"
+
 #include "Core/Except.hpp"
 #include "Core/Event.hpp"
 
@@ -19,6 +24,8 @@ CPostProcess::CPostProcess(ID3D11Device* device, ID3D11DeviceContext* context, i
     Targets[BloomTarget4] = CreateTarget(Device, Width / 8, Height / 8);
     Targets[BloomTarget5] = CreateTarget(Device, Width, Height);
     Targets[BloomCombine] = CreateTarget(Device, Width, Height);
+
+    DepthShader = RESM.GetPixelShader(L"shaders/Depth.psh");
 
     EventStream::Register(EEvent::UseBloomChanged, [this](const EventData& data) {
         UseBloom = static_cast<const BoolEventData&>(data).Value;
@@ -120,6 +127,17 @@ void CPostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* d
             BasicPostProcess->Process(Context);
         });
     }
+}
+
+void CPostProcess::RenderDepth(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* depthTex)
+{
+    RenderPP(rtv, Targets[0].Dsv.Get(), [&]() {
+        BasicPostProcess->SetEffect(DirectX::BasicPostProcess::Copy);
+        BasicPostProcess->SetSourceTexture(depthTex);
+        BasicPostProcess->Process(Context, [&]() {
+            Context->PSSetShader(DepthShader, 0, 0);
+        });
+    });
 }
 
 void CPostProcess::RenderPP(RenderView target, std::function<void()> func)

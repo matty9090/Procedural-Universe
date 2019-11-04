@@ -9,10 +9,12 @@
 #include "Core/Except.hpp"
 
 #include "Render/Shader.hpp"
-#include "Services/Log.hpp"
 
-#include "States/SimulationState.hpp"
-#include "States/SandboxState.hpp"
+#include "Services/Log.hpp"
+#include "Services/ResourceManager.hpp"
+
+#include "States/Simulation/SimulationState.hpp"
+#include "States/Sandbox/SandboxState.hpp"
 
 using Microsoft::WRL::ComPtr;
 
@@ -28,15 +30,17 @@ App::App() noexcept(false)
 // Initialize the Direct3D resources required to run.
 void App::Initialize(HWND window, int width, int height)
 {
-    FLog::Get().Log("Initializing...");
+    LOGM("Initializing...")
 
     DeviceResources->SetWindow(window, width, height);
 
     DeviceResources->CreateDeviceResources();
     DeviceResources->CreateWindowSizeDependentResources();
 
-    Timer.SetFixedTimeStep(true);
-    Timer.SetTargetElapsedSeconds(1.0 / 60.0);
+    RESM.SetDevice(DeviceResources->GetD3DDevice());
+
+    //Timer.SetFixedTimeStep(true);
+    //Timer.SetTargetElapsedSeconds(1.0 / 60.0);
 
     Mouse = std::make_unique<DirectX::Mouse>();
     Keyboard = std::make_unique<DirectX::Keyboard>();
@@ -45,7 +49,7 @@ void App::Initialize(HWND window, int width, int height)
 
     SwitchState(EState::Simulation);
 
-    FLog::Get().Log("Initialized");
+    LOGM("Initialized")
 }
 
 #pragma region Frame Update
@@ -79,6 +83,11 @@ void App::Update(float dt)
         }
     }
 
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::Escape))
+    {
+        PostQuitMessage(0);
+    }
+
     CurrentState->Update(dt);
 }
 #pragma endregion
@@ -100,7 +109,7 @@ void App::Render()
 
 void App::SwitchState(EState state, StateData& data)
 {
-    FLog::Get().Log("Switching to state " + std::to_string(static_cast<int>(state)));
+    LOGM("Switching to state " + std::to_string(static_cast<int>(state)))
 
     if (CurrentState)
         CurrentState->Cleanup();

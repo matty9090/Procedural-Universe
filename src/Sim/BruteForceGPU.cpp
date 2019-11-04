@@ -11,7 +11,7 @@ using namespace DirectX::SimpleMath;
 BruteForceGPU::BruteForceGPU(ID3D11DeviceContext* context)
     : Context(context)
 {
-    FLog::Get().Log("Brute Force GPU");
+    LOGM("Brute Force GPU")
 
     Context->GetDevice(&Device);
 
@@ -24,12 +24,12 @@ BruteForceGPU::BruteForceGPU(ID3D11DeviceContext* context)
 
     if(!LoadComputeShader(Device, L"shaders/Gravity.csh", GravityShader.ReleaseAndGetAddressOf(), defines))
     {
-        FLog::Get().Log("Could not load compute shader");
+        LOGM("Could not load compute shader")
     }
 
     if(!LoadComputeShader(Device, L"shaders/Update.csh", UpdateShader.ReleaseAndGetAddressOf(), defines))
     {
-        FLog::Get().Log("Could not load compute shader");
+        LOGM("Could not load compute shader")
     }
 
     UpdateBuffer = std::make_unique<ConstantBuffer<FrameBuffer>>(Device);

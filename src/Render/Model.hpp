@@ -22,12 +22,15 @@ public:
     DirectX::SimpleMath::Matrix  GetMatrix() const { return World; }
 
     void Move(DirectX::SimpleMath::Vector3 v);
+    void SetPosition(DirectX::SimpleMath::Vector3 p);
     void Rotate(DirectX::SimpleMath::Vector3 r);
     void Scale(float s);
     
     void Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline);
 
 protected:
+    void UpdateMatrices();
+
     DirectX::SimpleMath::Matrix World;
     DirectX::SimpleMath::Vector3 Position;
     DirectX::SimpleMath::Quaternion Rotation;
@@ -36,6 +39,5 @@ protected:
 
 private:
     CMesh* Mesh;
-
     ConstantBuffer<ModelConstantBuffer> MatrixBuffer;
 };

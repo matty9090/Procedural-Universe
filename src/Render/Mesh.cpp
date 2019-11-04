@@ -1,14 +1,16 @@
 #include "Mesh.hpp"
+
 #include "Services/Log.hpp"
+#include "Services/ResourceManager.hpp"
 
 #include <WICTextureLoader.h>
 
 CMesh::CMesh(ID3D11Device* device, std::vector<MeshVertex> vertices, std::vector<unsigned int> indices, ID3D11ShaderResourceView* texture)
-    : NumIndices(indices.size()), Texture(texture)
+    : NumIndices(static_cast<unsigned int>(indices.size())), Texture(texture)
 {
     D3D11_BUFFER_DESC vbd;
     vbd.Usage = D3D11_USAGE_IMMUTABLE;
-    vbd.ByteWidth = sizeof(MeshVertex) * vertices.size();
+    vbd.ByteWidth = sizeof(MeshVertex) * static_cast<UINT>(vertices.size());
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vbd.CPUAccessFlags = 0;
     vbd.MiscFlags = 0;
@@ -20,7 +22,7 @@ CMesh::CMesh(ID3D11Device* device, std::vector<MeshVertex> vertices, std::vector
 
     D3D11_BUFFER_DESC ibd;
     ibd.Usage = D3D11_USAGE_IMMUTABLE;
-    ibd.ByteWidth = sizeof(UINT) * indices.size();
+    ibd.ByteWidth = sizeof(UINT) * static_cast<UINT>(indices.size());
     ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
     ibd.CPUAccessFlags = 0;
     ibd.MiscFlags = 0;
@@ -38,7 +40,7 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
 
     if (!scene)
     {
-        FLog::Get().Log("Failed to load mesh " + file);
+        LOGM("Failed to load mesh " + file)
         return nullptr;
     }
 
@@ -82,12 +84,10 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
                 aiString str;
                 material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
 
-                std::string file = std::string("resources/") + str.C_Str();
+                std::string file = std::string("assets/") + str.C_Str();
                 std::wstring filew(file.begin(), file.end());
 
-                DX::ThrowIfFailed(DirectX::CreateWICTextureFromFile(device, filew.c_str(), nullptr, &texture));
-
-                FLog::Get().Log("Loaded texture " + file);
+                texture = RESM.GetTexture(filew.c_str());
             }
         }
 
@@ -96,7 +96,7 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
 
     CMesh* root = ProcessMesh(scene->mMeshes[0], scene);
 
-    FLog::Get().Log("Loaded mesh " + file);
+    LOGM("Loaded mesh " + file)
 
     return std::unique_ptr<CMesh>(root);
 }
