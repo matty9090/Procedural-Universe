@@ -14,7 +14,7 @@ CMesh::CMesh(ID3D11Device* device, std::vector<MeshVertex> vertices, std::vector
     vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     vbd.CPUAccessFlags = 0;
     vbd.MiscFlags = 0;
-
+    
     D3D11_SUBRESOURCE_DATA initData;
     initData.pSysMem = &vertices[0];
 

@@ -21,7 +21,7 @@ void GalaxyTarget::Render()
 
 void GalaxyTarget::RenderTransitionParent(float t)
 {
-    RenderLerp(t);
+    RenderLerp(1.0f);
 }
 
 void GalaxyTarget::MoveObjects(Vector3 v)
@@ -37,9 +37,9 @@ void GalaxyTarget::MoveObjects(Vector3 v)
     Context->Unmap(ParticleBuffer.Get(), 0);
 }
 
-Vector3 GalaxyTarget::GetClosestObject(Vector3 pos) const
+Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
 {
-    return Maths::ClosestParticle(pos, Particles).Position;
+    return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
 }
 
 Vector3 GalaxyTarget::GetMainObject() const
@@ -77,6 +77,38 @@ void GalaxyTarget::RenderLerp(float t)
     });
 
     Context->GSSetShader(nullptr, 0, 0);
+}
+
+void GalaxyTarget::BakeSkybox(Vector3 object)
+{
+    SkyboxGenerator->SetPosition(object);
+
+    SkyboxGenerator->Render([&](const ICamera& cam) {
+        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+
+        Matrix view = cam.GetViewMatrix();
+        Matrix viewProj = view * cam.GetProjectionMatrix();
+
+        ParticlePipeline.SetState(Context, [&]() {
+            unsigned int offset = 0;
+            unsigned int stride = sizeof(Particle);
+
+            Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
+            GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
+            Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
+            Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
+            Context->RSSetState(CommonStates->CullNone());
+            Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
+            
+            auto pivot1 = static_cast<unsigned int>(CurrentClosestObjectID);
+            auto pivot2 = static_cast<unsigned int>(Particles.size() - CurrentClosestObjectID - 1);
+
+            Context->Draw(pivot1, 0);
+            Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
+        });
+
+        Context->GSSetShader(nullptr, 0, 0);
+    });
 }
 
 void GalaxyTarget::CreateParticlePipeline()

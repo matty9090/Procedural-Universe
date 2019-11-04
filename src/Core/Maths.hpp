@@ -18,5 +18,5 @@ namespace Maths
         return v;
     }
 
-    const Particle& ClosestParticle(const DirectX::SimpleMath::Vector3& pos, const std::vector<Particle>& particles);
+    const Particle& ClosestParticle(const DirectX::SimpleMath::Vector3& pos, const std::vector<Particle>& particles, size_t* outID = nullptr);
 }

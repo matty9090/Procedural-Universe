@@ -30,6 +30,7 @@ public:
     void Rotate(DirectX::SimpleMath::Vector3 r);
     void Scale(float s);
     
+    void SetTexture(ID3D11ShaderResourceView* tex) { Texture = tex; }
     void Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline);
 
 protected:
@@ -44,4 +45,5 @@ protected:
 private:
     CMesh* Mesh;
     ConstantBuffer<ModelConstantBuffer> MatrixBuffer;
+    ID3D11ShaderResourceView* Texture = nullptr;
 };

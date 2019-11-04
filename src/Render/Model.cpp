@@ -5,7 +5,7 @@ using DirectX::SimpleMath::Matrix;
 
 CModel::CModel(ID3D11Device* device, CMesh* mesh) : MatrixBuffer(device), Mesh(mesh)
 {
-
+    Texture = Mesh->Texture.Get();
 }
 
 void CModel::Move(DirectX::SimpleMath::Vector3 v)
@@ -43,7 +43,7 @@ void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix View
         context->IASetVertexBuffers(0, 1, Mesh->VertexBuffer.GetAddressOf(), &stride, &offset);
         context->IASetIndexBuffer(Mesh->IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
         context->VSSetConstantBuffers(0, 1, MatrixBuffer.GetBuffer());
-        context->PSSetShaderResources(0, 1, Mesh->Texture.GetAddressOf());
+        context->PSSetShaderResources(0, 1, &Texture);
 
         context->DrawIndexed(Mesh->NumIndices, 0, 0);
     });

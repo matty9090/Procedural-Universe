@@ -12,12 +12,14 @@ public:
     void RenderTransitionParent(float t) override;
     void MoveObjects(Vector3 v) override;
 
-    Vector3 GetClosestObject(Vector3 pos) const override;
+    Vector3 GetClosestObject(Vector3 pos) override;
     Vector3 GetMainObject() const override;
 
 private:
-    void StateIdle() override;
     void RenderLerp(float t);
+    void BakeSkybox(Vector3 object) override;
+
+    void StateIdle() override;
     void CreateParticlePipeline();
 
     struct GSConstantBuffer
@@ -34,6 +36,7 @@ private:
         float Custom1, Custom2, Custom3;
     };
 
+    size_t CurrentClosestObjectID;
     Vector3 GalaxyPosition;
 
     RenderView ParticleRenderTarget;

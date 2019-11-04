@@ -6,9 +6,13 @@ SandboxTarget::SandboxTarget(ID3D11DeviceContext* context, std::string name, DX:
       Name(name),
       State(EState::Idle),
       Resources(resources),
-      Camera(camera)
+      Camera(camera),
+      SkyBox(context)
 {
     context->GetDevice(&Device);
+
+    auto size = resources->GetOutputSize();
+    SkyboxGenerator = std::make_unique<CSkyboxGenerator>(Device, Context, size.right - size.left, size.bottom - size.top);
 }
 
 void SandboxTarget::Update(float dt)
@@ -31,9 +35,16 @@ void SandboxTarget::StartTransitionParent()
     State = EState::TransitioningParent;
 }
 
-void SandboxTarget::EndTransitionParent()
+void SandboxTarget::EndTransitionUpParent()
 {
     State = EState::Idle;
+}
+
+void SandboxTarget::EndTransitionDownParent(Vector3 object)
+{
+    State = EState::Idle;
+    BakeSkybox(object);
+    SkyBox.SetTextureReceiveOwnership(SkyboxGenerator->GetTextureTakeOwnership());
 }
 
 void SandboxTarget::StartTransitionUpChild()

@@ -50,3 +50,4 @@ void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPosition();
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionColour();
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionTexture();
+std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionTextureCube();

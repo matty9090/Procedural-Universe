@@ -186,7 +186,7 @@ void SandboxState::TransitionLogic()
                 // Child stops rendering
                 // Parent stops lerping visuals
 
-                CurrentTarget->EndTransitionParent();
+                CurrentTarget->EndTransitionUpParent();
                 CurrentTarget->Child->EndTransitionUpChild();
                 Ship->VelocityScale = 1.0f;
 
@@ -199,7 +199,7 @@ void SandboxState::TransitionLogic()
                 // Current target becomes child and starts rendering normally
                 // Ship to child space
 
-                CurrentTarget->EndTransitionParent();
+                CurrentTarget->EndTransitionDownParent(object);
                 CurrentTarget->Child->EndTransitionDownChild();
                 CurrentTarget = CurrentTarget->Child.get();
 

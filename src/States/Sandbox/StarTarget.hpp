@@ -16,7 +16,7 @@ public:
     void ScaleObjects(float scale) override;
     void ResetObjectPositions() override;
 
-    Vector3 GetClosestObject(Vector3 pos) const override;
+    Vector3 GetClosestObject(Vector3 pos) override;
     Vector3 GetMainObject() const override;
 
 private:

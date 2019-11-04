@@ -6,8 +6,9 @@
 #include <Mouse.h>
 #include <SimpleMath.h>
 
-#include "Render/Particle.hpp"
-#include "Render/Model.hpp"
+#include "Camera.hpp"
+#include "Model.hpp"
+#include "Particle.hpp"
 
 using DirectX::SimpleMath::Quaternion;
 using DirectX::SimpleMath::Matrix;
@@ -18,7 +19,7 @@ using DirectX::SimpleMath::Vector3;
  * @brief Camera class
  * 
  */
-class CArcballCamera
+class CArcballCamera : public ICamera
 {
     public:
         /**

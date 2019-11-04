@@ -1,20 +1,25 @@
 #include "Maths.hpp"
 
-const Particle& Maths::ClosestParticle(const DirectX::SimpleMath::Vector3& pos, const std::vector<Particle>& particles)
+const Particle& Maths::ClosestParticle(const DirectX::SimpleMath::Vector3& pos, const std::vector<Particle>& particles, size_t* outID)
 {
-    const Particle* closest = nullptr;
+    const Particle* closest;
+    size_t id = 0;
     float distance = (std::numeric_limits<float>::max)();
 
-    for (const auto& p : particles)
+    for (size_t i = 0; i < particles.size(); ++i)
     {
-        float d = DirectX::SimpleMath::Vector3::DistanceSquared(pos, p.Position);
+        float d = DirectX::SimpleMath::Vector3::DistanceSquared(pos, particles[i].Position);
 
         if (d < distance)
         {
-            closest = &p;
+            closest = &particles[i];
+            id = i;
             distance = d;
         }
     }
+
+    if (outID)
+        *outID = id;
 
     return *closest;
 }

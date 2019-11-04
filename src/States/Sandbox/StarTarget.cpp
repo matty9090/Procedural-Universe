@@ -24,6 +24,12 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
 
 void StarTarget::Render()
 {
+    auto rtv = Resources->GetRenderTargetView();
+    auto dsv = Resources->GetDepthStencilView();
+
+    Context->OMSetRenderTargets(1, &rtv, dsv);
+    Parent->GetSkyBox().Draw(Star->GetPosition(), Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
+
     RenderLerp();
 }
 
@@ -65,7 +71,7 @@ void StarTarget::ScaleObjects(float scale)
     Context->Unmap(ParticleBuffer.Get(), 0);
 }
 
-Vector3 StarTarget::GetClosestObject(Vector3 pos) const
+Vector3 StarTarget::GetClosestObject(Vector3 pos)
 {
     return Maths::ClosestParticle(pos, Particles).Position;
 }
