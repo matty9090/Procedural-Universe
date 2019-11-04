@@ -16,30 +16,12 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
 void GalaxyTarget::Render()
 {
-    auto rtv = Resources->GetRenderTargetView();
-    auto dsv = Resources->GetDepthStencilView();
+    RenderLerp(1.0f);
+}
 
-    //ParticleRenderTarget.Clear(Context);
-    //SetRenderTarget(Context, ParticleRenderTarget);
-    Context->OMSetRenderTargets(1, &rtv, dsv);
-
-    Matrix view = Camera->GetViewMatrix();
-    Matrix viewProj = view * Camera->GetProjectionMatrix();
-
-    ParticlePipeline.SetState(Context, [&]() {
-        unsigned int offset = 0;
-        unsigned int stride = sizeof(Particle);
-
-        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-        GSBuffer->SetData(Context, GSConstantBuffer{ viewProj, view.Invert(), Vector3::Zero });
-        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-        Context->RSSetState(CommonStates->CullNone());
-        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
-    });
-
-    Context->GSSetShader(nullptr, 0, 0);
-    //PostProcess->Render(rtv, dsv, ParticleRenderTarget.Srv.Get());
+void GalaxyTarget::RenderTransitionParent(float t)
+{
+    RenderLerp(t);
 }
 
 void GalaxyTarget::MoveObjects(Vector3 v)
@@ -70,6 +52,33 @@ void GalaxyTarget::StateIdle()
     
 }
 
+void GalaxyTarget::RenderLerp(float t)
+{
+    auto rtv = Resources->GetRenderTargetView();
+    auto dsv = Resources->GetDepthStencilView();
+
+    Context->OMSetRenderTargets(1, &rtv, dsv);
+    LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+
+    Matrix view = Camera->GetViewMatrix();
+    Matrix viewProj = view * Camera->GetProjectionMatrix();
+
+    ParticlePipeline.SetState(Context, [&]() {
+        unsigned int offset = 0;
+        unsigned int stride = sizeof(Particle);
+
+        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
+        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
+        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
+        Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
+        Context->RSSetState(CommonStates->CullNone());
+        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
+    });
+
+    Context->GSSetShader(nullptr, 0, 0);
+}
+
 void GalaxyTarget::CreateParticlePipeline()
 {
     std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
@@ -80,7 +89,7 @@ void GalaxyTarget::CreateParticlePipeline()
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(L"shaders/SandboxParticle.gsh");
+    ParticlePipeline.LoadGeometry(L"shaders/SandboxParticleLerp.gsh");
     ParticlePipeline.CreateInputLayout(Device, layout);
 
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
@@ -88,4 +97,6 @@ void GalaxyTarget::CreateParticlePipeline()
 
     auto vp = Resources->GetScreenViewport();
     ParticleRenderTarget = CreateTarget(Device, static_cast<int>(vp.Width), static_cast<int>(vp.Height));
+
+    LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
 }

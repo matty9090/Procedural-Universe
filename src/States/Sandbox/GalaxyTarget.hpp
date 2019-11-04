@@ -9,6 +9,7 @@ public:
     GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData);
 
     void Render() override;
+    void RenderTransitionParent(float t) override;
     void MoveObjects(Vector3 v) override;
 
     Vector3 GetClosestObject(Vector3 pos) const override;
@@ -16,6 +17,7 @@ public:
 
 private:
     void StateIdle() override;
+    void RenderLerp(float t);
     void CreateParticlePipeline();
 
     struct GSConstantBuffer
@@ -26,6 +28,12 @@ private:
         float Custom;
     };
 
+    struct LerpConstantBuffer
+    {
+        float Alpha;
+        float Custom1, Custom2, Custom3;
+    };
+
     Vector3 GalaxyPosition;
 
     RenderView ParticleRenderTarget;
@@ -34,6 +42,8 @@ private:
     std::vector<Particle> Particles;
     std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
-    std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
+
+    std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
+    std::unique_ptr<ConstantBuffer<LerpConstantBuffer>> LerpBuffer;
 };

@@ -79,8 +79,8 @@ void SandboxState::Render()
 
     if (CurrentTarget->IsTransitioning())
     {
-        CurrentTarget->RenderTransitionParent(1.0f - CurrentTransitionT);
-        CurrentTarget->Child->RenderTransitionChild(CurrentTransitionT);
+        CurrentTarget->RenderTransitionParent(CurrentTransitionT);
+        CurrentTarget->Child->RenderTransitionChild(1.0f - CurrentTransitionT);
     }
     else
     {
@@ -88,7 +88,7 @@ void SandboxState::Render()
     }
 
     auto rtv = DeviceResources->GetRenderTargetView();
-    auto dsv = DeviceResources->GetDepthStencilView(); 
+    auto dsv = DeviceResources->GetDepthStencilView();
 
     Context->OMSetRenderTargets(1, &rtv, dsv);
     

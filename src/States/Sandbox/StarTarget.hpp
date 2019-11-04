@@ -21,6 +21,7 @@ public:
 
 private:
     void StateIdle() override;
+    void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f);
     void CreateStarPipeline();
     void CreateParticlePipeline();
 
@@ -32,14 +33,23 @@ private:
         float Custom;
     };
 
-    Vector3 StarPosition;
+    struct LerpConstantBuffer
+    {
+        float Alpha;
+        float Custom1, Custom2, Custom3;
+    };
+
+    std::unique_ptr<CModel> Star;
 
     RenderView ParticleRenderTarget;
+    RenderPipeline StarPipeline;
     RenderPipeline ParticlePipeline;
 
     std::vector<Particle> Particles;
     std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
-    std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
+
+    std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
+    std::unique_ptr<ConstantBuffer<LerpConstantBuffer>> LerpBuffer;
 };

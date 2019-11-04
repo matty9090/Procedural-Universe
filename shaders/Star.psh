@@ -1,0 +1,14 @@
+cbuffer Lerp
+{
+    float Alpha;
+};
+
+struct PS_Input
+{
+    float4 Position : SV_Position;
+};
+
+float4 main(in PS_Input i) : SV_TARGET
+{
+	return float4(1.0f, 1.0f, 0.0f, Alpha);
+}
