@@ -1,4 +1,5 @@
 #include "Model.hpp"
+#include "Mesh.hpp"
 
 using DirectX::SimpleMath::Matrix;
 

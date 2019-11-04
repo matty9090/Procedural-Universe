@@ -1,12 +1,16 @@
 #pragma once
 
-#include "Mesh.hpp"
 #include "ConstantBuffer.hpp"
+#include "RenderCommon.hpp"
+
+#include <SimpleMath.h>
 
 struct ModelConstantBuffer
 {
     DirectX::SimpleMath::Matrix WorldViewProj;
 };
+
+class CMesh;
 
 class CModel
 {

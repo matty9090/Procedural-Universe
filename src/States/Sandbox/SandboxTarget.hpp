@@ -7,6 +7,7 @@
 #include "Render/ConstantBuffer.hpp"
 #include "Render/PostProcess.hpp"
 #include "Render/RenderCommon.hpp"
+#include "Render/Model.hpp"
 
 #include <string>
 #include <memory>
