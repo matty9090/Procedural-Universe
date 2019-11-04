@@ -37,6 +37,8 @@ public:
 
 private:
     void Clear();
+    void FloatingOrigin();
+    void TransitionLogic();
     void CreateModelPipeline();
     void SetupTargets(const std::vector<Particle>& seedData);
 

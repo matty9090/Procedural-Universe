@@ -9,7 +9,6 @@ public:
     GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData);
 
     void Render() override;
-    void RenderTransition(float t) override;
     void MoveObjects(Vector3 v) override;
 
     Vector3 GetClosestObject(Vector3 pos) const override;

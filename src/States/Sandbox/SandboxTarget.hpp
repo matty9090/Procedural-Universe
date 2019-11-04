@@ -26,7 +26,11 @@ public:
     bool IsTransitioning() const { return State != EState::Idle; }
 
     virtual void Render() = 0;
-    virtual void RenderTransition(float t) = 0;
+
+    // TODO: Automate this
+    virtual void RenderTransitionChild(float t) { Render(); }
+    virtual void RenderTransitionParent(float t) { Render(); }
+
     virtual void MoveObjects(Vector3 v) {}
     virtual void ScaleObjects(float scale) {}
     virtual void ResetObjectPositions() {}

@@ -5,7 +5,9 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     : SandboxTarget(context, "Stellar", resources, camera),
       Particles(seedData)
 {
-    Scale = 0.04f;
+    Scale = 0.012f;
+    BeginTransitionDist = 1200.0f;
+    EndTransitionDist = 340.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -46,7 +48,7 @@ void StarTarget::Render()
     //PostProcess->Render(rtv, dsv, ParticleRenderTarget.Srv.Get());
 }
 
-void StarTarget::RenderTransition(float t)
+void StarTarget::RenderTransitionChild(float t)
 {
     auto rtv = Resources->GetRenderTargetView();
     auto dsv = Resources->GetDepthStencilView();
@@ -66,6 +68,35 @@ void StarTarget::RenderTransition(float t)
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
         GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, ParentLocationSpace });
+        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
+        Context->RSSetState(CommonStates->CullNone());
+        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
+    });
+
+    Context->GSSetShader(nullptr, 0, 0);
+    //PostProcess->Render(rtv, dsv, ParticleRenderTarget.Srv.Get());
+}
+
+void StarTarget::RenderTransitionParent(float t)
+{
+    auto rtv = Resources->GetRenderTargetView();
+    auto dsv = Resources->GetDepthStencilView();
+
+    //ParticleRenderTarget.Clear(Context);
+    //SetRenderTarget(Context, ParticleRenderTarget);
+    Context->OMSetRenderTargets(1, &rtv, dsv);
+
+    Matrix view = Camera->GetViewMatrix();
+    Matrix viewProj = view * Camera->GetProjectionMatrix();
+    view = view.Invert();
+
+    ParticlePipeline.SetState(Context, [&]() {
+        unsigned int offset = 0;
+        unsigned int stride = sizeof(Particle);
+
+        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
+        GSBuffer->SetData(Context, GSConstantBuffer{ viewProj, view, Vector3::Zero });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
         Context->RSSetState(CommonStates->CullNone());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);

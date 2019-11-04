@@ -26,19 +26,17 @@ void SandboxTarget::Update(float dt)
     }
 }
 
-void SandboxTarget::RenderTransition(float t)
-{
-    
-}
-
 void SandboxTarget::StartTransitionParent()
 {
     State = EState::TransitioningParent;
+    //ResetObjectPositions();
+    //ScaleObjects(Scale);
 }
 
 void SandboxTarget::EndTransitionParent()
 {
     State = EState::Idle;
+    //ScaleObjects(1.0f / Scale);
 }
 
 void SandboxTarget::StartTransitionUpChild()
