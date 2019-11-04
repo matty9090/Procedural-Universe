@@ -12,11 +12,6 @@
             "ctestCommandArgs": "",
             "variables": [
                 {
-                    "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
-                    "value": "True",
-                    "type": "BOOL"
-                },
-                {
                     "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
                     "value": "False",
                     "type": "BOOL"
@@ -24,6 +19,11 @@
                 {
                     "name": "BUILD_SHARED_LIBS",
                     "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_NO_EXPORT",
+                    "value": "True",
                     "type": "BOOL"
                 }
             ]
@@ -40,13 +40,18 @@
             "inheritEnvironments": [ "msvc_x64_x64" ],
             "variables": [
                 {
+                    "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
                     "name": "BUILD_SHARED_LIBS",
                     "value": "False",
                     "type": "BOOL"
                 },
                 {
-                    "name": "ASSIMP_BUILD_ASSIMP_TOOLS",
-                    "value": "False",
+                    "name": "ASSIMP_NO_EXPORT",
+                    "value": "True",
                     "type": "BOOL"
                 }
             ]
@@ -68,17 +73,12 @@
                     "type": "BOOL"
                 },
                 {
-                    "name": "ASSIMP_BUILD_TESTS",
-                    "value": "False",
-                    "type": "BOOL"
-                },
-                {
                     "name": "BUILD_SHARED_LIBS",
                     "value": "False",
                     "type": "BOOL"
                 },
                 {
-                    "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+                    "name": "ASSIMP_NO_EXPORT",
                     "value": "True",
                     "type": "BOOL"
                 }
@@ -101,22 +101,12 @@
                     "type": "BOOL"
                 },
                 {
-                    "name": "ASSIMP_BUILD_TESTS",
-                    "value": "False",
-                    "type": "BOOL"
-                },
-                {
                     "name": "BUILD_SHARED_LIBS",
                     "value": "False",
                     "type": "BOOL"
                 },
                 {
-                    "name": "ENABLE_TESTING",
-                    "value": "True",
-                    "type": "BOOL"
-                },
-                {
-                    "name": "gtest_force_shared_crt",
+                    "name": "ASSIMP_NO_EXPORT",
                     "value": "True",
                     "type": "BOOL"
                 }
