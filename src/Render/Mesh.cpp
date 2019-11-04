@@ -84,7 +84,7 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
                 aiString str;
                 material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
 
-                std::string file = std::string("resources/") + str.C_Str();
+                std::string file = std::string("assets/") + str.C_Str();
                 std::wstring filew(file.begin(), file.end());
 
                 texture = RESM.GetTexture(filew.c_str());

@@ -42,11 +42,6 @@ void GalaxyTarget::Render()
     //PostProcess->Render(rtv, dsv, ParticleRenderTarget.Srv.Get());
 }
 
-void GalaxyTarget::RenderTransition(float t)
-{
-    Render();
-}
-
 void GalaxyTarget::MoveObjects(Vector3 v)
 {
     for (auto& particle : Particles)
