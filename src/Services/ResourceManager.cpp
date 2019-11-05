@@ -8,10 +8,11 @@
 
 ID3D11VertexShader* FResourceManager::GetVertexShader(std::wstring file)
 {
-    if (IsCachedComResource(file)) return ComResourceCache[file].Vertex;
+    if (IsCachedComResource(file))
+        return reinterpret_cast<ID3D11VertexShader*>(ComResourceCache[file].Ptr);
 
-    ID3D11VertexShader** shader = &ComResourceCache[file].Vertex;
-    ID3DBlob** code = &ComResourceCache[file + L"blob"].ShaderCode;
+    ID3D11VertexShader** shader = reinterpret_cast<ID3D11VertexShader**>(&ComResourceCache[file].Ptr);
+    ID3DBlob** code = reinterpret_cast<ID3DBlob**>(&ComResourceCache[file + L"blob"].Ptr);
 
     LoadVertexShader(Device, file, shader, code);
 
@@ -20,8 +21,8 @@ ID3D11VertexShader* FResourceManager::GetVertexShader(std::wstring file)
 
 ID3DBlob* FResourceManager::GetVertexCode(std::wstring file)
 {
-    if (IsCachedComResource(file + L"blob"))
-        return ComResourceCache[file + L"blob"].ShaderCode;
+    if (IsCachedComResource(file))
+        return reinterpret_cast<ID3DBlob*>(ComResourceCache[file + L"blob"].Ptr);
 
     LOGE("Tried to get vertex code before vertex shader was loaded!");
 
@@ -30,9 +31,10 @@ ID3DBlob* FResourceManager::GetVertexCode(std::wstring file)
 
 ID3D11PixelShader* FResourceManager::GetPixelShader(std::wstring file)
 {
-    if (IsCachedComResource(file)) return ComResourceCache[file].Pixel;
+    if (IsCachedComResource(file))
+        return reinterpret_cast<ID3D11PixelShader*>(ComResourceCache[file].Ptr);
 
-    ID3D11PixelShader** shader = &ComResourceCache[file].Pixel;
+    ID3D11PixelShader** shader = reinterpret_cast<ID3D11PixelShader**>(&ComResourceCache[file].Ptr);
     LoadPixelShader(Device, file, shader);
 
     return *shader;
@@ -40,9 +42,10 @@ ID3D11PixelShader* FResourceManager::GetPixelShader(std::wstring file)
 
 ID3D11GeometryShader* FResourceManager::GetGeometryShader(std::wstring file)
 {
-    if (IsCachedComResource(file)) return ComResourceCache[file].Geometry;
+    if (IsCachedComResource(file))
+        return reinterpret_cast<ID3D11GeometryShader*>(ComResourceCache[file].Ptr);
 
-    ID3D11GeometryShader** shader = &ComResourceCache[file].Geometry;
+    ID3D11GeometryShader** shader = reinterpret_cast<ID3D11GeometryShader**>(&ComResourceCache[file].Ptr);
     LoadGeometryShader(Device, file, shader);
 
     return *shader;
@@ -50,9 +53,10 @@ ID3D11GeometryShader* FResourceManager::GetGeometryShader(std::wstring file)
 
 ID3D11ShaderResourceView* FResourceManager::GetTexture(std::wstring file)
 {
-    if (IsCachedComResource(file)) return ComResourceCache[file].Texture;
+    if (IsCachedComResource(file))
+        return reinterpret_cast<ID3D11ShaderResourceView*>(ComResourceCache[file].Ptr);
 
-    ID3D11ShaderResourceView** texture = &ComResourceCache[file].Texture;
+    ID3D11ShaderResourceView** texture = reinterpret_cast<ID3D11ShaderResourceView**>(&ComResourceCache[file].Ptr);
     DirectX::CreateWICTextureFromFile(Device, file.c_str(), nullptr, texture);
 
     LOGM("Loaded texture " + wstrtostr(file))
@@ -62,9 +66,9 @@ ID3D11ShaderResourceView* FResourceManager::GetTexture(std::wstring file)
 
 CMesh* FResourceManager::GetMesh(std::string mesh)
 {
-    if (IsCachedMesh(mesh)) return MeshCache[mesh];
+    if (IsCachedMesh(mesh)) return reinterpret_cast<CMesh*>(ResourceCache[mesh].Ptr);
 
-    CMesh** m = &MeshCache[mesh];
+    CMesh** m = reinterpret_cast<CMesh**>(&ResourceCache[mesh].Ptr);
     *m = CMesh::Load(Device, mesh).release();
 
     return *m;
@@ -72,7 +76,7 @@ CMesh* FResourceManager::GetMesh(std::string mesh)
 
 bool FResourceManager::IsCachedMesh(std::string res)
 {
-    bool r = MeshCache.find(res) != MeshCache.end();
+    bool r = ResourceCache.find(res) != ResourceCache.end();
     if (r) LOGV("Found " + res + " in cache");
     return r;
 }
@@ -86,5 +90,13 @@ bool FResourceManager::IsCachedComResource(std::wstring res)
 
 FResourceManager::~FResourceManager()
 {
+    for (auto& resource : ComResourceCache)
+    {
+        ((IUnknown*)resource.second.Ptr)->Release();
+    }
 
+    for (auto& resource : ResourceCache)
+    {
+        delete resource.second.Ptr;
+    }
 }

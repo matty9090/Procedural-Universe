@@ -47,9 +47,35 @@ private:
         ID3D11PixelShader* Pixel;
         ID3D11GeometryShader* Geometry;
         ID3D11ShaderResourceView* Texture;
+        ID3D11RasterizerState* Raster;
         ID3DBlob* ShaderCode;
     };
 
-    std::map<std::wstring, ComResource> ComResourceCache;
-    std::map<std::string , CMesh*>      MeshCache;
+    struct ComCacheEntry
+    {
+        void* Ptr;
+
+        enum EType
+        {
+            Vertex,
+            Pixel,
+            Geometry,
+            Texture,
+            Raster,
+            ShaderCode
+        } Type;
+    };
+
+    struct CacheEntry
+    {
+        void* Ptr;
+
+        enum EType
+        {
+            Mesh
+        } Type;
+    };
+
+    std::map<std::string , CacheEntry>    ResourceCache;
+    std::map<std::wstring, ComCacheEntry> ComResourceCache;
 };
