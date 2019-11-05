@@ -11,7 +11,7 @@
 class CSkyboxCamera : public ICamera
 {
 public:
-    CSkyboxCamera(int width, int height);
+    CSkyboxCamera();
 
     void SetPosition(DirectX::SimpleMath::Vector3 p) override { Position = p; }
     DirectX::SimpleMath::Vector3 GetPosition() const override { return Position; }
@@ -50,20 +50,20 @@ private:
     std::array<RenderView, 6> Views;
 
     std::array<DirectX::SimpleMath::Vector3, 6> ForwardVectors = {
-        DirectX::SimpleMath::Vector3 { -1.0f,  0.0f,  0.0f },
-        DirectX::SimpleMath::Vector3 {  0.0f,  0.0f, -1.0f },
-        DirectX::SimpleMath::Vector3 {  1.0f,  0.0f, -1.0f },
-        DirectX::SimpleMath::Vector3 {  0.0f,  0.0f,  1.0f },
-        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f },
-        DirectX::SimpleMath::Vector3 {  0.0f, -1.0f,  0.0f }
+        DirectX::SimpleMath::Vector3 { -1.0f,  0.0f,  0.0f }, // Face 0
+        DirectX::SimpleMath::Vector3 {  1.0f,  0.0f,  0.0f }, // Face 1
+        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f }, // Face 2
+        DirectX::SimpleMath::Vector3 {  0.0f, -1.0f,  0.0f }, // Face 3
+        DirectX::SimpleMath::Vector3 {  0.0f,  0.0f,  1.0f }, // Face 4
+        DirectX::SimpleMath::Vector3 {  0.0f,  0.0f, -1.0f }  // Face 5
     };
 
     std::array<DirectX::SimpleMath::Vector3, 6> UpVectors = {
-        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f },
-        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f },
-        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f },
-        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f },
-        DirectX::SimpleMath::Vector3 {  0.0f,  0.0f,  1.0f },
-        DirectX::SimpleMath::Vector3 {  0.0f,  0.0f, -1.0f }
+        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f }, // Face 0 
+        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f }, // Face 1
+        DirectX::SimpleMath::Vector3 {  0.0f,  0.0f, -1.0f }, // Face 2
+        DirectX::SimpleMath::Vector3 {  0.0f,  0.0f,  1.0f }, // Face 3
+        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f }, // Face 4
+        DirectX::SimpleMath::Vector3 {  0.0f,  1.0f,  0.0f }  // Face 5
     };
 };

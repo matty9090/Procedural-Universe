@@ -9,5 +9,8 @@ SamplerState Sampler : s0;
 
 float4 main(in PS_Input i) : SV_TARGET
 {
-	return Tex.Sample(Sampler, i.TexCoord);
+    float3 UV = i.TexCoord;
+    UV.x *= -1;
+
+	return Tex.Sample(Sampler, UV);
 }

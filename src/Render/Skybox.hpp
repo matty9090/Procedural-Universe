@@ -12,6 +12,7 @@ public:
 
     void Draw(DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Matrix viewProj);
     void SetTextureReceiveOwnership(ID3D11ShaderResourceView* tex);
+    void SetPosition(DirectX::SimpleMath::Vector3 position) { Sphere->SetPosition(position); }
 
 private:
     struct Vertex
@@ -21,11 +22,13 @@ private:
     };
 
     ID3D11DeviceContext* Context;
+
     RenderPipeline Pipeline;
 
     std::unique_ptr<CModel> Sphere;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer, IndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11SamplerState> Sampler;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Texture;
 };

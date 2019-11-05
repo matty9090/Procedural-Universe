@@ -40,6 +40,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
+    TestSky = std::make_unique<CSkyBox>(Context);
 }
 
 void SandboxState::Cleanup()
@@ -71,6 +72,8 @@ void SandboxState::Update(float dt)
     Ship->Control(Mouse, Keyboard, dt);
     Ship->Update(dt);
     Camera->Update(dt);
+
+    CurrentTarget->GetSkyBox().SetPosition(Camera->GetPosition());
 }
 
 void SandboxState::Render()
@@ -90,9 +93,10 @@ void SandboxState::Render()
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
 
-    Context->OMSetRenderTargets(1, &rtv, dsv);
-    
     Matrix viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
+
+    Context->OMSetRenderTargets(1, &rtv, dsv);
+    //TestSky->Draw(Ship->GetPosition(), viewProj);
 
     auto sampler = CommonStates->AnisotropicWrap();
     Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);

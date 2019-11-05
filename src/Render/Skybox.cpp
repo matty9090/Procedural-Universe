@@ -1,6 +1,8 @@
 #include "Skybox.hpp"
 #include "Services/ResourceManager.hpp"
 
+#include <DDSTextureLoader.h>
+
 CSkyBox::CSkyBox(ID3D11DeviceContext* context) : Context(context)
 {
     ID3D11Device* device;
@@ -11,19 +13,32 @@ CSkyBox::CSkyBox(ID3D11DeviceContext* context) : Context(context)
     Pipeline.LoadPixel(L"shaders/Skybox.psh");
     Pipeline.CreateInputLayout(device, CreateInputLayoutPositionTexture());
 
-    Sphere = std::make_unique<CModel>(device, RESM.GetMesh("assets/Sphere.obj"));
-    Sphere->Scale(50000.0f);
+    Sphere = std::make_unique<CModel>(device, RESM.GetMesh("assets/Skysphere.obj"));
+    Sphere->Scale(600000.0f);
+    Sphere->Rotate(DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f));
 
     CommonStates = std::make_unique<DirectX::CommonStates>(device);
+
+    float border[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    CD3D11_SAMPLER_DESC samplerDesc(
+        D3D11_FILTER_MIN_MAG_MIP_LINEAR,
+        D3D11_TEXTURE_ADDRESS_WRAP, D3D11_TEXTURE_ADDRESS_WRAP, D3D11_TEXTURE_ADDRESS_WRAP,
+        0, 1, D3D11_COMPARISON_NEVER, border,
+        0, D3D11_FLOAT32_MAX
+    );
+
+    DX::ThrowIfFailed(device->CreateSamplerState(&samplerDesc, Sampler.ReleaseAndGetAddressOf()));
+
+    //DirectX::CreateDDSTextureFromFile(device, L"assets/Skybox1.dds", nullptr, Texture.ReleaseAndGetAddressOf());
+    //Sphere->SetTexture(Texture.Get());
 }
 
 void CSkyBox::Draw(DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Matrix viewProj)
 {
-    auto sampler = CommonStates->AnisotropicWrap();
-
-    Sphere->SetPosition(position);
-    Context->RSSetState(CommonStates->CullNone());
-    Context->PSSetSamplers(0, 1, &sampler);
+    //Sphere->SetPosition(position);
+    Context->RSSetState(CommonStates->CullClockwise());
+    Context->PSSetSamplers(0, 1, Sampler.GetAddressOf());
     Sphere->Draw(Context, viewProj, Pipeline);
 }
 

@@ -7,16 +7,26 @@
 CSkyboxGenerator::CSkyboxGenerator(ID3D11Device* device, ID3D11DeviceContext* context, int width, int height)
     : Device(device),
       Context(context),
-      Camera(width, width)
+      Camera()
 {
     for (int i = 0; i < 6; ++i)
     {
-        Views[i] = CreateTarget(Device, width, width);
+        Views[i] = CreateTarget(Device, 2048, 2048);
     }
 }
 
 void CSkyboxGenerator::Render(std::function<void(const ICamera&)> renderFunc)
 {
+    UINT numVp = 1;
+    D3D11_VIEWPORT oldVp;
+    Context->RSGetViewports(&numVp, &oldVp);
+
+    D3D11_VIEWPORT vp = oldVp;
+    vp.Width = 2048.0f;
+    vp.Height = 2048.0f;
+
+    Context->RSSetViewports(1, &vp);
+
     for (int i = 0; i < 6; ++i)
     {
         Views[i].Clear(Context);
@@ -25,13 +35,15 @@ void CSkyboxGenerator::Render(std::function<void(const ICamera&)> renderFunc)
         renderFunc(Camera);
     }
 
-    bSuccess = Generate();
+    Context->RSSetViewports(1, &oldVp);
 
-    //for (int i = 0; i < 6; ++i)
-    //{
-    //    //auto file = std::wstring(L"assets/Skybox") + std::to_wstring(i + 1).c_str() + L".png";
-    //    //DirectX::SaveWICTextureToFile(Context, Views[i].Rt.Get(), GUID_ContainerFormatPng, file.c_str());
-    //}
+    /*for (int i = 0; i < 6; ++i)
+    {
+        auto file = std::wstring(L"assets/Skybox") + std::to_wstring(i + 1).c_str() + L".png";
+        DirectX::SaveWICTextureToFile(Context, Views[i].Rt.Get(), GUID_ContainerFormatPng, file.c_str());
+    }*/
+
+    bSuccess = Generate();
 }
 
 bool CSkyboxGenerator::Generate()
@@ -43,7 +55,7 @@ bool CSkyboxGenerator::Generate()
     D3D11_TEXTURE2D_DESC texArrayDesc;
     texArrayDesc.Width = texElementDesc.Width;
     texArrayDesc.Height = texElementDesc.Height;
-    texArrayDesc.MipLevels = texElementDesc.MipLevels;
+    texArrayDesc.MipLevels = 1;
     texArrayDesc.ArraySize = 6;
     texArrayDesc.Format = texElementDesc.Format;
     texArrayDesc.SampleDesc.Count = 1;
@@ -65,25 +77,22 @@ bool CSkyboxGenerator::Generate()
 
     for (UINT i = 0; i < 6; ++i)
     {
-        for (UINT mipLevel = 0; mipLevel < texArrayDesc.MipLevels; mipLevel++)
-        {
-            sourceRegion.left = 0;
-            sourceRegion.right = (texArrayDesc.Width >> mipLevel);
-            sourceRegion.top = 0;
-            sourceRegion.bottom = (texArrayDesc.Height >> mipLevel);
-            sourceRegion.front = 0;
-            sourceRegion.back = 1;
+        sourceRegion.left = 0;
+        sourceRegion.right = texArrayDesc.Width;
+        sourceRegion.top = 0;
+        sourceRegion.bottom = texArrayDesc.Height;
+        sourceRegion.front = 0;
+        sourceRegion.back = 1;
 
-            if (sourceRegion.bottom == 0 || sourceRegion.right == 0)
-                break;
+        if (sourceRegion.bottom == 0 || sourceRegion.right == 0)
+            break;
 
-            Context->CopySubresourceRegion(
-                texArray,
-                D3D11CalcSubresource(mipLevel, i, texArrayDesc.MipLevels),
-                0, 0, 0,
-                Views[i].Rt.Get(), mipLevel, &sourceRegion
-            );
-        }
+        Context->CopySubresourceRegion(
+            texArray,
+            D3D11CalcSubresource(0, i, texArrayDesc.MipLevels),
+            0, 0, 0,
+            Views[i].Rt.Get(), 0, &sourceRegion
+        );
     }
 
     D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
@@ -101,10 +110,9 @@ bool CSkyboxGenerator::Generate()
     return true;
 }
 
-CSkyboxCamera::CSkyboxCamera(int width, int height)
+CSkyboxCamera::CSkyboxCamera()
 {
-    float aspect = static_cast<float>(width) / static_cast<float>(height);
-    Proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(DirectX::XM_PI / 2.0f, aspect, 0.01f, 2000.0f);
+    Proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(DirectX::XM_PI / 2.0f, 1.0f, 10.f, 2000.0f);
 }
 
 void CSkyboxCamera::MakeLookAt(DirectX::SimpleMath::Vector3 target, DirectX::SimpleMath::Vector3 up)
