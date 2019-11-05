@@ -27,7 +27,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     auto sandboxData = static_cast<SandboxStateData&>(data);
 
     for (auto& p : sandboxData.Particles)
-        p.Position *= 340.0f;
+        p.Position *= 2000.0f;
 
     CreateModelPipeline();
     SetupTargets(sandboxData.Particles);

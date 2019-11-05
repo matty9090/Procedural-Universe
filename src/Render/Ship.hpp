@@ -20,10 +20,10 @@ private:
     float Mass = 10.0f;
     float Accel = 0.0f;
     float Friction = 0.8f;
-    float MaxSpeed = 12000.0f;
+    float MaxSpeed = 30000.0f;
     float Thrust = 0.0f;
-    float ThrustInc = 10000.0f;
-    float MaxThrust = 14000.0f;
+    float ThrustInc = 14000.0f;
+    float MaxThrust = 20000.0f;
     float RotationSpeed = 0.8f;
     float ZRotationSpeed = 1.6f;
 

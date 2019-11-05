@@ -7,8 +7,8 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     : SandboxTarget(context, "Stellar", resources, camera),
       Particles(seedData)
 {
-    Scale = 0.012f;
-    BeginTransitionDist = 1200.0f;
+    Scale = 0.01f;
+    BeginTransitionDist = 3000.0f;
     EndTransitionDist = 340.0f;
 
     auto vp = Resources->GetScreenViewport();
