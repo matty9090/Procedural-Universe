@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <string>
 #include <stdio.h>
+#include <comdef.h>
 #include <winerror.h>
 
 namespace DX
@@ -16,8 +17,18 @@ namespace DX
 
         virtual const char* what() const override
         {
-            static char s_str[64] = {};
-            sprintf_s(s_str, "Failure with HRESULT of %08X", static_cast<unsigned int>(result));
+            _com_error err(result);
+            LPCTSTR errMsg = err.ErrorMessage();
+
+            TCHAR szBuffer[512];
+
+            FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM,
+                NULL, result,
+                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                (LPTSTR)szBuffer, 512, NULL);
+
+            static char s_str[512] = {};
+            sprintf_s(s_str, "Failure with HRESULT of %08X (%ls)", static_cast<unsigned int>(result), szBuffer);
             return s_str;
         }
 

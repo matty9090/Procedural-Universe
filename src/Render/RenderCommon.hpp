@@ -10,6 +10,8 @@
 #include "Core/Except.hpp"
 #include "Render/Particle.hpp"
 
+enum class ECullMode { None, Clockwise, Anticlockwise };
+
 struct RenderView
 {
     Microsoft::WRL::ComPtr<ID3D11Texture2D> Rt;
@@ -28,13 +30,16 @@ struct RenderPipeline
     ID3D11VertexShader*    VertexShader = nullptr;
     ID3D11GeometryShader*  GeometryShader = nullptr;
     ID3D11PixelShader*     PixelShader = nullptr;
+
     Microsoft::WRL::ComPtr<ID3D11InputLayout> InputLayout;
+    Microsoft::WRL::ComPtr<ID3D11RasterizerState> Raster;
 
     D3D_PRIMITIVE_TOPOLOGY Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
     void LoadVertex(std::wstring file);
     void LoadPixel(std::wstring file);
     void LoadGeometry(std::wstring file);
+    void CreateRasteriser(ID3D11Device* device, ECullMode cullMode);
     void CreateInputLayout(ID3D11Device* device, std::vector<D3D11_INPUT_ELEMENT_DESC> layout);
 
     void SetState(ID3D11DeviceContext* context, std::function<void()> state) const;

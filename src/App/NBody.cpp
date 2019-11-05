@@ -150,7 +150,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         {
             g_app->Initialize(hwnd, rc.right - rc.left, rc.bottom - rc.top);
         }
-        catch (std::exception ex)
+        catch (const std::exception& ex)
         {
             MessageBoxA(hwnd, ex.what(), "Error", MB_OK | MB_ICONEXCLAMATION);
             return 1;

@@ -98,7 +98,6 @@ void SimulationState::RenderParticles()
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
         GSBuffer->SetData(Context, GSConstantBuffer { view * proj, view.Invert() });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-        Context->RSSetState(DeviceResources->GetRasterizerState());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
         Context->Draw(NumParticles, 0);
     });
@@ -114,6 +113,7 @@ void SimulationState::CreateDeviceDependentResources()
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
     ParticlePipeline.LoadGeometry(L"shaders/DrawParticle.gsh");
+    ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
 
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);

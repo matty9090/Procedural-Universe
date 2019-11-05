@@ -71,7 +71,6 @@ void GalaxyTarget::RenderLerp(float t)
         GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
         Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-        Context->RSSetState(CommonStates->CullNone());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
         Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
     });
@@ -97,7 +96,6 @@ void GalaxyTarget::BakeSkybox(Vector3 object)
             GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
             Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
             Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-            Context->RSSetState(CommonStates->CullNone());
             Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
             
             auto pivot1 = static_cast<unsigned int>(CurrentClosestObjectID);
@@ -122,6 +120,7 @@ void GalaxyTarget::CreateParticlePipeline()
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
     ParticlePipeline.LoadGeometry(L"shaders/SandboxParticleLerp.gsh");
+    ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, layout);
 
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);

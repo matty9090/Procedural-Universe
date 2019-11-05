@@ -10,17 +10,20 @@ RenderView CreateTarget(ID3D11Device* device, int width, int height)
     t.Height = height;
 
     CD3D11_TEXTURE2D_DESC desc(DXGI_FORMAT_R16G16B16A16_FLOAT, width, height,
-                               1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+                               1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+                               D3D11_USAGE_DEFAULT, 0, 1, 0);
 
     CD3D11_TEXTURE2D_DESC dsDesc(DXGI_FORMAT_D32_FLOAT, width, height,
                                  1, 1, D3D11_BIND_DEPTH_STENCIL, D3D11_USAGE_DEFAULT, 0, 1, 0 );
 
-    CD3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc(D3D11_DSV_DIMENSION_TEXTURE2DMS);
+    CD3D11_DEPTH_STENCIL_VIEW_DESC dsvDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
+    CD3D11_SHADER_RESOURCE_VIEW_DESC srvDesc(D3D11_SRV_DIMENSION_TEXTURE2D);
+    CD3D11_RENDER_TARGET_VIEW_DESC rtvDesc(D3D11_RTV_DIMENSION_TEXTURE2D);
 
     DX::ThrowIfFailed(device->CreateTexture2D(&desc, nullptr, t.Rt.GetAddressOf()));
     DX::ThrowIfFailed(device->CreateTexture2D(&dsDesc, nullptr, t.Ds.ReleaseAndGetAddressOf()));
-    DX::ThrowIfFailed(device->CreateShaderResourceView(t.Rt.Get(), nullptr, t.Srv.ReleaseAndGetAddressOf()));
-    DX::ThrowIfFailed(device->CreateRenderTargetView(t.Rt.Get(), nullptr, t.Rtv.ReleaseAndGetAddressOf()));
+    DX::ThrowIfFailed(device->CreateShaderResourceView(t.Rt.Get(), &srvDesc, t.Srv.ReleaseAndGetAddressOf()));
+    DX::ThrowIfFailed(device->CreateRenderTargetView(t.Rt.Get(), &rtvDesc, t.Rtv.ReleaseAndGetAddressOf()));
     DX::ThrowIfFailed(device->CreateDepthStencilView(t.Ds.Get(), &dsvDesc, t.Dsv.ReleaseAndGetAddressOf()));
 
     return t;
@@ -97,6 +100,20 @@ void RenderPipeline::LoadGeometry(std::wstring file)
     GeometryShader = RESM.GetGeometryShader(file);
 }
 
+void RenderPipeline::CreateRasteriser(ID3D11Device* device, ECullMode cullMode)
+{
+    D3D11_CULL_MODE cull = D3D11_CULL_NONE;
+
+    if(cullMode == ECullMode::Clockwise) cull = D3D11_CULL_FRONT;
+    if(cullMode == ECullMode::Anticlockwise) cull = D3D11_CULL_BACK;
+
+    CD3D11_RASTERIZER_DESC rastDesc(D3D11_FILL_SOLID, cull, FALSE,
+        D3D11_DEFAULT_DEPTH_BIAS, D3D11_DEFAULT_DEPTH_BIAS_CLAMP,
+        D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS, TRUE, FALSE, FALSE, TRUE);
+
+    DX::ThrowIfFailed(device->CreateRasterizerState(&rastDesc, Raster.ReleaseAndGetAddressOf()));
+}
+
 void RenderPipeline::CreateInputLayout(ID3D11Device* device, std::vector<D3D11_INPUT_ELEMENT_DESC> layout)
 {
     DX::ThrowIfFailed(
@@ -117,6 +134,7 @@ void RenderPipeline::SetState(ID3D11DeviceContext* context, std::function<void()
     context->VSSetShader(VertexShader, 0, 0);
     context->GSSetShader(GeometryShader, 0, 0);
     context->PSSetShader(PixelShader, 0, 0);
+    context->RSSetState(Raster.Get());
 
     state();
 }

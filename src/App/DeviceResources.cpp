@@ -241,6 +241,12 @@ void DeviceResources::CreateDeviceResources()
     ThrowIfFailed(device.As(&m_d3dDevice));
     ThrowIfFailed(context.As(&m_d3dContext));
     ThrowIfFailed(context.As(&m_d3dAnnotation));
+
+    CD3D11_RASTERIZER_DESC rastDesc(D3D11_FILL_SOLID, D3D11_CULL_NONE, FALSE,
+        D3D11_DEFAULT_DEPTH_BIAS, D3D11_DEFAULT_DEPTH_BIAS_CLAMP,
+        D3D11_DEFAULT_SLOPE_SCALED_DEPTH_BIAS, TRUE, FALSE, TRUE, FALSE);
+
+    DX::ThrowIfFailed(device->CreateRasterizerState(&rastDesc, m_raster.ReleaseAndGetAddressOf()));
 }
 
 // These resources need to be recreated every time the window size is changed.
@@ -302,14 +308,10 @@ void DeviceResources::CreateWindowSizeDependentResources()
         swapChainDesc.Width = backBufferWidth;
         swapChainDesc.Height = backBufferHeight;
         swapChainDesc.Format = backBufferFormat;
+        swapChainDesc.SampleDesc.Count = 4;
+        swapChainDesc.SampleDesc.Quality = 0;
         swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
         swapChainDesc.BufferCount = m_backBufferCount;
-        swapChainDesc.SampleDesc.Count = 1;
-        swapChainDesc.SampleDesc.Quality = 0;
-        swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-        swapChainDesc.SwapEffect = (m_options & (c_FlipPresent | c_AllowTearing | c_EnableHDR)) ? DXGI_SWAP_EFFECT_FLIP_DISCARD : DXGI_SWAP_EFFECT_DISCARD;
-        swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-        swapChainDesc.Flags = (m_options & c_AllowTearing) ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0u;
 
         DXGI_SWAP_CHAIN_FULLSCREEN_DESC fsSwapChainDesc = {};
         fsSwapChainDesc.Windowed = TRUE;
@@ -333,7 +335,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
     // Create a render target view of the swap chain back buffer.
     ThrowIfFailed(m_swapChain->GetBuffer(0, IID_PPV_ARGS(m_renderTarget.ReleaseAndGetAddressOf())));
 
-    CD3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc(D3D11_RTV_DIMENSION_TEXTURE2D, m_backBufferFormat);
+    CD3D11_RENDER_TARGET_VIEW_DESC renderTargetViewDesc(D3D11_RTV_DIMENSION_TEXTURE2DMS, m_backBufferFormat);
     ThrowIfFailed(m_d3dDevice->CreateRenderTargetView(
         m_renderTarget.Get(),
         &renderTargetViewDesc,
@@ -351,7 +353,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
             1, // Use a single mipmap level.
             D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE,
             D3D11_USAGE_DEFAULT,
-            0, 1, 0
+            0, 4, 0
         );
 
         ThrowIfFailed(m_d3dDevice->CreateTexture2D(
@@ -360,7 +362,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
             m_depthStencil.ReleaseAndGetAddressOf()
         ));
         
-        CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2D);
+        CD3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc(D3D11_DSV_DIMENSION_TEXTURE2DMS);
         depthStencilViewDesc.Flags = 0;
         depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
 
@@ -372,7 +374,7 @@ void DeviceResources::CreateWindowSizeDependentResources()
 
         D3D11_SHADER_RESOURCE_VIEW_DESC srDesc;
         srDesc.Format = DXGI_FORMAT_R32_FLOAT;
-        srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+        srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DMS;
         srDesc.Texture2D.MipLevels = 1;
         srDesc.Texture2D.MostDetailedMip = 0;
 
@@ -396,7 +398,8 @@ void DeviceResources::CreatePostProcessTargets()
     UINT height = std::max<UINT>(static_cast<UINT>(m_outputSize.bottom - m_outputSize.top), 1u);
 
     CD3D11_TEXTURE2D_DESC desc(DXGI_FORMAT_R16G16B16A16_FLOAT, width, height,
-                          1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+                          1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE,
+                          D3D11_USAGE_DEFAULT, 0, 4, 0);
     
     ThrowIfFailed(m_d3dDevice->CreateTexture2D(&desc, nullptr, m_sceneTex.GetAddressOf()));
     ThrowIfFailed(m_d3dDevice->CreateShaderResourceView(m_sceneTex.Get(), nullptr, m_sceneSrv.ReleaseAndGetAddressOf()));

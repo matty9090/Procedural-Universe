@@ -7,9 +7,9 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     : SandboxTarget(context, "Stellar", resources, camera),
       Particles(seedData)
 {
-    Scale = 0.012f;
-    BeginTransitionDist = 1200.0f;
-    EndTransitionDist = 340.0f;
+    Scale = 0.01f;
+    BeginTransitionDist = 1400.0f;
+    EndTransitionDist = 300.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -106,7 +106,6 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t)
         GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
         Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-        Context->RSSetState(CommonStates->CullNone());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
         Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
     });
@@ -114,7 +113,6 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t)
     LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
     Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
     Context->GSSetShader(nullptr, 0, 0);
-    Context->RSSetState(CommonStates->CullClockwise());
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
     Star->Draw(Context, viewProj, StarPipeline);
 }
@@ -134,6 +132,7 @@ void StarTarget::CreateStarPipeline()
     StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     StarPipeline.LoadVertex(L"shaders/Position.vsh");
     StarPipeline.LoadPixel(L"shaders/Star.psh");
+    StarPipeline.CreateRasteriser(Device, ECullMode::Clockwise);
     StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
 
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
@@ -145,6 +144,7 @@ void StarTarget::CreateParticlePipeline()
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
     ParticlePipeline.LoadGeometry(L"shaders/SandboxParticleLerp.gsh");
+    ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
 
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);

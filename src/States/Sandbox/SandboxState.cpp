@@ -27,7 +27,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     auto sandboxData = static_cast<SandboxStateData&>(data);
 
     for (auto& p : sandboxData.Particles)
-        p.Position *= 340.0f;
+        p.Position *= 500.0f;
 
     CreateModelPipeline();
     SetupTargets(sandboxData.Particles);
@@ -101,7 +101,6 @@ void SandboxState::Render()
     auto sampler = CommonStates->AnisotropicWrap();
     Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
     Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
-    Context->RSSetState(CommonStates->CullClockwise());
     Context->PSSetSamplers(0, 1, &sampler);
 
     Ship->Draw(Context, viewProj, ModelPipeline);
@@ -233,6 +232,7 @@ void SandboxState::CreateModelPipeline()
     ModelPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     ModelPipeline.LoadVertex(L"shaders/PositionTexture.vsh");
     ModelPipeline.LoadPixel(L"shaders/Texture.psh");
+    ModelPipeline.CreateRasteriser(Device, ECullMode::Clockwise);
     ModelPipeline.CreateInputLayout(Device, layout);
 }
 
