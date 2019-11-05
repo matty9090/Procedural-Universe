@@ -5,7 +5,9 @@
 
 #include <thread>
 
-BarnesHut::BarnesHut(ID3D11DeviceContext* context) : Context(context)
+BarnesHut::BarnesHut(ID3D11DeviceContext* context)
+    : Context(context),
+      Pool(std::bind(&BarnesHut::Exec, this, std::placeholders::_1))
 {
     LOGM("Barnes-Hut")
 
@@ -54,36 +56,27 @@ void BarnesHut::Update(float dt)
     Tree->CalculateMass();
     particle = Particles->data();
 
-    const size_t numThreads = 8;
-    std::array<std::thread, numThreads> threads;
-
+    const size_t numThreads = Pool.GetNumWorkers();
     const size_t loopsPerThread = Particles->size() / numThreads;
-    const int remainder = Particles->size() % numThreads;
+    const size_t remainder = Particles->size() % numThreads;
 
-    size_t thread;
+    int32_t thread;
 
     for(thread = 0; thread < numThreads; ++thread)
     {
-        threads[thread] = std::thread([&](size_t t, size_t loops) {
-            for(size_t i = t * loops; i < (t + 1) * loops; ++i)
-            {
-                Particle* p = &(*Particles)[i];
-                p->Forces = Tree->CalculateForce(p);
-            }
-        }, thread, loopsPerThread);
+        Pool.Dispatch(thread, { static_cast<size_t>(thread), loopsPerThread });
     }
     
     if(remainder > 0)
     {
-        for(size_t i = thread; i < thread + remainder; ++i)
+        for(int32_t i = thread; i < thread + remainder; ++i)
         {
             Particle* p = &(*Particles)[i];
             p->Forces = Tree->CalculateForce(p);
         }
     }
 
-    for(int thread = 0; thread < numThreads; ++thread)
-        threads[thread].join();
+    Pool.Join();
 
     particle = Particles->data();
 
@@ -105,4 +98,13 @@ void BarnesHut::Update(float dt)
 void BarnesHut::RenderDebug(DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Matrix proj)
 {
     Tree->RenderDebug(DebugCube.get(), DebugSphere.get(), view, proj);
+}
+
+void BarnesHut::Exec(const ParticleInfo& info)
+{
+    for (size_t i = info.Index * info.Loops; i < (info.Index + 1) * info.Loops; ++i)
+    {
+        Particle* p = &(*Particles)[i];
+        p->Forces = Tree->CalculateForce(p);
+    }
 }

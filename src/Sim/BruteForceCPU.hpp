@@ -1,6 +1,7 @@
 #pragma once
 
 #include "INBodySim.hpp"
+#include "Core/ThreadPool.hpp"
 #include "Render/ConstantBuffer.hpp"
 
 #include <wrl/client.h>
@@ -16,7 +17,14 @@ class BruteForceCPU : public INBodySim
     private:
         ID3D11DeviceContext* Context = nullptr;
 
-        std::vector<Particle>* Particles;
+        struct ParticleInfo
+        {
+            size_t Index;
+            size_t Loops;
+        };
 
-        void Exec(size_t index, size_t loops);
+        std::vector<Particle>* Particles;
+        CThreadPool<ParticleInfo> Pool;
+
+        void Exec(const ParticleInfo& info);
 };
