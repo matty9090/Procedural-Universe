@@ -1,7 +1,9 @@
 #pragma once
 
 #include "App/DeviceResources.hpp"
+
 #include "Core/Maths.hpp"
+#include "Core/ThreadPool.hpp"
 
 #include "Render/Model.hpp"
 #include "Render/Skybox.hpp"
@@ -44,7 +46,9 @@ public:
     virtual Vector3 GetClosestObject(Vector3 pos) = 0;
     virtual Vector3 GetMainObject() const = 0;
 
-    void StartTransitionParent();
+    void StartTransitionUpParent();
+    void StartTransitionDownParent(Vector3 object);
+
     void EndTransitionUpParent();
     void EndTransitionDownParent(Vector3 object);
 
@@ -83,4 +87,6 @@ private:
         TransitioningParent,
         TransitioningChild
     } State;
+
+    CThreadPool<Vector3> SkyboxWorker;
 };

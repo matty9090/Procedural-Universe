@@ -40,7 +40,6 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
-    TestSky = std::make_unique<CSkyBox>(Context);
 }
 
 void SandboxState::Cleanup()
@@ -73,7 +72,8 @@ void SandboxState::Update(float dt)
     Ship->Update(dt);
     Camera->Update(dt);
 
-    CurrentTarget->GetSkyBox().SetPosition(Camera->GetPosition());
+    if(CurrentTarget->Parent)
+        CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
 }
 
 void SandboxState::Render()
@@ -96,7 +96,6 @@ void SandboxState::Render()
     Matrix viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
 
     Context->OMSetRenderTargets(1, &rtv, dsv);
-    //TestSky->Draw(Ship->GetPosition(), viewProj);
 
     auto sampler = CommonStates->AnisotropicWrap();
     Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -155,7 +154,7 @@ void SandboxState::TransitionLogic()
             Ship->SetPosition(Ship->GetPosition() * CurrentTarget->Child->Scale);
             Ship->Move(CurrentTarget->Child->ParentLocationSpace);
 
-            CurrentTarget->StartTransitionParent();
+            CurrentTarget->StartTransitionUpParent();
             CurrentTarget->Child->StartTransitionUpChild();
         }
     }
@@ -179,7 +178,7 @@ void SandboxState::TransitionLogic()
                 LOGM("Starting down transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
                 
                 CurrentTarget->Child->StartTransitionDownChild(object);
-                CurrentTarget->StartTransitionParent();
+                CurrentTarget->StartTransitionDownParent(object);
             }
         }
         else

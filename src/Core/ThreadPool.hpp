@@ -12,6 +12,7 @@ public:
     ~CThreadPool();
 
     int32_t GetNumWorkers() const { return NumWorkers; }
+    void SetNumWorkers(uint32_t num) { NumWorkers = num; }
 
     void Dispatch(uint32_t thread, const T& info);
     void Join();
@@ -38,7 +39,7 @@ inline CThreadPool<T>::CThreadPool(std::function<void(const T&)> func) : UserFun
     NumWorkers = std::thread::hardware_concurrency();
     NumWorkers = NumWorkers == 0 ? 8 : NumWorkers;
     --NumWorkers;
-
+    
     for (uint32_t i = 0; i < NumWorkers; ++i)
     {
         Workers[i] = std::thread(&CThreadPool::Work, this, i);

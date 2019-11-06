@@ -52,7 +52,6 @@ private:
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
     std::unique_ptr<CShip>            Ship;
-    std::unique_ptr<CSkyBox>          TestSky;
     std::unique_ptr<CShipCamera>      Camera;
 
     std::unique_ptr<SandboxTarget> RootTarget;

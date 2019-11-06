@@ -86,7 +86,7 @@ class CShipCamera : public ICamera
          * 
          * @return Vector3 
          */
-        Vector3 GetPosition() const { return View.Translation(); }
+        Vector3 GetPosition() const { return View.Invert().Translation(); }
 
         /**
          * @brief Get the x and y pixel coordinates for the given world point

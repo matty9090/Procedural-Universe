@@ -29,14 +29,10 @@ CSkyBox::CSkyBox(ID3D11DeviceContext* context) : Context(context)
     );
 
     DX::ThrowIfFailed(device->CreateSamplerState(&samplerDesc, Sampler.ReleaseAndGetAddressOf()));
-
-    //DirectX::CreateDDSTextureFromFile(device, L"assets/Skybox1.dds", nullptr, Texture.ReleaseAndGetAddressOf());
-    //Sphere->SetTexture(Texture.Get());
 }
 
-void CSkyBox::Draw(DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Matrix viewProj)
+void CSkyBox::Draw(DirectX::SimpleMath::Matrix viewProj)
 {
-    //Sphere->SetPosition(position);
     Context->RSSetState(CommonStates->CullClockwise());
     Context->PSSetSamplers(0, 1, Sampler.GetAddressOf());
     Sphere->Draw(Context, viewProj, Pipeline);

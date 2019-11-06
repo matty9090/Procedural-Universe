@@ -28,7 +28,7 @@ void StarTarget::Render()
     auto dsv = Resources->GetDepthStencilView();
 
     Context->OMSetRenderTargets(1, &rtv, dsv);
-    Parent->GetSkyBox().Draw(Star->GetPosition(), Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
+    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
 
     RenderLerp();
 }
