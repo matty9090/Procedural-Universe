@@ -22,7 +22,8 @@ class CSplatting;
 enum class EState
 {
     Simulation,
-    Sandbox
+    Sandbox,
+    DebugSandbox
 };
 
 class App final : public DX::IDeviceNotify

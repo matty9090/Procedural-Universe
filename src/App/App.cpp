@@ -15,6 +15,7 @@
 
 #include "States/Simulation/SimulationState.hpp"
 #include "States/Sandbox/SandboxState.hpp"
+#include "States/DebugSandbox/DebugSandboxState.hpp"
 
 using Microsoft::WRL::ComPtr;
 
@@ -25,6 +26,7 @@ App::App() noexcept(false)
 
     States.push_back(std::make_unique<SimulationState>());
     States.push_back(std::make_unique<SandboxState>());
+    States.push_back(std::make_unique<DebugSandboxState>());
 }
 
 // Initialize the Direct3D resources required to run.
@@ -76,6 +78,19 @@ void App::Update(float dt)
         {
             auto Sim = static_cast<SimulationState*>(CurrentState);
             SwitchState(EState::Sandbox, SandboxStateData(Sim->GetParticles()));
+        }
+        else
+        {
+            SwitchState(EState::Simulation);
+        }
+    }
+
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::Z))
+    {
+        if (CurrentStateID == EState::Simulation)
+        {
+            auto Sim = static_cast<SimulationState*>(CurrentState);
+            SwitchState(EState::DebugSandbox, DebugSandboxStateData(Sim->GetParticles()));
         }
         else
         {
