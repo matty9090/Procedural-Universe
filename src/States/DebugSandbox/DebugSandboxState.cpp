@@ -108,8 +108,10 @@ void DebugSandboxState::SetupTargets(const std::vector<Particle>& seedData)
     std::vector<Particle> seedData2 = seedData;
     seedData2.erase(seedData2.end() - seedData2.size() + 60, seedData2.end());
 
-    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), seedData2);
-    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
+    auto rtv = DeviceResources->GetRenderTargetView();
+
+    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
 
     Star->Parent = Galaxy.get();
     Galaxy->Child = std::move(Star);

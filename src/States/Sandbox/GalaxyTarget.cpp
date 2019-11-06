@@ -1,7 +1,7 @@
 #include "GalaxyTarget.hpp"
 
-GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData)
-    : SandboxTarget(context, "Galactic", resources, camera),
+GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData)
+    : SandboxTarget(context, "Galactic", resources, camera, rtv),
       Particles(seedData)
 {
     auto vp = Resources->GetScreenViewport();
@@ -21,7 +21,7 @@ void GalaxyTarget::Render()
 
 void GalaxyTarget::RenderTransitionParent(float t)
 {
-    RenderLerp(1.0f);
+    RenderLerp(t);
 }
 
 void GalaxyTarget::MoveObjects(Vector3 v)
@@ -54,11 +54,10 @@ void GalaxyTarget::StateIdle()
 
 void GalaxyTarget::RenderLerp(float t)
 {
-    auto rtv = Resources->GetRenderTargetView();
     auto dsv = Resources->GetDepthStencilView();
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    Context->OMSetRenderTargets(1, &rtv, dsv);
-    LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+    LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
@@ -73,7 +72,16 @@ void GalaxyTarget::RenderLerp(float t)
         Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
         Context->RSSetState(CommonStates->CullNone());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
+
+        auto pivot1 = static_cast<unsigned int>(CurrentClosestObjectID);
+        auto pivot2 = static_cast<unsigned int>(Particles.size() - CurrentClosestObjectID - 1);
+
+        Context->Draw(pivot1, 0);
+        Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
+
+        // Draw object of interest separately to lerp it's size
+        LerpBuffer->SetData(Context, LerpConstantBuffer{ t });
+        Context->Draw(1, static_cast<unsigned int>(CurrentClosestObjectID));
     });
 
     Context->GSSetShader(nullptr, 0, 0);
@@ -81,10 +89,8 @@ void GalaxyTarget::RenderLerp(float t)
 
 void GalaxyTarget::BakeSkybox(Vector3 object)
 {
-    SkyboxGenerator->SetPosition(object);
-
     SkyboxGenerator->Render([&](const ICamera& cam) {
-        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+        LerpBuffer->SetData(Context, LerpConstantBuffer{ 1.0f });
 
         Matrix view = cam.GetViewMatrix();
         Matrix viewProj = view * cam.GetProjectionMatrix();
@@ -94,12 +100,12 @@ void GalaxyTarget::BakeSkybox(Vector3 object)
             unsigned int stride = sizeof(Particle);
 
             Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-            GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
+            GSBuffer->SetData(Context, GSConstantBuffer{ viewProj, view.Invert(), Vector3::Zero });
             Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
             Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
             Context->RSSetState(CommonStates->CullNone());
             Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-            
+
             auto pivot1 = static_cast<unsigned int>(CurrentClosestObjectID);
             auto pivot2 = static_cast<unsigned int>(Particles.size() - CurrentClosestObjectID - 1);
 

@@ -90,8 +90,11 @@ void SandboxState::Render()
         CurrentTarget->Render();
     }
 
+
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
+
+    PostProcess->Render(rtv, dsv, DeviceResources->GetSceneShaderResourceView());
 
     Matrix viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
 
@@ -112,8 +115,10 @@ void SandboxState::Clear()
 
     auto depthStencil = DeviceResources->GetDepthStencilView();
     auto renderTarget = DeviceResources->GetRenderTargetView();
+    auto sceneTarget  = DeviceResources->GetSceneRenderTargetView();
 
     Context->ClearRenderTargetView(renderTarget, DirectX::Colors::Black);
+    Context->ClearRenderTargetView(sceneTarget , DirectX::Colors::Black);
     Context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     auto viewport = DeviceResources->GetScreenViewport();
@@ -240,14 +245,16 @@ void SandboxState::SetupTargets(const std::vector<Particle>& seedData)
     std::vector<Particle> seedData2 = seedData;
     seedData2.erase(seedData2.end() - seedData2.size() + 60, seedData2.end());
 
-    for (auto& p : seedData2) p.Position /= 10;
+    for (auto& p : seedData2) p.Position /= 20;
 
-    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), seedData);
-    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
-    std::unique_ptr<SandboxTarget> Star2  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
-    std::unique_ptr<SandboxTarget> Star3  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
-    std::unique_ptr<SandboxTarget> Star4  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
-    std::unique_ptr<SandboxTarget> Star5  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
+    auto rtv = DeviceResources->GetSceneRenderTargetView();
+
+    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv, seedData);
+    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Star2  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Star3  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Star4  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Star5  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
 
     Star->Parent = Galaxy.get();
     Star2->Parent = Star.get();

@@ -3,13 +3,13 @@
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
 
-StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData)
-    : SandboxTarget(context, "Stellar", resources, camera),
+StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData)
+    : SandboxTarget(context, "Stellar", resources, camera, rtv),
       Particles(seedData)
 {
     Scale = 0.01f;
-    BeginTransitionDist = 3000.0f;
-    EndTransitionDist = 340.0f;
+    BeginTransitionDist = 3200.0f;
+    EndTransitionDist = 700.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -24,12 +24,6 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
 
 void StarTarget::Render()
 {
-    auto rtv = Resources->GetRenderTargetView();
-    auto dsv = Resources->GetDepthStencilView();
-
-    Context->OMSetRenderTargets(1, &rtv, dsv);
-    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
-
     RenderLerp();
 }
 
@@ -73,7 +67,7 @@ void StarTarget::ScaleObjects(float scale)
 
 Vector3 StarTarget::GetClosestObject(Vector3 pos)
 {
-    return Maths::ClosestParticle(pos, Particles).Position;
+    return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
 }
 
 Vector3 StarTarget::GetMainObject() const
@@ -88,15 +82,15 @@ void StarTarget::StateIdle()
 
 void StarTarget::RenderLerp(float scale, Vector3 voffset, float t)
 {
-    auto rtv = Resources->GetRenderTargetView();
     auto dsv = Resources->GetDepthStencilView();
-
-    Context->OMSetRenderTargets(1, &rtv, dsv);
-
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+    
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
     view = view.Invert();
     view *= Matrix::CreateScale(scale);
+
+    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
 
     ParticlePipeline.SetState(Context, [&]() {
         unsigned int offset = 0;
@@ -111,12 +105,44 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t)
         Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
     });
 
-    LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+    LerpBuffer->SetData(Context, LerpConstantBuffer { t });
     Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
     Context->GSSetShader(nullptr, 0, 0);
     Context->RSSetState(CommonStates->CullClockwise());
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
     Star->Draw(Context, viewProj, StarPipeline);
+}
+
+void StarTarget::BakeSkybox(Vector3 object)
+{
+    SkyboxGenerator->Render([&](const ICamera& cam) {
+        LerpBuffer->SetData(Context, LerpConstantBuffer{ 1.0f });
+
+        Matrix view = cam.GetViewMatrix();
+        Matrix viewProj = view * cam.GetProjectionMatrix();
+        
+        Parent->GetSkyBox().Draw(viewProj);
+
+        ParticlePipeline.SetState(Context, [&]() {
+            unsigned int offset = 0;
+            unsigned int stride = sizeof(Particle);
+
+            Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
+            GSBuffer->SetData(Context, GSConstantBuffer{ viewProj, view.Invert(), Vector3::Zero });
+            Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
+            Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
+            Context->RSSetState(CommonStates->CullNone());
+            Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
+
+            auto pivot1 = static_cast<unsigned int>(CurrentClosestObjectID);
+            auto pivot2 = static_cast<unsigned int>(Particles.size() - CurrentClosestObjectID - 1);
+
+            Context->Draw(pivot1, 0);
+            Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
+        });
+
+        Context->GSSetShader(nullptr, 0, 0);
+    });
 }
 
 void StarTarget::ResetObjectPositions()

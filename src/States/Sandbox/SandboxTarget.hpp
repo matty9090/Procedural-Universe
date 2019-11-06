@@ -26,7 +26,7 @@ using DirectX::SimpleMath::Vector3;
 class SandboxTarget
 {
 public:
-    SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera);
+    SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv);
     virtual ~SandboxTarget() {}
 
     void Update(float dt);
@@ -76,6 +76,7 @@ protected:
     CShipCamera* Camera = nullptr;
     ID3D11Device* Device = nullptr;
     ID3D11DeviceContext* Context = nullptr;
+    ID3D11RenderTargetView* RenderTarget = nullptr;
     DX::DeviceResources* Resources = nullptr;
 
     std::unique_ptr<CSkyboxGenerator> SkyboxGenerator;
@@ -87,6 +88,4 @@ private:
         TransitioningParent,
         TransitioningChild
     } State;
-
-    CThreadPool<Vector3> SkyboxWorker;
 };
