@@ -24,11 +24,20 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
 
 void StarTarget::Render()
 {
+    auto dsv = Resources->GetDepthStencilView();
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
+
+    Matrix viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
+
     RenderLerp();
 }
 
 void StarTarget::RenderTransitionChild(float t)
 {
+    auto dsv = Resources->GetDepthStencilView();
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+
     Star->Move(ParentLocationSpace);
     RenderLerp(Scale, ParentLocationSpace, t);
     Star->Move(-ParentLocationSpace);
@@ -36,7 +45,11 @@ void StarTarget::RenderTransitionChild(float t)
 
 void StarTarget::RenderTransitionParent(float t)
 {
-    RenderLerp(1.0f, Vector3::Zero, t);
+    auto dsv = Resources->GetDepthStencilView();
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
+
+    RenderLerp(1.0f, Vector3::Zero, t, true);
 }
 
 void StarTarget::MoveObjects(Vector3 v)
@@ -80,21 +93,18 @@ void StarTarget::StateIdle()
     
 }
 
-void StarTarget::RenderLerp(float scale, Vector3 voffset, float t)
+void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
 {
-    auto dsv = Resources->GetDepthStencilView();
-    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-    
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
     view = view.Invert();
     view *= Matrix::CreateScale(scale);
 
-    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
-
     ParticlePipeline.SetState(Context, [&]() {
         unsigned int offset = 0;
         unsigned int stride = sizeof(Particle);
+
+        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
         GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
@@ -102,7 +112,23 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t)
         Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
         Context->RSSetState(CommonStates->CullNone());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Context->Draw(static_cast<unsigned int>(Particles.size()), 0);
+
+        if (single)
+        {
+            auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
+            auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
+
+            Context->Draw(pivot1, 0);
+            Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
+
+            // Draw object of interest separately to lerp it's size
+            LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+            Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
+        }
+        else
+        {
+            Context->Draw(static_cast<UINT>(Particles.size()), 0);
+        }
     });
 
     LerpBuffer->SetData(Context, LerpConstantBuffer { t });

@@ -57,14 +57,14 @@ void GalaxyTarget::RenderLerp(float t)
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
-
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
 
     ParticlePipeline.SetState(Context, [&]() {
         unsigned int offset = 0;
         unsigned int stride = sizeof(Particle);
+
+        LerpBuffer->SetData(Context, LerpConstantBuffer{ 1.0f });
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
         GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
@@ -80,7 +80,7 @@ void GalaxyTarget::RenderLerp(float t)
         Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
 
         // Draw object of interest separately to lerp it's size
-        LerpBuffer->SetData(Context, LerpConstantBuffer{ t });
+        LerpBuffer->SetData(Context, LerpConstantBuffer { t });
         Context->Draw(1, static_cast<unsigned int>(CurrentClosestObjectID));
     });
 
@@ -90,7 +90,7 @@ void GalaxyTarget::RenderLerp(float t)
 void GalaxyTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
-        LerpBuffer->SetData(Context, LerpConstantBuffer{ 1.0f });
+        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
         Matrix view = cam.GetViewMatrix();
         Matrix viewProj = view * cam.GetProjectionMatrix();

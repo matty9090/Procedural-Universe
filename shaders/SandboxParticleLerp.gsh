@@ -59,7 +59,7 @@ void main
 		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
         outVert.ViewportPosition.z = LogDepthBuffer(outVert.ViewportPosition.w);
 
-        outVert.Colour = inParticle[0].Colour;
+        outVert.Colour = float4(inParticle[0].Colour.rgb, Lerp);
         outVert.UV = UVs[i];
 		outStrip.Append( outVert );
 	}
