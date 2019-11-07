@@ -147,6 +147,7 @@ void StarTarget::BakeSkybox(Vector3 object)
         Matrix view = cam.GetViewMatrix();
         Matrix viewProj = view * cam.GetProjectionMatrix();
         
+        Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
         Parent->GetSkyBox().Draw(viewProj);
 
         ParticlePipeline.SetState(Context, [&]() {
