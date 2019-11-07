@@ -54,7 +54,7 @@ void main
 	{
 		const float scale = 300.0f;
         float3 corner = Corners[i] * scale * Lerp;
-        float3 worldPosition = inParticle[0].Position + mul( corner, (float3x3)InvViewMatrix ) + Translation;
+        float3 worldPosition = inParticle[0].Position + mul(corner, (float3x3)InvViewMatrix) + Translation;
         
 		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
         outVert.ViewportPosition.z = LogDepthBuffer(outVert.ViewportPosition.w);

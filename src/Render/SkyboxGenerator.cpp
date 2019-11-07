@@ -98,7 +98,7 @@ void CSkyboxGenerator::Generate()
 
 CSkyboxCamera::CSkyboxCamera()
 {
-    Proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(DirectX::XM_PI / 2.0f, 1.0f, 10.f, 2000.0f);
+    Proj = DirectX::SimpleMath::Matrix::CreatePerspectiveFieldOfView(DirectX::XM_PIDIV2, 1.0f, 10.f, 2000.0f);
 }
 
 void CSkyboxCamera::MakeLookAt(DirectX::SimpleMath::Vector3 target, DirectX::SimpleMath::Vector3 up)

@@ -39,7 +39,9 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     Camera->Attach(Ship.get());
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
+
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
+    PostProcess->GaussianBlur = 5.0f;
 }
 
 void SandboxState::Cleanup()
@@ -89,7 +91,6 @@ void SandboxState::Render()
     {
         CurrentTarget->Render();
     }
-
 
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
@@ -210,6 +211,8 @@ void SandboxState::TransitionLogic()
                 CurrentTarget->EndTransitionDownParent(object);
                 CurrentTarget->Child->EndTransitionDownChild();
                 CurrentTarget = CurrentTarget->Child.get();
+
+                CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
 
                 Ship->Move(-CurrentTarget->ParentLocationSpace);
                 Ship->SetPosition(Ship->GetPosition() / CurrentTarget->Scale);

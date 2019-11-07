@@ -51,7 +51,7 @@ void main
         float3 corner = Corners[i] * scale;
         float3 worldPosition = inParticle[0].Position + mul( corner, (float3x3)InvViewMatrix ) + Translation;
         
-		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
+		outVert.ViewportPosition = mul(float4(worldPosition, 1.0f), ViewProjMatrix);
         outVert.ViewportPosition.z = LogDepthBuffer(outVert.ViewportPosition.w);
 
         outVert.Colour = inParticle[0].Colour;

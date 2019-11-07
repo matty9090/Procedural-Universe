@@ -54,7 +54,6 @@ void SandboxTarget::EndTransitionDownParent(Vector3 object)
     BakeSkybox(object);
 
     SkyBox.SetTextureReceiveOwnership(SkyboxGenerator->GetTextureTakeOwnership());
-    SkyBox.SetPosition(object);
 }
 
 void SandboxTarget::StartTransitionUpChild()
