@@ -9,6 +9,6 @@ struct VSInputTx
 
 float4 main(VSInputTx pin) : SV_Target
 {
-    float color = Texture.Sample(Sampler, pin.TexCoord).r / 2.0f;
+    float color = pow(Texture.Sample(Sampler, pin.TexCoord).r, 5);
     return float4(color, color, color, 1.0f);
 }

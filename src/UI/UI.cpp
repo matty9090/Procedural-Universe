@@ -72,7 +72,7 @@ void CUI::Render()
     ImGui::Separator();
 
     ImGui::Text("Settings");
-    ImGui::SliderInt("Particles", &newNumParticles, 1, 20000);
+    ImGui::SliderInt("Particles", &newNumParticles, 1, 50000);
     ImGui::SliderFloat("Sim Speed", &newSimSpeed, 0.001f, 1.0f);
     
     if(ImGui::Combo("Seeder", &SelectedSeeder, "Random\0Galaxy\0StarSystem\0"))

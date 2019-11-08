@@ -10,9 +10,10 @@ class CSkyBox
 public:
     CSkyBox(ID3D11DeviceContext* context);
 
-    void Draw(DirectX::SimpleMath::Vector3 position, DirectX::SimpleMath::Matrix viewProj);
+    void Draw(DirectX::SimpleMath::Matrix viewProj);
     void SetTextureReceiveOwnership(ID3D11ShaderResourceView* tex);
     void SetPosition(DirectX::SimpleMath::Vector3 position) { Sphere->SetPosition(position); }
+    void Move(DirectX::SimpleMath::Vector3 v) { Sphere->Move(v); }
 
 private:
     struct Vertex

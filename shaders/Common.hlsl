@@ -1,4 +1,4 @@
-static const float Far = 2000000.0;
+static const float Far = 800000.0;
 static const float C = 1.0f;
 
 float LogDepthBuffer(float w) {

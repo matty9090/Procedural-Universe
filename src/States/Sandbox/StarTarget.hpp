@@ -6,7 +6,7 @@
 class StarTarget : public SandboxTarget
 {
 public:
-    StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData);
+    StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData);
 
     void Render() override;
     void RenderTransitionChild(float t) override;
@@ -21,7 +21,9 @@ public:
 
 private:
     void StateIdle() override;
-    void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f);
+    void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f, bool single = false);
+    void BakeSkybox(Vector3 object) override;
+
     void CreateStarPipeline();
     void CreateParticlePipeline();
 
@@ -39,6 +41,7 @@ private:
         float Custom1, Custom2, Custom3;
     };
 
+    size_t CurrentClosestObjectID;
     std::unique_ptr<CModel> Star;
 
     RenderView ParticleRenderTarget;

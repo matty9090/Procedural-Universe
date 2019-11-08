@@ -1,11 +1,10 @@
 #pragma once
 
 #include "Core/State.hpp"
-#include "SandboxTarget.hpp"
+#include "States/Sandbox/SandboxTarget.hpp"
 
 #include "Render/ShipCamera.hpp"
 #include "Render/Particle.hpp"
-#include "Render/PostProcess.hpp"
 #include "Render/ConstantBuffer.hpp"
 #include "Render/Ship.hpp"
 
@@ -18,14 +17,14 @@
 #include <CommonStates.h>
 
 
-struct SandboxStateData : public StateData
+struct DebugSandboxStateData : public StateData
 {
     std::vector<Particle> Particles;
 
-    SandboxStateData(std::vector<Particle> particles) : Particles(particles) {}
+    DebugSandboxStateData(std::vector<Particle> particles) : Particles(particles) {}
 };
 
-class SandboxState : public IState
+class DebugSandboxState : public IState
 {
 public:
     // IState override
@@ -37,10 +36,9 @@ public:
 
 private:
     void Clear();
-    void FloatingOrigin();
-    void TransitionLogic();
-    void CreateModelPipeline();
+    void RenderUI();
     void SetupTargets(const std::vector<Particle>& seedData);
+    void TestTransitions();
 
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
@@ -48,16 +46,8 @@ private:
     DirectX::Keyboard* Keyboard;
     DX::DeviceResources* DeviceResources;
 
-    std::unique_ptr<CPostProcess> PostProcess;
-    std::unique_ptr<DirectX::CommonStates> CommonStates;
-
-    std::unique_ptr<CShip>            Ship;
-    std::unique_ptr<CShipCamera>      Camera;
+    std::unique_ptr<CShipCamera> Camera;
 
     std::unique_ptr<SandboxTarget> RootTarget;
     SandboxTarget* CurrentTarget;
-    RenderPipeline ModelPipeline;
-
-    float CamOriginSnapThreshold = 5000.0f;
-    float CurrentTransitionT = 0.0f;
 };

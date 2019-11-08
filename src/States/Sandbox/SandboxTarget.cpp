@@ -1,13 +1,14 @@
 #include "SandboxTarget.hpp"
 #include "Services/Log.hpp"
 
-SandboxTarget::SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera)
+SandboxTarget::SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
     : Context(context),
       Name(name),
       State(EState::Idle),
       Resources(resources),
       Camera(camera),
-      SkyBox(context)
+      SkyBox(context),
+      RenderTarget(rtv)
 {
     context->GetDevice(&Device);
 
@@ -30,7 +31,12 @@ void SandboxTarget::Update(float dt)
     }
 }
 
-void SandboxTarget::StartTransitionParent()
+void SandboxTarget::StartTransitionUpParent()
+{
+    State = EState::TransitioningParent;
+}
+
+void SandboxTarget::StartTransitionDownParent(Vector3 object)
 {
     State = EState::TransitioningParent;
 }
@@ -43,9 +49,11 @@ void SandboxTarget::EndTransitionUpParent()
 void SandboxTarget::EndTransitionDownParent(Vector3 object)
 {
     State = EState::Idle;
+
+    SkyboxGenerator->SetPosition(object);
     BakeSkybox(object);
+
     SkyBox.SetTextureReceiveOwnership(SkyboxGenerator->GetTextureTakeOwnership());
-    SkyBox.SetPosition(object);
 }
 
 void SandboxTarget::StartTransitionUpChild()

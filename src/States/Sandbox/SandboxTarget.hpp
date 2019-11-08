@@ -1,7 +1,9 @@
 #pragma once
 
 #include "App/DeviceResources.hpp"
+
 #include "Core/Maths.hpp"
+#include "Core/ThreadPool.hpp"
 
 #include "Render/Model.hpp"
 #include "Render/Skybox.hpp"
@@ -24,7 +26,7 @@ using DirectX::SimpleMath::Vector3;
 class SandboxTarget
 {
 public:
-    SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera);
+    SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv);
     virtual ~SandboxTarget() {}
 
     void Update(float dt);
@@ -44,7 +46,9 @@ public:
     virtual Vector3 GetClosestObject(Vector3 pos) = 0;
     virtual Vector3 GetMainObject() const = 0;
 
-    void StartTransitionParent();
+    void StartTransitionUpParent();
+    void StartTransitionDownParent(Vector3 object);
+
     void EndTransitionUpParent();
     void EndTransitionDownParent(Vector3 object);
 
@@ -72,6 +76,7 @@ protected:
     CShipCamera* Camera = nullptr;
     ID3D11Device* Device = nullptr;
     ID3D11DeviceContext* Context = nullptr;
+    ID3D11RenderTargetView* RenderTarget = nullptr;
     DX::DeviceResources* Resources = nullptr;
 
     std::unique_ptr<CSkyboxGenerator> SkyboxGenerator;

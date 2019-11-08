@@ -11,7 +11,8 @@
 using namespace DirectX::SimpleMath;
 
 BruteForceCPU::BruteForceCPU(ID3D11DeviceContext* context)
-    : Context(context)
+    : Context(context),
+      Pool(std::bind(&BruteForceCPU::Exec, this, std::placeholders::_1))
 {
     LOGM("Brute Force CPU")
 }
@@ -21,22 +22,21 @@ void BruteForceCPU::Init(std::vector<Particle>& particles)
     Particles = &particles;
 }
 
-void BruteForceCPU::Exec(size_t index, size_t loops)
+void BruteForceCPU::Exec(const ParticleInfo& info)
 {
-    for(size_t i = index * loops; i < (index + 1) * loops; ++i)
+    for(size_t i = info.Index * info.Loops; i < (info.Index + 1) * info.Loops; ++i)
     {
         for(size_t j = 0; j < Particles->size(); ++j)
         {
             if(i == j) continue;
             
-            auto& a = (*Particles)[i];
-            auto& b = (*Particles)[j];
+            auto& a = (*Particles)[j];
+            auto& b = (*Particles)[i];
 
             auto diff = (b.Position - a.Position);
             diff.Normalize();
 
             double f = Phys::Gravity(a, b);
-
             b.Forces += Vec3d(f * diff.x, f * diff.y, f * diff.z);
         }
     }
@@ -44,22 +44,19 @@ void BruteForceCPU::Exec(size_t index, size_t loops)
 
 void BruteForceCPU::Update(float dt)
 {
-    const size_t numThreads = 8;
-    std::array<std::thread, numThreads> threads;
-
+    const size_t numThreads = Pool.GetNumWorkers();
     const size_t loopsPerThread = Particles->size() / numThreads;
-    const int remainder = Particles->size() % numThreads;
+    const size_t remainder = Particles->size() % numThreads;
 
-    size_t thread;
+    uint32_t thread;
 
-    for(thread = 0; thread < numThreads; ++thread)
-        threads[thread] = std::thread(&BruteForceCPU::Exec, this, thread, loopsPerThread);
+    for (thread = 0; thread < numThreads; ++thread)
+        Pool.Dispatch(thread, { thread, loopsPerThread });
 
     if(remainder > 0)
-        Exec(thread, remainder);
+        Exec({ thread, remainder });
 
-    for(int thread = 0; thread < numThreads; ++thread)
-        threads[thread].join();
+    Pool.Join();
 
     for(int i = 0; i < Particles->size(); ++i)
     {

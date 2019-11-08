@@ -12,9 +12,5 @@ float4 main(in PS_Input i) : SV_TARGET
 	
 	if(r2 > 1.0) discard;
 
-	float4 Col;
-	Col.rgb = i.Colour;
-	Col.a = 1.0f;
-
-	return Col;
+	return i.Colour;
 }

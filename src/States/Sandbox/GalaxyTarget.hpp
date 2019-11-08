@@ -6,7 +6,7 @@
 class GalaxyTarget : public SandboxTarget
 {
 public:
-    GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, const std::vector<Particle>& seedData);
+    GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData);
 
     void Render() override;
     void RenderTransitionParent(float t) override;

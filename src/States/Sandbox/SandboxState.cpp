@@ -27,7 +27,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     auto sandboxData = static_cast<SandboxStateData&>(data);
 
     for (auto& p : sandboxData.Particles)
-        p.Position *= 500.0f;
+        p.Position *= 2000.0f;
 
     CreateModelPipeline();
     SetupTargets(sandboxData.Particles);
@@ -39,8 +39,9 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     Camera->Attach(Ship.get());
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
+
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
-    TestSky = std::make_unique<CSkyBox>(Context);
+    PostProcess->GaussianBlur = 5.0f;
 }
 
 void SandboxState::Cleanup()
@@ -73,7 +74,8 @@ void SandboxState::Update(float dt)
     Ship->Update(dt);
     Camera->Update(dt);
 
-    CurrentTarget->GetSkyBox().SetPosition(Camera->GetPosition());
+    if(CurrentTarget->Parent)
+        CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
 }
 
 void SandboxState::Render()
@@ -93,10 +95,11 @@ void SandboxState::Render()
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
 
+    PostProcess->Render(rtv, dsv, DeviceResources->GetSceneShaderResourceView());
+
     Matrix viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
 
     Context->OMSetRenderTargets(1, &rtv, dsv);
-    //TestSky->Draw(Ship->GetPosition(), viewProj);
 
     auto sampler = CommonStates->AnisotropicWrap();
     Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -112,8 +115,10 @@ void SandboxState::Clear()
 
     auto depthStencil = DeviceResources->GetDepthStencilView();
     auto renderTarget = DeviceResources->GetRenderTargetView();
+    auto sceneTarget  = DeviceResources->GetSceneRenderTargetView();
 
     Context->ClearRenderTargetView(renderTarget, DirectX::Colors::Black);
+    Context->ClearRenderTargetView(sceneTarget , DirectX::Colors::Black);
     Context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 
     auto viewport = DeviceResources->GetScreenViewport();
@@ -154,7 +159,7 @@ void SandboxState::TransitionLogic()
             Ship->SetPosition(Ship->GetPosition() * CurrentTarget->Child->Scale);
             Ship->Move(CurrentTarget->Child->ParentLocationSpace);
 
-            CurrentTarget->StartTransitionParent();
+            CurrentTarget->StartTransitionUpParent();
             CurrentTarget->Child->StartTransitionUpChild();
         }
     }
@@ -178,7 +183,7 @@ void SandboxState::TransitionLogic()
                 LOGM("Starting down transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
                 
                 CurrentTarget->Child->StartTransitionDownChild(object);
-                CurrentTarget->StartTransitionParent();
+                CurrentTarget->StartTransitionDownParent(object);
             }
         }
         else
@@ -205,6 +210,8 @@ void SandboxState::TransitionLogic()
                 CurrentTarget->EndTransitionDownParent(object);
                 CurrentTarget->Child->EndTransitionDownChild();
                 CurrentTarget = CurrentTarget->Child.get();
+
+                CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
 
                 Ship->Move(-CurrentTarget->ParentLocationSpace);
                 Ship->SetPosition(Ship->GetPosition() / CurrentTarget->Scale);
@@ -241,14 +248,16 @@ void SandboxState::SetupTargets(const std::vector<Particle>& seedData)
     std::vector<Particle> seedData2 = seedData;
     seedData2.erase(seedData2.end() - seedData2.size() + 60, seedData2.end());
 
-    for (auto& p : seedData2) p.Position /= 10;
+    for (auto& p : seedData2) p.Position /= 20;
 
-    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), seedData);
-    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
-    std::unique_ptr<SandboxTarget> Star2  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
-    std::unique_ptr<SandboxTarget> Star3  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
-    std::unique_ptr<SandboxTarget> Star4  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
-    std::unique_ptr<SandboxTarget> Star5  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), seedData2);
+    auto rtv = DeviceResources->GetSceneRenderTargetView();
+
+    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv, seedData);
+    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Star2  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Star3  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Star4  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Star5  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
 
     Star->Parent = Galaxy.get();
     Star2->Parent = Star.get();

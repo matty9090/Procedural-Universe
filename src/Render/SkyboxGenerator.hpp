@@ -37,13 +37,14 @@ public:
     ID3D11ShaderResourceView* GetTextureTakeOwnership() { return Srv.Detach(); }
 
 private:
-    bool Generate();
+    void Generate();
 
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Srv;
 
-    bool bSuccess = false;
+    D3D11_TEXTURE2D_DESC TexArrayDesc;
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> TexArray;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Srv;
 
     CSkyboxCamera Camera;
 
