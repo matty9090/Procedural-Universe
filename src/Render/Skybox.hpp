@@ -27,6 +27,7 @@ private:
     RenderPipeline Pipeline;
 
     std::unique_ptr<CModel> Sphere;
+    std::unique_ptr<DirectX::CommonStates> CommonStates;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer, IndexBuffer;
     Microsoft::WRL::ComPtr<ID3D11SamplerState> Sampler;

@@ -25,41 +25,26 @@ CPostProcess::CPostProcess(ID3D11Device* device, ID3D11DeviceContext* context, i
     Targets[BloomTarget5] = CreateTarget(Device, Width, Height);
     Targets[BloomCombine] = CreateTarget(Device, Width, Height);
 
+    CD3D11_TEXTURE2D_DESC desc(DXGI_FORMAT_R16G16B16A16_FLOAT, width, height,
+        1, 1, D3D11_BIND_SHADER_RESOURCE, D3D11_USAGE_DEFAULT, 0, 1, 0);
+
+    Device->CreateTexture2D(&desc, nullptr, SceneTexture.GetAddressOf());
+    Device->CreateShaderResourceView(SceneTexture.Get(), nullptr, SceneSrv.ReleaseAndGetAddressOf());
+
     DepthShader = RESM.GetPixelShader(L"shaders/Depth.psh");
-
-    EventStream::Register(EEvent::UseBloomChanged, [this](const EventData& data) {
-        UseBloom = static_cast<const BoolEventData&>(data).Value;
-    });
-
-    EventStream::Register(EEvent::GaussianBlurChanged, [this](const EventData& data) {
-        GaussianBlur = static_cast<const FloatEventData&>(data).Value;
-    });
-
-    EventStream::Register(EEvent::BloomBaseChanged, [this](const EventData& data) {
-        BloomBase = static_cast<const FloatEventData&>(data).Value;
-    });
-
-    EventStream::Register(EEvent::BloomAmountChanged, [this](const EventData& data) {
-        BloomAmount = static_cast<const FloatEventData&>(data).Value;
-    });
-
-    EventStream::Register(EEvent::BloomSatChanged, [this](const EventData& data) {
-        BloomSat = static_cast<const FloatEventData&>(data).Value;
-    });
-
-    EventStream::Register(EEvent::BloomBaseSatChanged, [this](const EventData& data) {
-        BloomBaseSat = static_cast<const FloatEventData&>(data).Value;
-    });
+    RegisterEvents();
 }
 
-void CPostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* sceneTex)
+void CPostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11Texture2D* sceneTex)
 {
+    Context->ResolveSubresource(SceneTexture.Get(), D3D11CalcSubresource(0, 0, 1), sceneTex, D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R16G16B16A16_FLOAT);
+
     if(UseBloom)
     {
         RenderPP(Targets[Blur], [&]() {
             BasicPostProcess->SetEffect(DirectX::BasicPostProcess::GaussianBlur_5x5);
             BasicPostProcess->SetGaussianParameter(GaussianBlur);
-            BasicPostProcess->SetSourceTexture(sceneTex);
+            BasicPostProcess->SetSourceTexture(SceneSrv.Get());
             BasicPostProcess->Process(Context);
         });
 
@@ -108,7 +93,7 @@ void CPostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* d
         RenderPP(Targets[BloomCombine], [&]() {
             DualPostProcess->SetEffect(DirectX::DualPostProcess::BloomCombine);
             DualPostProcess->SetSourceTexture(Targets[BloomTarget5].Srv.Get());
-            DualPostProcess->SetSourceTexture2(sceneTex);
+            DualPostProcess->SetSourceTexture2(SceneSrv.Get());
             DualPostProcess->SetBloomCombineParameters(BloomAmount, BloomBase, BloomSat, BloomBaseSat);
             DualPostProcess->Process(Context);
         });
@@ -123,7 +108,7 @@ void CPostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* d
     {
         RenderPP(rtv, dsv, [&]() {
             BasicPostProcess->SetEffect(DirectX::BasicPostProcess::Copy);
-            BasicPostProcess->SetSourceTexture(sceneTex);
+            BasicPostProcess->SetSourceTexture(SceneSrv.Get());
             BasicPostProcess->Process(Context);
         });
     }
@@ -137,6 +122,33 @@ void CPostProcess::RenderDepth(ID3D11RenderTargetView* rtv, ID3D11DepthStencilVi
         BasicPostProcess->Process(Context, [&]() {
             Context->PSSetShader(DepthShader, 0, 0);
         });
+    });
+}
+
+void CPostProcess::RegisterEvents()
+{
+    EventStream::Register(EEvent::UseBloomChanged, [this](const EventData& data) {
+        UseBloom = static_cast<const BoolEventData&>(data).Value;
+    });
+
+    EventStream::Register(EEvent::GaussianBlurChanged, [this](const EventData& data) {
+        GaussianBlur = static_cast<const FloatEventData&>(data).Value;
+    });
+
+    EventStream::Register(EEvent::BloomBaseChanged, [this](const EventData& data) {
+        BloomBase = static_cast<const FloatEventData&>(data).Value;
+    });
+
+    EventStream::Register(EEvent::BloomAmountChanged, [this](const EventData& data) {
+        BloomAmount = static_cast<const FloatEventData&>(data).Value;
+    });
+
+    EventStream::Register(EEvent::BloomSatChanged, [this](const EventData& data) {
+        BloomSat = static_cast<const FloatEventData&>(data).Value;
+    });
+
+    EventStream::Register(EEvent::BloomBaseSatChanged, [this](const EventData& data) {
+        BloomBaseSat = static_cast<const FloatEventData&>(data).Value;
     });
 }
 

@@ -19,6 +19,8 @@ CSkyBox::CSkyBox(ID3D11DeviceContext* context) : Context(context)
     Sphere->Scale(420000.0f);
     Sphere->Rotate(DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f));
 
+    CommonStates = std::make_unique<DirectX::CommonStates>(device);
+
     float border[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 
     CD3D11_SAMPLER_DESC samplerDesc(

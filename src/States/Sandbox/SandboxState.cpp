@@ -95,7 +95,7 @@ void SandboxState::Render()
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
 
-    PostProcess->Render(rtv, dsv, DeviceResources->GetSceneShaderResourceView());
+    PostProcess->Render(rtv, dsv, DeviceResources->GetSceneTexture());
 
     Matrix viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
 

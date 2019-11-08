@@ -81,7 +81,7 @@ void SimulationState::Render()
     if (bDrawDebug)
         Sim->RenderDebug(Camera->GetViewMatrix(), Camera->GetProjectionMatrix());
 
-    PostProcess->Render(renderTarget, dsv, DeviceResources->GetSceneShaderResourceView());
+    PostProcess->Render(renderTarget, dsv, DeviceResources->GetSceneTexture());
 
     UI->Render();
 }
