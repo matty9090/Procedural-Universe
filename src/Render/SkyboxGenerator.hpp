@@ -42,13 +42,14 @@ private:
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
 
-    D3D11_TEXTURE2D_DESC TexArrayDesc;
-    Microsoft::WRL::ComPtr<ID3D11Texture2D> TexArray;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Srv;
 
     CSkyboxCamera Camera;
 
-    std::array<RenderView, 6> Views;
+    static bool bMadeViews;
+    static D3D11_TEXTURE2D_DESC TexArrayDesc;
+    static std::array<RenderView, 6> Views;
+    static Microsoft::WRL::ComPtr<ID3D11Texture2D> TexArray;
 
     std::array<DirectX::SimpleMath::Vector3, 6> ForwardVectors = {
         DirectX::SimpleMath::Vector3 { -1.0f,  0.0f,  0.0f }, // Face 0
