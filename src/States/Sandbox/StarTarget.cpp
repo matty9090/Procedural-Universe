@@ -113,7 +113,11 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
         }
     });
 
-    LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+    if (single)
+        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+    else
+        LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+
     Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
     Context->GSSetShader(nullptr, 0, 0);
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -150,6 +154,11 @@ void StarTarget::BakeSkybox(Vector3 object)
         });
 
         Context->GSSetShader(nullptr, 0, 0);
+        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+        Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
+        Context->GSSetShader(nullptr, 0, 0);
+        Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Star->Draw(Context, viewProj, StarPipeline);
     });
 }
 
