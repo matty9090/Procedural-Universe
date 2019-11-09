@@ -4,6 +4,7 @@
 #include <SimpleMath.h>
 #include <memory>
 #include <wrl/client.h>
+#include <Render/RenderCommon.hpp>
 #include <Render/ConstantBuffer.hpp>
 
 class Cube
@@ -11,7 +12,7 @@ class Cube
 public:
     Cube(ID3D11DeviceContext* context);
 
-    void Render(DirectX::SimpleMath::Vector3 position, float scale, DirectX::SimpleMath::Matrix viewProj);
+    void Render(DirectX::SimpleMath::Vector3 position, float scale, DirectX::SimpleMath::Matrix viewProj, bool dynamicColour = true);
 
 private:
     struct Vertex
@@ -32,9 +33,7 @@ private:
 
     ID3D11DeviceContext* Context;
     
-    Microsoft::WRL::ComPtr<ID3D11VertexShader> VertexShader;
-    Microsoft::WRL::ComPtr<ID3D11PixelShader> PixelShader;
-    Microsoft::WRL::ComPtr<ID3D11InputLayout> Layout;
+    RenderPipeline Pipeline;
     Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
     Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
 

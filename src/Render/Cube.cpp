@@ -9,18 +9,10 @@ Cube::Cube(ID3D11DeviceContext* context) : Context(context)
     ID3D11Device* device;
     Context->GetDevice(&device);
 
-    ID3DBlob* VertexCode;
-
-    LoadVertexShader(device, L"shaders/Position.vsh", VertexShader.ReleaseAndGetAddressOf(), &VertexCode);
-    LoadPixelShader(device, L"shaders/Tint.psh", PixelShader.ReleaseAndGetAddressOf());
-
-    D3D11_INPUT_ELEMENT_DESC VertexLayout[] = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    };
-    
-    DX::ThrowIfFailed(
-        device->CreateInputLayout(VertexLayout, 1, VertexCode->GetBufferPointer(), VertexCode->GetBufferSize(), Layout.ReleaseAndGetAddressOf())
-    );
+    Pipeline.LoadVertex(L"shaders/Position.vsh");
+    Pipeline.LoadPixel(L"shaders/Tint.psh");
+    Pipeline.CreateInputLayout(device, CreateInputLayoutPosition());
+    Pipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 
     Vertex vertices[] {
         {{ -1.0f,  1.0f, -1.0f }},
@@ -62,36 +54,38 @@ Cube::Cube(ID3D11DeviceContext* context) : Context(context)
     PixelCB  = std::make_unique<ConstantBuffer<PSBuffer>>(device);
 }
 
-void Cube::Render(DirectX::SimpleMath::Vector3 position, float scale, DirectX::SimpleMath::Matrix viewProj)
+void Cube::Render(DirectX::SimpleMath::Vector3 position, float scale, DirectX::SimpleMath::Matrix viewProj, bool dynamicColour)
 {
-    Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
-    Context->IASetInputLayout(Layout.Get());
+    Pipeline.SetState(Context, [&]() {
+        unsigned int offset = 0;
+        unsigned int stride = sizeof(Vertex);
 
-    unsigned int offset = 0;
-    unsigned int stride = sizeof(Vertex);
+        Context->IASetVertexBuffers(0, 1, VertexBuffer.GetAddressOf(), &stride, &offset);
+        Context->IASetIndexBuffer(IndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+        
+        DirectX::SimpleMath::Vector4 col(position);
 
-    Context->IASetVertexBuffers(0, 1, VertexBuffer.GetAddressOf(), &stride, &offset);
-    Context->IASetIndexBuffer(IndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+        if (dynamicColour)
+        {
+            col.Normalize();
 
-    Context->VSSetShader(VertexShader.Get(), 0, 0);
-    Context->PSSetShader(PixelShader.Get(), 0, 0);
+            if (col.x < 0.3f && col.y < 0.3f && col.z < 0.3f)
+                col = DirectX::Colors::LightSkyBlue;
 
-    DirectX::SimpleMath::Vector4 col(position);
-    col.Normalize();
+            col.w = 1.0f;
+        }
+        else
+            col = DirectX::Colors::DarkCyan;
 
-    if(col.x < 0.3f && col.y < 0.3f && col.z < 0.3f)
-        col = DirectX::Colors::LightSkyBlue;
+        DirectX::SimpleMath::Matrix world = DirectX::SimpleMath::Matrix::CreateScale(scale / 2.0f) *
+            DirectX::SimpleMath::Matrix::CreateTranslation(position);
 
-    col.w = 1.0f;
+        VertexCB->SetData(Context, { world * viewProj });
+        PixelCB->SetData(Context, { col });
 
-    DirectX::SimpleMath::Matrix world = DirectX::SimpleMath::Matrix::CreateScale(scale / 2.0f) *
-                                        DirectX::SimpleMath::Matrix::CreateTranslation(position);
+        Context->VSSetConstantBuffers(0, 1, VertexCB->GetBuffer());
+        Context->PSSetConstantBuffers(0, 1, PixelCB->GetBuffer());
 
-    VertexCB->SetData(Context, { world * viewProj });
-    PixelCB->SetData(Context, { col });
-
-    Context->VSSetConstantBuffers(0, 1, VertexCB->GetBuffer());
-    Context->PSSetConstantBuffers(0, 1, PixelCB->GetBuffer());
-
-    Context->DrawIndexed(24, 0, 0);
+        Context->DrawIndexed(24, 0, 0);
+    });
 }

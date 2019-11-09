@@ -36,7 +36,6 @@ void Octree::Split()
                 bounds.TopLeft = cur;
                 bounds.BottomRight = cur + off;
 
-                std::lock_guard<std::mutex> lock(Mutex);
                 Children[i] = std::make_unique<Octree>(bounds, Depth + 1);
 
                 cur.x += size;
@@ -48,7 +47,6 @@ void Octree::Split()
         cur.z += size;
     }
 
-    std::lock_guard<std::mutex> lock(Mutex);
     IsLeaf = false;
 }
 
@@ -59,8 +57,6 @@ void Octree::Add(Particle* p)
     {
         for (auto& child : Children)
         {
-            std::lock_guard<std::mutex> lock(Mutex);
-
             if(child->Bounds.Contains(p))
                 child->Add(p);
         }
@@ -71,12 +67,8 @@ void Octree::Add(Particle* p)
         if(IsLeaf)
             Split();
 
-        std::lock_guard<std::mutex> lock(Mutex);
-
         for(auto& child : Children)
         {
-            std::lock_guard<std::mutex> lock(Mutex);
-
             if(child->Bounds.Contains(p)) child->Add(p);
             if(child->Bounds.Contains(P)) child->Add(P);
         }
@@ -88,7 +80,6 @@ void Octree::Add(Particle* p)
         P = p;
     }
 
-    std::lock_guard<std::mutex> lock(Mutex);
     ++NumParticles;
 }
 

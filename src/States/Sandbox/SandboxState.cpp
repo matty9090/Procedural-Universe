@@ -39,6 +39,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     Camera->Attach(Ship.get());
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
+    ClosestObjCube = std::make_unique<Cube>(Context);
 
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     PostProcess->GaussianBlur = 5.0f;
@@ -64,6 +65,11 @@ void SandboxState::Cleanup()
 
 void SandboxState::Update(float dt)
 {
+    Tracker.Update(Keyboard->GetState());
+
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::F1))
+        bShowClosestObject = !bShowClosestObject;
+
     FloatingOrigin();
     TransitionLogic();
 
@@ -107,6 +113,12 @@ void SandboxState::Render()
     Context->PSSetSamplers(0, 1, &sampler);
 
     Ship->Draw(Context, viewProj, ModelPipeline);
+
+    if (bShowClosestObject)
+    {
+        auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
+        ClosestObjCube->Render(closest, 100.0f, Camera->GetViewMatrix() * Camera->GetProjectionMatrix(), false);
+    }
 }
 
 void SandboxState::Clear()

@@ -33,7 +33,6 @@ class Octree
         Vec3d CalculateForce(Particle *p);
         void RenderDebug(Cube* cube, DirectX::GeometricPrimitive* sphere, DirectX::SimpleMath::Matrix view, DirectX::SimpleMath::Matrix proj);
 
-        std::mutex Mutex;
         int Depth = 0;
         int NumParticles = 0;
         BoundingCube Bounds;

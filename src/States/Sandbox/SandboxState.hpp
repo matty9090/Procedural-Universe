@@ -7,6 +7,7 @@
 #include "Render/Particle.hpp"
 #include "Render/PostProcess.hpp"
 #include "Render/ConstantBuffer.hpp"
+#include "Render/Cube.hpp"
 #include "Render/Ship.hpp"
 
 #include <list>
@@ -47,10 +48,12 @@ private:
     DirectX::Mouse* Mouse;
     DirectX::Keyboard* Keyboard;
     DX::DeviceResources* DeviceResources;
+    DirectX::Keyboard::KeyboardStateTracker Tracker;
 
     std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
+    std::unique_ptr<Cube>             ClosestObjCube;
     std::unique_ptr<CShip>            Ship;
     std::unique_ptr<CShipCamera>      Camera;
 
@@ -60,4 +63,6 @@ private:
 
     float CamOriginSnapThreshold = 5000.0f;
     float CurrentTransitionT = 0.0f;
+
+    bool bShowClosestObject = false;
 };
