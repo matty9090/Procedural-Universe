@@ -7,9 +7,9 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     : SandboxTarget(context, "Stellar", resources, camera, rtv),
       Particles(seedData)
 {
-    Scale = 0.01f;
+    Scale = 0.006f;
     BeginTransitionDist = 3200.0f;
-    EndTransitionDist = 700.0f;
+    EndTransitionDist = 300.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -58,11 +58,8 @@ void StarTarget::MoveObjects(Vector3 v)
         particle.Position += v;
 
     Star->Move(v);
-
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
-    Context->Unmap(ParticleBuffer.Get(), 0);
+    UpdateParticleBuffer();
+    Centre += v;
 }
 
 void StarTarget::ScaleObjects(float scale)
@@ -71,26 +68,12 @@ void StarTarget::ScaleObjects(float scale)
         particle.Position /= scale;
 
     Star->Scale(1.0f / scale);
-
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
-    Context->Unmap(ParticleBuffer.Get(), 0);
+    UpdateParticleBuffer();
 }
 
 Vector3 StarTarget::GetClosestObject(Vector3 pos)
 {
     return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
-}
-
-Vector3 StarTarget::GetMainObject() const
-{
-    return Star->GetPosition();
-}
-
-void StarTarget::StateIdle()
-{
-    
 }
 
 void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
@@ -170,6 +153,14 @@ void StarTarget::BakeSkybox(Vector3 object)
     });
 }
 
+void StarTarget::UpdateParticleBuffer()
+{
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
+    Context->Unmap(ParticleBuffer.Get(), 0);
+}
+
 void StarTarget::ResetObjectPositions()
 {
     MoveObjects(-Star->GetPosition());
@@ -179,8 +170,7 @@ void StarTarget::ResetObjectPositions()
 void StarTarget::CreateStarPipeline()
 {
     Star = std::make_unique<CModel>(Device, RESM.GetMesh("assets/Sphere.obj"));
-    Star->SetPosition(Vector3::Zero);
-    Star->Scale(300.0f);
+    Star->Scale(200.0f);
 
     StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     StarPipeline.LoadVertex(L"shaders/Position.vsh");
@@ -196,7 +186,7 @@ void StarTarget::CreateParticlePipeline()
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(L"shaders/SandboxParticleLerp.gsh");
+    ParticlePipeline.LoadGeometry(L"shaders/PlanetParticle.gsh");
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
 

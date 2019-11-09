@@ -10,8 +10,8 @@ SandboxTarget::SandboxTarget(ID3D11DeviceContext* context, std::string name, DX:
       SkyBox(context),
       RenderTarget(rtv)
 {
-    context->GetDevice(&Device);
-
+    Context->GetDevice(&Device);
+        
     auto size = resources->GetOutputSize();
     SkyboxGenerator = std::make_unique<CSkyboxGenerator>(Device, Context, size.right - size.left, size.bottom - size.top);
 }
@@ -34,26 +34,25 @@ void SandboxTarget::Update(float dt)
 void SandboxTarget::StartTransitionUpParent()
 {
     State = EState::TransitioningParent;
+    OnStartTransitionUpParent();
 }
 
 void SandboxTarget::StartTransitionDownParent(Vector3 object)
 {
     State = EState::TransitioningParent;
+    OnStartTransitionDownParent(object);
 }
 
 void SandboxTarget::EndTransitionUpParent()
 {
     State = EState::Idle;
+    OnEndTransitionUpParent();
 }
 
 void SandboxTarget::EndTransitionDownParent(Vector3 object)
 {
     State = EState::Idle;
-
-    SkyboxGenerator->SetPosition(object);
-    BakeSkybox(object);
-
-    SkyBox.SetTextureReceiveOwnership(SkyboxGenerator->GetTextureTakeOwnership());
+    OnEndTransitionDownParent(object);
 }
 
 void SandboxTarget::StartTransitionUpChild()
@@ -61,6 +60,7 @@ void SandboxTarget::StartTransitionUpChild()
     State = EState::TransitioningChild;
     ResetObjectPositions();
     ScaleObjects(1.0f / Scale);
+    OnStartTransitionUpChild();
 }
 
 void SandboxTarget::StartTransitionDownChild(Vector3 location)
@@ -68,16 +68,26 @@ void SandboxTarget::StartTransitionDownChild(Vector3 location)
     State = EState::TransitioningChild;
     ParentLocationSpace = location;
     ScaleObjects(1.0f / Scale);
+    OnStartTransitionDownChild(location);
 }
 
 void SandboxTarget::EndTransitionUpChild()
 {
     State = EState::Idle;
     ScaleObjects(Scale);
+    OnEndTransitionUpChild();
 }
 
 void SandboxTarget::EndTransitionDownChild()
 {
     State = EState::Idle;
     ScaleObjects(Scale);
+    OnEndTransitionDownChild();
+}
+
+void SandboxTarget::GenerateSkybox(Vector3 location)
+{
+    SkyboxGenerator->SetPosition(location);
+    BakeSkybox(location);
+    SkyBox.SetTextureReceiveOwnership(SkyboxGenerator->GetTextureTakeOwnership());
 }

@@ -13,11 +13,11 @@ public:
     void MoveObjects(Vector3 v) override;
 
     Vector3 GetClosestObject(Vector3 pos) override;
-    Vector3 GetMainObject() const override;
 
 private:
     void RenderLerp(float t);
     void BakeSkybox(Vector3 object) override;
+    void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
 
     void StateIdle() override;
     void CreateParticlePipeline();

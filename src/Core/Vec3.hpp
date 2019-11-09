@@ -3,6 +3,9 @@
 #include <string>
 #include <sstream>
 
+#include <d3d11.h>
+#include <SimpleMath.h>
+
 /*
 	3D vector class
 */
@@ -12,7 +15,7 @@ template <class T = float> struct Vec3 {
 	Vec3() : x(0), y(0), z(0) {}
 	Vec3(T _x, T _y, T _z) : x(_x), y(_y), z(_z) {}
 
-	inline float distance(Vec3 v) {
+	inline float Distance(Vec3 v) {
 		T dx = (v.x - x) * (v.x - x);
 		T dy = (v.y - y) * (v.y - y);
 		T dz = (v.z - z) * (v.z - z);
@@ -20,7 +23,7 @@ template <class T = float> struct Vec3 {
 		return sqrtf(dx + dy + dz);
 	}
 
-    inline float distanceSqr(Vec3 v) {
+    inline float DistanceSqr(Vec3 v) {
 		T dx = (v.x - x) * (v.x - x);
 		T dy = (v.y - y) * (v.y - y);
 		T dz = (v.z - z) * (v.z - z);
@@ -28,12 +31,12 @@ template <class T = float> struct Vec3 {
 		return dx + dy + dz;
 	}
 
-	inline float length() {
+	inline float Length() {
 		return sqrtf(x * x + y * y + z * z);
 	}
 
-	inline Vec3 normalised() {
-		float m = length();
+	inline Vec3 Normalised() {
+		float m = Length();
 		return Vec3(x / m, y / m, z / m);
 	}
 
@@ -77,7 +80,7 @@ template <class T = float> struct Vec3 {
         z /= v;
 	}
 
-	std::string toString() {
+	std::string ToString() {
 		std::ostringstream ss;
 		ss.precision(5);
 
@@ -85,6 +88,11 @@ template <class T = float> struct Vec3 {
 
 		return ss.str();
 	}
+
+    DirectX::SimpleMath::Vector3 AsVector3()
+    {
+        return DirectX::SimpleMath::Vector3(static_cast<float>(x), static_cast<float>(y), static_cast<float>(z));
+    }
 };
 
 typedef Vec3<double> Vec3d;

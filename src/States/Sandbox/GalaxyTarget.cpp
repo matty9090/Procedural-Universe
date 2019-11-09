@@ -42,11 +42,6 @@ Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
     return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
 }
 
-Vector3 GalaxyTarget::GetMainObject() const
-{
-    return GalaxyPosition;
-}
-
 void GalaxyTarget::StateIdle()
 {
     

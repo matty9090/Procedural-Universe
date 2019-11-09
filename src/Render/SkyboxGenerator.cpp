@@ -7,7 +7,6 @@
 bool CSkyboxGenerator::bMadeViews;
 D3D11_TEXTURE2D_DESC  CSkyboxGenerator::TexArrayDesc;
 std::array<RenderView, 6> CSkyboxGenerator::Views;
-Microsoft::WRL::ComPtr<ID3D11Texture2D> CSkyboxGenerator::TexArray;
 
 CSkyboxGenerator::CSkyboxGenerator(ID3D11Device* device, ID3D11DeviceContext* context, int width, int height)
     : Device(device),
@@ -35,11 +34,11 @@ CSkyboxGenerator::CSkyboxGenerator(ID3D11Device* device, ID3D11DeviceContext* co
         TexArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
         TexArrayDesc.CPUAccessFlags = 0;
         TexArrayDesc.MiscFlags = D3D11_RESOURCE_MISC_TEXTURECUBE;
+    }
 
-        if (FAILED(Device->CreateTexture2D(&TexArrayDesc, 0, &TexArray)))
-        {
-            LOGE("Failed to create texture for skybox");
-        }
+    if (FAILED(Device->CreateTexture2D(&TexArrayDesc, 0, &TexArray)))
+    {
+        LOGE("Failed to create texture for skybox");
     }
 
     bMadeViews = true;

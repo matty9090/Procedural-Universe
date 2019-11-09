@@ -146,7 +146,7 @@ void DebugSandboxState::TestTransitions()
     auto TransitionUp = [&]() {
         if (CurrentTarget->Parent && !CurrentTarget->IsTransitioning())
         {
-            float parentDist = Vector3::Distance(Vector3::Zero, CurrentTarget->GetMainObject()) * CurrentTarget->Scale;
+            float parentDist = Vector3::Distance(Vector3::Zero, CurrentTarget->GetCentre()) * CurrentTarget->Scale;
             float scaledDistToParent = (parentDist - CurrentTarget->EndTransitionDist) / CurrentTarget->BeginTransitionDist;
 
             if (CurrentTarget->Parent)

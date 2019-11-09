@@ -17,12 +17,12 @@ public:
     void ResetObjectPositions() override;
 
     Vector3 GetClosestObject(Vector3 pos) override;
-    Vector3 GetMainObject() const override;
 
 private:
-    void StateIdle() override;
+    void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
     void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f, bool single = false);
     void BakeSkybox(Vector3 object) override;
+    void UpdateParticleBuffer();
 
     void CreateStarPipeline();
     void CreateParticlePipeline();

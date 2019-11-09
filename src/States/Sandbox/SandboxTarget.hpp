@@ -31,11 +31,10 @@ public:
 
     void Update(float dt);
     bool IsTransitioning() const { return State != EState::Idle; }
+    Vector3 GetCentre() const { return Centre; }
     CSkyBox& GetSkyBox() { return SkyBox; }
 
     virtual void Render() = 0;
-
-    // TODO: Automate this
     virtual void RenderTransitionChild(float t) { Render(); }
     virtual void RenderTransitionParent(float t) { Render(); }
 
@@ -44,7 +43,6 @@ public:
     virtual void ResetObjectPositions() {}
 
     virtual Vector3 GetClosestObject(Vector3 pos) = 0;
-    virtual Vector3 GetMainObject() const = 0;
 
     void StartTransitionUpParent();
     void StartTransitionDownParent(Vector3 object);
@@ -68,11 +66,23 @@ public:
     float EndTransitionDist = 400.0f;
     
 protected:
+    virtual void OnStartTransitionUpParent() {}
+    virtual void OnStartTransitionDownParent(Vector3 object) {}
+    virtual void OnEndTransitionUpParent() {}
+    virtual void OnEndTransitionDownParent(Vector3 object) {}
+    virtual void OnStartTransitionUpChild() {}
+    virtual void OnStartTransitionDownChild(Vector3 location) {}
+    virtual void OnEndTransitionUpChild() {}
+    virtual void OnEndTransitionDownChild() {}
+
     virtual void StateIdle() {}
     virtual void StateTransitioning() {}
     virtual void BakeSkybox(Vector3 object) {}
 
+    void GenerateSkybox(Vector3 location);
+
     CSkyBox SkyBox;
+    Vector3 Centre;
     CShipCamera* Camera = nullptr;
     ID3D11Device* Device = nullptr;
     ID3D11DeviceContext* Context = nullptr;

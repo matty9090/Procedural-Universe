@@ -143,7 +143,7 @@ void SandboxState::TransitionLogic()
     if (CurrentTarget->Parent && !CurrentTarget->IsTransitioning())
     {
         // Transition up calculations
-        float parentDist = Vector3::Distance(Ship->GetPosition(), CurrentTarget->GetMainObject()) * CurrentTarget->Scale;
+        float parentDist = Vector3::Distance(Ship->GetPosition(), CurrentTarget->GetCentre()) * CurrentTarget->Scale;
         float scaledDistToParent = (parentDist - CurrentTarget->EndTransitionDist) / CurrentTarget->BeginTransitionDist;
 
         if (scaledDistToParent > 0.0f && CurrentTarget->Parent)
@@ -155,7 +155,7 @@ void SandboxState::TransitionLogic()
 
             CurrentTarget = CurrentTarget->Parent;
 
-            Ship->Move(-CurrentTarget->Child->GetMainObject());
+            Ship->Move(-CurrentTarget->Child->GetCentre());
             Ship->SetPosition(Ship->GetPosition() * CurrentTarget->Child->Scale);
             Ship->Move(CurrentTarget->Child->ParentLocationSpace);
 
@@ -248,7 +248,7 @@ void SandboxState::SetupTargets(const std::vector<Particle>& seedData)
     std::vector<Particle> seedData2 = seedData;
     seedData2.erase(seedData2.end() - seedData2.size() + 60, seedData2.end());
 
-    for (auto& p : seedData2) p.Position /= 20;
+    for (auto& p : seedData2) p.Position /= 100;
 
     auto rtv = DeviceResources->GetSceneRenderTargetView();
 
