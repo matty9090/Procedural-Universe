@@ -2,7 +2,7 @@
 
 #include "INBodySim.hpp"
 #include "Core/ThreadPool.hpp"
-#include "Render/ConstantBuffer.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
 
 #include <wrl/client.h>
 

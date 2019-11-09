@@ -8,7 +8,7 @@
 #include "Core/Event.hpp"
 #include "Core/Except.hpp"
 
-#include "Render/Shader.hpp"
+#include "Render/DX/Shader.hpp"
 
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"

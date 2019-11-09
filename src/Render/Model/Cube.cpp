@@ -1,6 +1,6 @@
 #include "Cube.hpp"
 #include "Core/Except.hpp"
-#include "Render/Shader.hpp"
+#include "Render/DX/Shader.hpp"
 
 #include <DirectXColors.h>
 

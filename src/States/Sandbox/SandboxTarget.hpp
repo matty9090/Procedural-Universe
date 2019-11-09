@@ -5,13 +5,13 @@
 #include "Core/Maths.hpp"
 #include "Core/ThreadPool.hpp"
 
-#include "Render/Model.hpp"
-#include "Render/Skybox.hpp"
-#include "Render/ShipCamera.hpp"
-#include "Render/ConstantBuffer.hpp"
-#include "Render/PostProcess.hpp"
-#include "Render/RenderCommon.hpp"
-#include "Render/SkyboxGenerator.hpp"
+#include "Render/Model/Model.hpp"
+#include "Render/Model/Skybox.hpp"
+#include "Render/Cameras/ShipCamera.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
+#include "Render/DX/RenderCommon.hpp"
+#include "Render/Misc/PostProcess.hpp"
+#include "Render/Misc/SkyboxGenerator.hpp"
 
 #include <string>
 #include <memory>

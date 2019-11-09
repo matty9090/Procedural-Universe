@@ -1,5 +1,5 @@
-#include "Render/PostProcess.hpp"
-#include "Render/Shader.hpp"
+#include "Render/Misc/PostProcess.hpp"
+#include "Render/DX/Shader.hpp"
 
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"

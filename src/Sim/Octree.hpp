@@ -7,8 +7,8 @@
 #include <GeometricPrimitive.h>
 
 #include "Core/Vec3.hpp"
-#include "Render/Cube.hpp"
-#include "Render/Particle.hpp"
+#include "Render/Model/Cube.hpp"
+#include "Render/Misc/Particle.hpp"
 
 struct BoundingCube
 {

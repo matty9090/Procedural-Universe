@@ -4,7 +4,7 @@
 
 #include "Octree.hpp"
 #include "INBodySim.hpp"
-#include "Render/Cube.hpp"
+#include "Render/Model/Cube.hpp"
 #include "Core/ThreadPool.hpp"
 
 class BarnesHut : public INBodySim

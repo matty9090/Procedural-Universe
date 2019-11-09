@@ -7,7 +7,7 @@
 #include <CommonStates.h>
 #include <PostProcess.h>
 
-#include "RenderCommon.hpp"
+#include "Render/DX/RenderCommon.hpp"
 
 class CSplatting
 {

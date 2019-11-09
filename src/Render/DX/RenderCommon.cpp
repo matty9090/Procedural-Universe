@@ -1,5 +1,5 @@
 #include "RenderCommon.hpp"
-#include "Render/Shader.hpp"
+#include "Render/DX/Shader.hpp"
 
 #include "Services/ResourceManager.hpp"
 

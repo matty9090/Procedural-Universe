@@ -1,4 +1,4 @@
-#include "Render/ShipCamera.hpp"
+#include "ShipCamera.hpp"
 #include "Services/Log.hpp"
 #include "Core/Maths.hpp"
 

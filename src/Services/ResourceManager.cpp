@@ -1,8 +1,8 @@
 #include "ResourceManager.hpp"
 #include "Services/Log.hpp"
 
-#include "Render/Shader.hpp"
-#include "Render/Mesh.hpp"
+#include "Render/DX/Shader.hpp"
+#include "Render/Model/Mesh.hpp"
 
 #include <WICTextureLoader.h>
 

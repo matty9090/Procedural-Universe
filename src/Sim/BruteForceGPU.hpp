@@ -1,7 +1,7 @@
 #pragma once
 
 #include "INBodySim.hpp"
-#include "Render/ConstantBuffer.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
 
 #include <wrl/client.h>
 

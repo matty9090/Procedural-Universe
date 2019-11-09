@@ -7,8 +7,8 @@
 #include <SimpleMath.h>
 
 #include "Camera.hpp"
-#include "Ship.hpp"
-#include "Particle.hpp"
+#include "Render/Model/Ship.hpp"
+#include "Render/Misc/Particle.hpp"
 
 using DirectX::SimpleMath::Quaternion;
 using DirectX::SimpleMath::Matrix;

@@ -6,12 +6,12 @@
 #include "Sim/INBodySim.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
-#include "Render/ArcballCamera.hpp"
-#include "Render/Particle.hpp"
-#include "Render/Splatting.hpp"
-#include "Render/PostProcess.hpp"
-#include "Render/RenderCommon.hpp"
-#include "Render/ConstantBuffer.hpp"
+#include "Render/Cameras/ArcballCamera.hpp"
+#include "Render/Misc/Particle.hpp"
+#include "Render/Misc/Splatting.hpp"
+#include "Render/Misc/PostProcess.hpp"
+#include "Render/DX/RenderCommon.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
 
 #include <Mouse.h>
 #include <Keyboard.h>

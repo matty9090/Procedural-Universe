@@ -5,8 +5,8 @@
 #include <functional>
 #include <SimpleMath.h>
 
-#include "RenderCommon.hpp"
-#include "Render/Camera.hpp"
+#include "Render/DX/RenderCommon.hpp"
+#include "Render/Cameras/Camera.hpp"
 
 class CSkyboxCamera : public ICamera
 {

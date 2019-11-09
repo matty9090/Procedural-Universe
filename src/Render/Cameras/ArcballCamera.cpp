@@ -1,4 +1,4 @@
-#include "Render/ArcballCamera.hpp"
+#include "ArcballCamera.hpp"
 #include "Services/Log.hpp"
 
 #include <algorithm>

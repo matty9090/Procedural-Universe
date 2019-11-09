@@ -2,7 +2,7 @@
 #include "Physics.hpp"
 #include "Core/Vec3.hpp"
 #include "Services/Log.hpp"
-#include "Render/Shader.hpp"
+#include "Render/DX/Shader.hpp"
 
 #include <stdlib.h>
 #include <thread>

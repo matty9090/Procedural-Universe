@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RenderCommon.hpp"
+#include "Render/DX/RenderCommon.hpp"
 #include "Model.hpp"
 
 #include <CommonStates.h>

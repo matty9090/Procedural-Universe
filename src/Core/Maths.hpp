@@ -4,7 +4,7 @@
 #include <d3d11.h>
 #include <SimpleMath.h>
 
-#include "Render/Particle.hpp"
+#include "Render/Misc/Particle.hpp"
 
 namespace Maths
 {

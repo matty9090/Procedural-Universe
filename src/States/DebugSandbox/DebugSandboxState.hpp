@@ -3,10 +3,10 @@
 #include "Core/State.hpp"
 #include "States/Sandbox/SandboxTarget.hpp"
 
-#include "Render/ShipCamera.hpp"
-#include "Render/Particle.hpp"
-#include "Render/ConstantBuffer.hpp"
-#include "Render/Ship.hpp"
+#include "Render/Cameras/ShipCamera.hpp"
+#include "Render/Misc/Particle.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
+#include "Render/Model/Ship.hpp"
 
 #include <list>
 #include <vector>

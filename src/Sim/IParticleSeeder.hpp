@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Render/Particle.hpp"
+#include "Render/Misc/Particle.hpp"
 
 #include <memory>
 #include <vector>

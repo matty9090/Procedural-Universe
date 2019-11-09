@@ -4,8 +4,9 @@
 #include <SimpleMath.h>
 #include <memory>
 #include <wrl/client.h>
-#include <Render/RenderCommon.hpp>
-#include <Render/ConstantBuffer.hpp>
+
+#include <Render/DX/RenderCommon.hpp>
+#include <Render/DX/ConstantBuffer.hpp>
 
 class Cube
 {

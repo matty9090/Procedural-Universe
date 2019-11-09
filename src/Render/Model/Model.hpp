@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ConstantBuffer.hpp"
-#include "RenderCommon.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
+#include "Render/DX/RenderCommon.hpp"
 
 #include <SimpleMath.h>
 

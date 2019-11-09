@@ -8,7 +8,7 @@
 #include <functional>
 
 #include "Core/Except.hpp"
-#include "Render/Particle.hpp"
+#include "Render/Misc/Particle.hpp"
 
 enum class ECullMode { None, Clockwise, Anticlockwise };
 

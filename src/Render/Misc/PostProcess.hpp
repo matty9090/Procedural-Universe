@@ -7,7 +7,7 @@
 #include <map>
 #include <functional>
 
-#include "RenderCommon.hpp"
+#include "Render/DX/RenderCommon.hpp"
 
 class CPostProcess
 {

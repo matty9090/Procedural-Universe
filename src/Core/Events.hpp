@@ -4,7 +4,7 @@
 
 #include "Sim/INBodySim.hpp"
 #include "Sim/IParticleSeeder.hpp"
-#include "Render/Particle.hpp"
+#include "Render/Misc/Particle.hpp"
 
 struct EventData {};
 

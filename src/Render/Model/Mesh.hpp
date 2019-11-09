@@ -11,7 +11,7 @@
 #include <assimp/importer.hpp>
 #include <assimp/postprocess.h>
 
-#include "Render/RenderCommon.hpp"
+#include "Render/DX/RenderCommon.hpp"
 
 struct MeshVertex
 {
