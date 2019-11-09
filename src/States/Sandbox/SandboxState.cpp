@@ -6,6 +6,7 @@
 
 #include "GalaxyTarget.hpp"
 #include "StarTarget.hpp"
+#include "PlanetTarget.hpp"
 
 #include <DirectXColors.h>
 
@@ -266,21 +267,12 @@ void SandboxState::SetupTargets(const std::vector<Particle>& seedData)
 
     std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv, seedData);
     std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
-    std::unique_ptr<SandboxTarget> Star2  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
-    std::unique_ptr<SandboxTarget> Star3  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
-    std::unique_ptr<SandboxTarget> Star4  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
-    std::unique_ptr<SandboxTarget> Star5  = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Planet = std::make_unique<PlanetTarget>(Context, DeviceResources, Camera.get(), rtv, seedData2);
 
     Star->Parent = Galaxy.get();
-    Star2->Parent = Star.get();
-    Star3->Parent = Star2.get();
-    Star4->Parent = Star3.get();
-    Star5->Parent = Star4.get();
+    Planet->Parent = Star.get();
 
-    Star4->Child  = std::move(Star5);
-    Star3->Child  = std::move(Star4);
-    Star2->Child  = std::move(Star3);
-    Star->Child   = std::move(Star2);
+    Star->Child   = std::move(Planet);
     Galaxy->Child = std::move(Star);
 
     CurrentTarget = Galaxy.get();
