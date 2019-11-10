@@ -56,3 +56,4 @@ std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPosition();
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionColour();
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionTexture();
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionTextureCube();
+std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionNormalTexture();

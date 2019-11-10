@@ -1,59 +1,61 @@
 #pragma once
 
-#include "Quadtree.hpp"
-
 #include <vector>
 #include <d3d11.h>
 #include <SimpleMath.h>
+
+#include "Quadtree.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
 
 using namespace DirectX::SimpleMath;
 
 class CPlanet;
 
-enum class EFace
+struct TerrainBuffer
 {
-    Top,
-    Bottom,
-    Left,
-    Right,
-    Front,
-    Back
+    Matrix WorldViewProj;
+};
+
+struct TerrainVertex
+{
+    Vector3 Position;
+    Vector3 Normal;
+    Vector2 UV;
 };
 
 class CTerrainNode : public Quadtree<CTerrainNode>
 {
 	public:	
-		CTerrainNode(CPlanet* planet, EQuad quad, CTerrainNode* parent);
+		CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad = (EQuad)0);
 
+        void Generate();
 		void Update(float dt);
+		void Render(Matrix viewProj);
 
-		Vector3 GetVertex(int index) const { return Vertices[index]; }
-        Vector3 GetNormal(int index) const { return Normals[index]; }
+		TerrainVertex GetVertex(int index) const { return Vertices[index]; }
 
         Matrix World;
 		CPlanet* Planet;
 		Quaternion Orientation;
+		float Diameter = 0.0f;
 
 	private:
-		void Generate();
-		void ClearMeshData();
 		void NotifyNeighbours();
 		void FixEdges();
 
 		void SplitFunction() override;
 		void MergeFunction() override;
-        void HideFunction()  override;
 		bool DistanceFunction() override;
 		void TickFunction(float dt, int child) override { ChildNodes[child]->Update(dt); }
 
         Vector3 GetCenterWorld();
         Vector3 PointToSphere(Vector3 p);
 
-		float Diameter = 0.0f;
+        std::vector<TerrainVertex> Vertices;
+        std::vector<UINT> Indices;
 
-		std::vector<Vector3> Vertices;
-		std::vector<Vector3> Normals;
-		std::vector<UINT>    Triangles;
-		std::vector<Vector2> UV;
-		std::vector<Vector3> Tangents;
+        ConstantBuffer<TerrainBuffer> Buffer;
+
+        Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
+        Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
 };

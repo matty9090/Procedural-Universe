@@ -1,14 +1,12 @@
 #include "TerrainNode.hpp"
 #include "Planet.hpp"
 
-#include <string>
-#include <cassert>
-#include <exception>
+#include "Services/Log.hpp"
 
-
-CTerrainNode::CTerrainNode(CPlanet* planet, EQuad quad, CTerrainNode* parent)
+CTerrainNode::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad)
 	: Quadtree(quad, parent),
-      Planet(planet)
+      Planet(planet),
+      Buffer(planet->GetDevice())
 {
     for (size_t child = 0; child < 4; ++child) {
         ChildNodes[child] = nullptr;
@@ -25,11 +23,10 @@ CTerrainNode::CTerrainNode(CPlanet* planet, EQuad quad, CTerrainNode* parent)
 
 void CTerrainNode::Generate()
 {
-	ClearMeshData();
+	UINT gridsize = Planet->GridSize, gh = Planet->GridSize / 2;
 
-	int gridsize = Planet->GridSize, gh = Planet->GridSize / 2;
-
-    Tangents.reserve(gridsize * gridsize);
+    Indices.clear();
+    Vertices.clear();
     Vertices.reserve(gridsize * gridsize);
 
 	float step = Bounds.size / (gridsize - 1);
@@ -43,50 +40,62 @@ void CTerrainNode::Generate()
 		case SW: sx = 0,  sy = gh; break;
 	}
 
-	for (int y = 0; y < gridsize; ++y)
+	for (UINT y = 0; y < gridsize; ++y)
 	{
 		float yy = Bounds.y + y * step;
 
-		for (int x = 0; x < gridsize; ++x, ++k)
+		for (UINT x = 0; x < gridsize; ++x, ++k)
 		{
+            TerrainVertex vertex;
+
 			if (Parent && (x % 2 == 0) && (y % 2 == 0))
 			{
 				int xh = sx + x / 2;
 				int yh = sy + y / 2;
 
-				Vertices.push_back(Parent->GetVertex(xh + yh * gridsize));
-				Normals.push_back(Parent->GetNormal(xh + yh * gridsize));
+                vertex = Parent->GetVertex(xh + yh * gridsize);
 			}
 			else
 			{
 				float xx = Bounds.x + x * step;
 
 				Vector3 pos = Vector3(xx, yy, 1.0f);
-				pos = Vector3::Transform(PointToSphere(pos), Orientation);;
+				pos = Vector3::Transform(PointToSphere(pos), Orientation);
 
 				Vector3 normal = pos;
 				normal.Normalize();
 
 				float height = Planet->GetHeight(normal);
-				Vector3 finalPos = pos * Planet->Radius + normal * height;
+                Vector3 finalPos = pos * Planet->Radius + normal * height;
 
-				Vertices.push_back(finalPos);
-				Normals.push_back(normal);
-
-				Vector3 morphPos = finalPos, morphNorm = normal;
+                vertex.Position = finalPos;
+                vertex.Normal = normal;
 			}
+
+            Vertices.push_back(vertex);
 		}
 	}
 
-	Triangles = Planet->IndexPerm[0];
-    // TODO: Generate
+	Indices = Planet->IndexPerm[0];
+    
+    D3D11_BUFFER_DESC desc;
+    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.ByteWidth = static_cast<UINT>(Vertices.size() * sizeof(TerrainVertex));
+    desc.CPUAccessFlags = 0;
+    desc.MiscFlags = 0;
+    desc.StructureByteStride = 0;
 
-	float morph = Bounds.size * Planet->SplitDistance;
-}
+    D3D11_SUBRESOURCE_DATA data;
+    data.pSysMem = Vertices.data();
 
-void CTerrainNode::ClearMeshData()
-{
-	
+    Planet->GetDevice()->CreateBuffer(&desc, &data, VertexBuffer.ReleaseAndGetAddressOf());
+
+    desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    desc.ByteWidth = static_cast<UINT>(Indices.size() * sizeof(UINT));
+    data.pSysMem = Indices.data();
+
+    Planet->GetDevice()->CreateBuffer(&desc, &data, IndexBuffer.ReleaseAndGetAddressOf());
 }
 
 void CTerrainNode::NotifyNeighbours()
@@ -117,9 +126,19 @@ void CTerrainNode::FixEdges()
 	int d3 = depths[West]  ? CPlanet::Left   : 0;
 
 	int perm = d0 | d1 | d2 | d3;
-	Triangles = Planet->IndexPerm[perm];
+	Indices = Planet->IndexPerm[perm];
 
-    // TODO: Generate
+    D3D11_BUFFER_DESC desc;
+    desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.ByteWidth = static_cast<UINT>(sizeof(UINT) * Indices.size());
+    desc.CPUAccessFlags = 0;
+    desc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA data;
+    data.pSysMem = Indices.data();
+
+    Planet->GetDevice()->CreateBuffer(&desc, &data, IndexBuffer.ReleaseAndGetAddressOf());
 }
 
 Vector3 CTerrainNode::PointToSphere(Vector3 p)
@@ -136,12 +155,33 @@ void CTerrainNode::Update(float dt)
 	Quadtree::Update(dt);
 }
 
-Vector3 CTerrainNode::GetCenterWorld()
+void CTerrainNode::Render(Matrix viewProj)
 {
-    Vector3 midpoint = Vertices[(Planet->GridSize * Planet->GridSize) / 2];
-    return Vector3::Transform(midpoint, World);
+    if (IsLeaf())
+    {
+        auto context = Planet->GetContext();
+        Buffer.SetData(context, { Planet->World * World * viewProj });
+
+        UINT offset = 0;
+        UINT stride = sizeof(TerrainVertex);
+
+        context->IASetVertexBuffers(0, 1, VertexBuffer.GetAddressOf(), &stride, &offset);
+        context->IASetIndexBuffer(IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+        context->VSSetConstantBuffers(0, 1, Buffer.GetBuffer());
+        context->DrawIndexed(static_cast<UINT>(Indices.size()), 0, 0);
+    }
+    else
+    {
+        for (int i = 0; i < 4; ++i)
+            ChildNodes[i]->Render(viewProj);
+    }
 }
 
+Vector3 CTerrainNode::GetCenterWorld()
+{
+    Vector3 midpoint = Vertices[(Planet->GridSize * Planet->GridSize) / 2].Position;
+    return Vector3::Transform(midpoint, Planet->World * World);
+}
 
 void CTerrainNode::SplitFunction()
 {
@@ -150,7 +190,7 @@ void CTerrainNode::SplitFunction()
 
 	for (int i = 0; i < 4; ++i)
 	{
-        ChildNodes[i] = new CTerrainNode(Planet, static_cast<EQuad>(i), this);
+        ChildNodes[i] = new CTerrainNode(Planet, this, static_cast<EQuad>(i));
 	}
 
 	ChildNodes[NW]->SetBounds(Square{ x    , y    , d });
@@ -164,7 +204,6 @@ void CTerrainNode::SplitFunction()
 	for (int i = 0; i < 4; ++i)
 		ChildNodes[i]->FixEdges();
 
-	HideFunction();
 	NotifyNeighbours();
 }
 
@@ -178,11 +217,6 @@ void CTerrainNode::MergeFunction()
 	NotifyNeighbours();
 }
 
-void CTerrainNode::HideFunction()
-{
-
-}
-
 bool CTerrainNode::DistanceFunction()
 {
 	Vector3 cam = Planet->Camera->GetPosition();
@@ -192,7 +226,8 @@ bool CTerrainNode::DistanceFunction()
 	//float horizon = sqrtf(height * (2 * Radius + height));
 	//bool visible = distance - Diameter < horizon;
 
-	//SetActorHiddenInGame(!visible);
+    if(distance < Bounds.size * Planet->SplitDistance)
+        LOGM("Splitting")
 
 	return Depth < 8 && distance < Bounds.size * Planet->SplitDistance;
 }

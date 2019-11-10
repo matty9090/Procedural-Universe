@@ -44,6 +44,11 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     PostProcess->GaussianBlur = 5.0f;
+
+    CPlanet::GeneratePermutations();
+
+    Planet = std::make_unique<CPlanet>(Context, Camera.get());
+    Planet->SetPosition(Vector3(0.0f, 0.0f, 6600.0f));
 }
 
 void SandboxState::Cleanup()
@@ -83,6 +88,8 @@ void SandboxState::Update(float dt)
 
     if(CurrentTarget->Parent)
         CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
+
+    Planet->Update(dt);
 }
 
 void SandboxState::Render()
@@ -98,6 +105,8 @@ void SandboxState::Render()
     {
         CurrentTarget->Render();
     }
+
+    Planet->Render();
 
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
@@ -147,6 +156,7 @@ void SandboxState::FloatingOrigin()
     if (!CurrentTarget->IsTransitioning() && shipPos.Length() > CamOriginSnapThreshold)
     {
         Ship->SetPosition(Vector3::Zero);
+        Planet->Move(-shipPos);
         CurrentTarget->MoveObjects(-shipPos);
     }
 }

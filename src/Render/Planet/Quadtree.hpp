@@ -22,7 +22,7 @@ struct Quadtree
 
         Quadtree(EQuad quad, T* parent)
             : Depth(0),
-              Bounds{ -1.0f, -1.0f, 2.0f },
+              Bounds { -1.0f, -1.0f, 2.0f },
               Parent(parent),
               Quad(quad)
         {}
@@ -62,7 +62,6 @@ struct Quadtree
 
 		virtual void SplitFunction() {}
 		virtual void MergeFunction() {}
-		virtual void HideFunction()  {}
 		virtual void TickFunction(float dt, int child)  {}
 		virtual bool DistanceFunction() { return false; }
 };
@@ -108,8 +107,6 @@ void Quadtree<T>::Update(float dt)
 			Split();
 		else if (!IsLeaf())
 		{
-			HideFunction();
-
 			for (int i = 0; i < 4; ++i)
 				TickFunction(dt, i);
 		}

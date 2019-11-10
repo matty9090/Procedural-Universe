@@ -7,6 +7,7 @@
 
 UINT CPlanet::GridSize = 9;
 
+std::map<UINT, std::vector<UINT>> CPlanet::IndexPerm;
 std::map<int, std::map<int, int>> Quadtree<CTerrainNode>::FaceCorrection;
 std::map<int, std::map<int, int>> Quadtree<CTerrainNode>::InternalCorrection;
 
@@ -15,16 +16,87 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
       Context(context)
 {
     Context->GetDevice(&Device);
+
+    World = Matrix::Identity;
+
+    CommonStates = std::make_unique<DirectX::CommonStates>(Device);
+
+    TerrainPipeline.LoadVertex(L"shaders/Planet.vsh");
+    TerrainPipeline.LoadPixel(L"shaders/Planet.psh");
+    TerrainPipeline.CreateInputLayout(Device, CreateInputLayoutPositionNormalTexture());
+    TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+    for (int i = 0; i < 6; ++i)
+    {
+        DirectX::SimpleMath::Vector3 o = Orientations[(EFace)i] * DirectX::XM_PI / 180.0f;
+        Nodes[i] = new CTerrainNode(this, nullptr);
+        Nodes[i]->Orientation = Quaternion::CreateFromYawPitchRoll(o.y, o.x, o.z);
+        Nodes[i]->World = Matrix::Identity;
+    }
+
+    for (int f = 0; f < 6; ++f)
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            Nodes[f]->RootNeighbourList.push_back(Nodes[(int)Neighbours[(EFace)f][i]]);
+        }
+    }
+
+    for (int i = 0; i < 6; ++i)
+    {
+        Nodes[i]->Generate();
+    }
+}
+
+CPlanet::~CPlanet()
+{
+    for (int i = 0; i < 6; ++i)
+    {
+        delete Nodes[i];
+    }
 }
 
 void CPlanet::Update(float dt)
 {
+    for (int i = 0; i < 6; ++i)
+    {
+        Nodes[i]->Update(dt);
+    }
+}
 
+void CPlanet::Render()
+{
+    TerrainPipeline.SetState(Context, [&]() {
+        Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->RSSetState(CommonStates->Wireframe());
+    });
+
+    for (int i = 0; i < 6; ++i)
+    {
+        Nodes[i]->Render(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
+    }
+}
+
+void CPlanet::Move(DirectX::SimpleMath::Vector3 v)
+{
+    Position += v;
+    UpdateMatrix();
+}
+
+void CPlanet::SetPosition(DirectX::SimpleMath::Vector3 p)
+{
+    Position = p;
+    UpdateMatrix();
 }
 
 float CPlanet::GetHeight(DirectX::SimpleMath::Vector3 normal)
 {
     return 0.0f;
+}
+
+void CPlanet::UpdateMatrix()
+{
+    World = Matrix::CreateTranslation(Position);
 }
 
 void CPlanet::GeneratePermutations()
