@@ -1,7 +1,8 @@
 #include "TerrainNode.hpp"
-#include "Planet.hpp"
-
 #include "Services/Log.hpp"
+
+#include "Render/Planet/Planet.hpp"
+#include "Render/Planet/Components/TerrainComponent.hpp"
 
 CTerrainNode::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad)
 	: Quadtree(quad, parent),
@@ -23,7 +24,7 @@ CTerrainNode::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad)
 
 void CTerrainNode::Generate()
 {
-	UINT gridsize = Planet->GridSize, gh = Planet->GridSize / 2;
+	UINT gridsize = CTerrainComponent::GridSize, gh = CTerrainComponent::GridSize / 2;
 
     Indices.clear();
     Vertices.clear();
@@ -76,7 +77,7 @@ void CTerrainNode::Generate()
 		}
 	}
 
-	Indices = Planet->IndexPerm[0];
+	Indices = CTerrainComponent::IndexPerm[0];
     
     D3D11_BUFFER_DESC desc;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -120,13 +121,13 @@ void CTerrainNode::FixEdges()
 	for (int i = 0; i < 4; ++i) neighbours[i] = GetGreaterThanOrEqualNeighbour(i);
 	for (int i = 0; i < 4; ++i) depths[i]     = neighbours[i] && (Depth - neighbours[i]->GetDepth() >= 1);
 
-	int d0 = depths[North] ? CPlanet::Top    : 0;
-	int d1 = depths[East]  ? CPlanet::Right  : 0;
-	int d2 = depths[South] ? CPlanet::Bottom : 0;
-	int d3 = depths[West]  ? CPlanet::Left   : 0;
+	int d0 = depths[North] ? CTerrainComponent::Top    : 0;
+	int d1 = depths[East]  ? CTerrainComponent::Right  : 0;
+	int d2 = depths[South] ? CTerrainComponent::Bottom : 0;
+	int d3 = depths[West]  ? CTerrainComponent::Left   : 0;
 
 	int perm = d0 | d1 | d2 | d3;
-	Indices = Planet->IndexPerm[perm];
+	Indices = CTerrainComponent::IndexPerm[perm];
 
     D3D11_BUFFER_DESC desc;
     desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -179,7 +180,7 @@ void CTerrainNode::Render(Matrix viewProj)
 
 Vector3 CTerrainNode::GetCenterWorld()
 {
-    Vector3 midpoint = Vertices[(Planet->GridSize * Planet->GridSize) / 2].Position;
+    Vector3 midpoint = Vertices[(CTerrainComponent::GridSize * CTerrainComponent::GridSize) / 2].Position;
     return Vector3::Transform(midpoint, Planet->World * World);
 }
 

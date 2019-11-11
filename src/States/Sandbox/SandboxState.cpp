@@ -7,6 +7,7 @@
 #include "GalaxyTarget.hpp"
 #include "StarTarget.hpp"
 #include "PlanetTarget.hpp"
+#include "Render/Planet/Components/TerrainComponent.hpp"
 
 #include <DirectXColors.h>
 
@@ -45,7 +46,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     PostProcess->GaussianBlur = 5.0f;
 
-    CPlanet::GeneratePermutations();
+    CTerrainComponent::GeneratePermutations();
 
     Planet = std::make_unique<CPlanet>(Context, Camera.get());
     Planet->SetPosition(Vector3(0.0f, 0.0f, 8000.0f));
