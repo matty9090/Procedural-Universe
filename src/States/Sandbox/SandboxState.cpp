@@ -48,7 +48,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     CPlanet::GeneratePermutations();
 
     Planet = std::make_unique<CPlanet>(Context, Camera.get());
-    Planet->SetPosition(Vector3(0.0f, 0.0f, 6600.0f));
+    Planet->SetPosition(Vector3(0.0f, 0.0f, 8000.0f));
 }
 
 void SandboxState::Cleanup()
@@ -75,6 +75,9 @@ void SandboxState::Update(float dt)
 
     if (Tracker.IsKeyReleased(DirectX::Keyboard::F1))
         bShowClosestObject = !bShowClosestObject;
+
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::F2))
+        PostProcess->UseBloom = !PostProcess->UseBloom;
 
     FloatingOrigin();
     TransitionLogic();

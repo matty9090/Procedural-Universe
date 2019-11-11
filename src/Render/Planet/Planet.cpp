@@ -5,7 +5,7 @@
 #include <array>
 #include <algorithm>
 
-UINT CPlanet::GridSize = 9;
+UINT CPlanet::GridSize = 21;
 
 std::map<UINT, std::vector<UINT>> CPlanet::IndexPerm;
 std::map<int, std::map<int, int>> Quadtree<CTerrainNode>::FaceCorrection;
@@ -46,6 +46,8 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
     {
         Nodes[i]->Generate();
     }
+
+    Noise.SetFractalOctaves(6);
 }
 
 CPlanet::~CPlanet()
@@ -68,7 +70,7 @@ void CPlanet::Render()
 {
     TerrainPipeline.SetState(Context, [&]() {
         Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Context->RSSetState(CommonStates->Wireframe());
+        Context->RSSetState(CommonStates->CullCounterClockwise());
     });
 
     for (int i = 0; i < 6; ++i)
@@ -91,7 +93,8 @@ void CPlanet::SetPosition(DirectX::SimpleMath::Vector3 p)
 
 float CPlanet::GetHeight(DirectX::SimpleMath::Vector3 normal)
 {
-    return 0.0f;
+    normal *= 100;
+    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * 10.0f;
 }
 
 void CPlanet::UpdateMatrix()

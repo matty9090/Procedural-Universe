@@ -10,6 +10,7 @@
 
 #include "Render/DX/RenderCommon.hpp"
 #include "Render/Cameras/Camera.hpp"
+#include "Misc/FastNoise.h"
 
 class CTerrainNode;
 
@@ -52,6 +53,7 @@ public:
     RenderPipeline TerrainPipeline;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
     static std::map<UINT, std::vector<UINT>> IndexPerm;
+    FastNoise Noise;
 
     std::map<EFace, DirectX::SimpleMath::Vector3> Orientations = {
         { EFace::Top,    {  90.0f,   0.0f, 0.0f } },
