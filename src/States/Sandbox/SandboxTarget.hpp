@@ -58,6 +58,7 @@ public:
 
     std::string Name;
     float Scale = 1.0f;
+    float VelocityMultiplier = 1.0f;
     Vector3 ParentLocationSpace;
     SandboxTarget* Parent = nullptr;
     std::unique_ptr<SandboxTarget> Child = nullptr;

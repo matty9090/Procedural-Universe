@@ -83,6 +83,9 @@ void SandboxState::Update(float dt)
     FloatingOrigin();
     TransitionLogic();
 
+    if (!CurrentTarget->IsTransitioning())
+        Ship->VelocityScale = CurrentTarget->VelocityMultiplier;
+
     Camera->Events(Mouse, Mouse->GetState(), dt);
     CurrentTarget->Update(dt);
 
@@ -90,7 +93,7 @@ void SandboxState::Update(float dt)
     Ship->Update(dt);
     Camera->Update(dt);
 
-    if(CurrentTarget->Parent)
+    if (CurrentTarget->Parent)
         CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
 
     //Planet->Update(dt);

@@ -113,4 +113,9 @@ void PlanetTarget::CreatePlanetPipeline()
 void PlanetTarget::StateIdle(float dt)
 {
     Planet->Update(dt);
+
+    float dist = Vector3::Distance(Camera->GetPosition(), Planet->GetPosition()) - Planet->Radius;
+    float t = (dist - 100.0f) / (Planet->Radius * 3.0f);
+
+    VelocityMultiplier = Maths::Clamp(Maths::Lerp(0.01f, 1.0f, t), 0.01f, 1.0f);
 }
