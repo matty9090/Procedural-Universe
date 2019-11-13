@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include "Components/TerrainComponent.hpp"
+#include "Components/AtmosphereComponent.hpp"
 
 CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
     : Camera(cam),
@@ -13,9 +14,12 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
     Context->GetDevice(&Device);
 
     World = DirectX::SimpleMath::Matrix::Identity;
+
+    Noise.SetFrequency(1.0f);
     Noise.SetFractalOctaves(6);
 
     Components.push_back(std::make_unique<CTerrainComponent>(this));
+    Components.push_back(std::make_unique<CAtmosphereComponent>(this, 200.0f));
 }
 
 CPlanet::~CPlanet()
@@ -41,6 +45,12 @@ void CPlanet::Move(DirectX::SimpleMath::Vector3 v)
     UpdateMatrix();
 }
 
+void CPlanet::Scale(float s)
+{
+    PlanetScale *= s;
+    UpdateMatrix();
+}
+
 void CPlanet::SetPosition(DirectX::SimpleMath::Vector3 p)
 {
     Position = p;
@@ -49,11 +59,11 @@ void CPlanet::SetPosition(DirectX::SimpleMath::Vector3 p)
 
 float CPlanet::GetHeight(DirectX::SimpleMath::Vector3 normal)
 {
-    normal *= 100;
-    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * 10.0f;
+    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * 100.0f;
 }
 
 void CPlanet::UpdateMatrix()
 {
-    World = DirectX::SimpleMath::Matrix::CreateTranslation(Position);
+    World = DirectX::SimpleMath::Matrix::CreateScale(PlanetScale) *
+            DirectX::SimpleMath::Matrix::CreateTranslation(Position); 
 }

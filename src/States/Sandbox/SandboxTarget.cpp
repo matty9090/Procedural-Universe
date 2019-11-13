@@ -21,12 +21,12 @@ void SandboxTarget::Update(float dt)
     switch (State)
     {
         case EState::Idle:
-            StateIdle();
+            StateIdle(dt);
             break;
 
         case EState::TransitioningParent:
         case EState::TransitioningChild:
-            StateTransitioning();
+            StateTransitioning(dt);
             break;
     }
 }

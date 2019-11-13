@@ -18,8 +18,6 @@ private:
     void RenderLerp(float t);
     void BakeSkybox(Vector3 object) override;
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
-
-    void StateIdle() override;
     void CreateParticlePipeline();
 
     struct GSConstantBuffer

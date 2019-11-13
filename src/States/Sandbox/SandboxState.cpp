@@ -49,7 +49,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     CTerrainComponent::GeneratePermutations();
 
     Planet = std::make_unique<CPlanet>(Context, Camera.get());
-    Planet->SetPosition(Vector3(0.0f, 0.0f, 8000.0f));
+    //Planet->SetPosition(Vector3(0.0f, 0.0f, 20000.0f));
 }
 
 void SandboxState::Cleanup()
@@ -93,7 +93,7 @@ void SandboxState::Update(float dt)
     if(CurrentTarget->Parent)
         CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
 
-    Planet->Update(dt);
+    //Planet->Update(dt);
 }
 
 void SandboxState::Render()
@@ -110,7 +110,7 @@ void SandboxState::Render()
         CurrentTarget->Render();
     }
 
-    Planet->Render();
+    //Planet->Render();
 
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();

@@ -1,4 +1,5 @@
 #include "SandboxTarget.hpp"
+#include "Render/Planet/Planet.hpp"
 
 #include <memory>
 #include <CommonStates.h>
@@ -23,6 +24,7 @@ private:
     void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f, bool single = false);
     void BakeSkybox(Vector3 object) override;
     void CreatePlanetPipeline();
+    void StateIdle(float dt) override;
 
     struct LerpConstantBuffer
     {
@@ -31,7 +33,7 @@ private:
     };
 
     size_t CurrentClosestObjectID;
-    std::unique_ptr<CModel> Planet;
+    std::unique_ptr<CPlanet> Planet;
 
     RenderView ParticleRenderTarget;
     RenderPipeline StarPipeline;

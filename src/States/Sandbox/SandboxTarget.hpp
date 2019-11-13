@@ -75,8 +75,8 @@ protected:
     virtual void OnEndTransitionUpChild() {}
     virtual void OnEndTransitionDownChild() {}
 
-    virtual void StateIdle() {}
-    virtual void StateTransitioning() {}
+    virtual void StateIdle(float dt) {}
+    virtual void StateTransitioning(float dt) {}
     virtual void BakeSkybox(Vector3 object) {}
 
     void GenerateSkybox(Vector3 location);

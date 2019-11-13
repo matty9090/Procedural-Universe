@@ -32,6 +32,12 @@ void CModel::Scale(float s)
     UpdateMatrices();
 }
 
+void CModel::SetScale(float s)
+{
+    RelativeScale = s;
+    UpdateMatrices();
+}
+
 void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline)
 {
     MatrixBuffer.SetData(context, { World * ViewProj });

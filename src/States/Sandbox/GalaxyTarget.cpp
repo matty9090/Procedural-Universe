@@ -42,11 +42,6 @@ Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
     return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
 }
 
-void GalaxyTarget::StateIdle()
-{
-    
-}
-
 void GalaxyTarget::RenderLerp(float t)
 {
     auto dsv = Resources->GetDepthStencilView();

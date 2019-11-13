@@ -1,11 +1,11 @@
 #include "TerrainComponent.hpp"
-
-#include <set>
-
 #include "TerrainNode.hpp"
 #include "Render/Planet/Planet.hpp"
 
+#include <set>
+
 UINT CTerrainComponent::GridSize = 21;
+
 std::map<UINT, std::vector<UINT>> CTerrainComponent::IndexPerm;
 std::map<int, std::map<int, int>> Quadtree<CTerrainNode>::FaceCorrection;
 std::map<int, std::map<int, int>> Quadtree<CTerrainNode>::InternalCorrection;
@@ -69,7 +69,6 @@ void CTerrainComponent::Render(DirectX::SimpleMath::Matrix viewProj)
         Nodes[i]->Render(viewProj);
     }
 }
-
 
 void CTerrainComponent::GeneratePermutations()
 {

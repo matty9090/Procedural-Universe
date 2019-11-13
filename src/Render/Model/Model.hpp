@@ -29,6 +29,7 @@ public:
     void SetPosition(DirectX::SimpleMath::Vector3 p);
     void Rotate(DirectX::SimpleMath::Vector3 r);
     void Scale(float s);
+    void SetScale(float s);
     
     void SetTexture(ID3D11ShaderResourceView* tex) { Texture = tex; }
     void Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline);

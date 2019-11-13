@@ -17,6 +17,7 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
+    Planet = std::make_unique<CPlanet>(Context, Camera);
 
     CreatePlanetPipeline();
 }
@@ -72,11 +73,11 @@ void PlanetTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
 
-    LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+    /*LerpBuffer->SetData(Context, LerpConstantBuffer { t });
     Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
     Context->GSSetShader(nullptr, 0, 0);
-    Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
-    Planet->Draw(Context, viewProj, StarPipeline);
+    Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);*/
+    Planet->Render();
 }
 
 void PlanetTarget::BakeSkybox(Vector3 object)
@@ -100,9 +101,6 @@ void PlanetTarget::ResetObjectPositions()
 
 void PlanetTarget::CreatePlanetPipeline()
 {
-    Planet = std::make_unique<CModel>(Device, RESM.GetMesh("assets/Sphere.obj"));
-    Planet->Scale(200.0f);
-
     StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     StarPipeline.LoadVertex(L"shaders/Position.vsh");
     StarPipeline.LoadPixel(L"shaders/Star.psh");
@@ -110,4 +108,9 @@ void PlanetTarget::CreatePlanetPipeline()
     StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
 
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
+}
+
+void PlanetTarget::StateIdle(float dt)
+{
+    Planet->Update(dt);
 }
