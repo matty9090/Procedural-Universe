@@ -26,6 +26,8 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     Camera = std::make_unique<CShipCamera>(width, height);
     Camera->SetPosition(Vector3(0.0f, 4.0f, -30.0f));
 
+    CTerrainComponent::GeneratePermutations();
+
     auto sandboxData = static_cast<SandboxStateData&>(data);
 
     for (auto& p : sandboxData.Particles)
@@ -45,8 +47,6 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     PostProcess->GaussianBlur = 5.0f;
-
-    CTerrainComponent::GeneratePermutations();
 
     Planet = std::make_unique<CPlanet>(Context, Camera.get());
     //Planet->SetPosition(Vector3(0.0f, 0.0f, 20000.0f));

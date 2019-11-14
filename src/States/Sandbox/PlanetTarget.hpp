@@ -21,15 +21,13 @@ public:
 
 private:
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
-    void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f, bool single = false);
-    void BakeSkybox(Vector3 object) override;
     void CreatePlanetPipeline();
     void StateIdle(float dt) override;
 
-    struct LerpConstantBuffer
+    struct PlanetConstantBuffer
     {
-        float Alpha;
-        float Custom1, Custom2, Custom3;
+        Vector3 LightDir;
+        float Lerp;
     };
 
     size_t CurrentClosestObjectID;
@@ -41,5 +39,5 @@ private:
     std::vector<Particle> Particles;
     std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
-    std::unique_ptr<ConstantBuffer<LerpConstantBuffer>> LerpBuffer;
+    std::unique_ptr<ConstantBuffer<PlanetConstantBuffer>> PlanetBuffer;
 };

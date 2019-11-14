@@ -1,3 +1,9 @@
+cbuffer c0
+{
+    float3 LightDirection;
+    float Lerp;
+};
+
 struct PS_Input
 {
     float4 Position : SV_POSITION;
@@ -12,10 +18,9 @@ struct PS_Output
 
 void main(in PS_Input v_in, out PS_Output colour)
 {
-    float3 lightDir = float3(0.0f, 0.5f, -0.5f);
     float3 lightCol = float3(1.0f, 1.0f, 1.0f);
     float3 diffuse = float3(0.0f, 0.7f, 0.1f);
 
-    float3 light = diffuse * lightCol * max(dot(v_in.Normal, lightDir), 0.0f);
-    colour.Colour = float4(light, 1.0f);
+    float3 light = diffuse * lightCol * max(dot(v_in.Normal, LightDirection), 0.0f);
+    colour.Colour = float4(diffuse, Lerp);
 }

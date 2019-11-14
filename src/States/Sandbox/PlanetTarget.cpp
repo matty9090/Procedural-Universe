@@ -24,13 +24,18 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
 void PlanetTarget::Render()
 {
+    Matrix view = Camera->GetViewMatrix();
+    Matrix viewProj = view * Camera->GetProjectionMatrix();
+
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
+    Parent->GetSkyBox().Draw(viewProj);
 
-    Matrix viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
-
-    RenderLerp();
+    Vector3 lightDir = Parent->GetCentre() - Centre;
+    PlanetBuffer->SetData(Context, PlanetConstantBuffer { lightDir, 1.0f });
+    Context->PSSetConstantBuffers(0, 1, PlanetBuffer->GetBuffer());
+    Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
+    Planet->Render();
 }
 
 void PlanetTarget::RenderTransitionChild(float t)
@@ -39,7 +44,16 @@ void PlanetTarget::RenderTransitionChild(float t)
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
     Planet->Move(ParentLocationSpace);
-    RenderLerp(Scale, ParentLocationSpace, t);
+
+    Matrix view = Camera->GetViewMatrix();
+    Matrix viewProj = view * Camera->GetProjectionMatrix();
+
+    Vector3 lightDir = Parent->GetCentre() - Centre;
+    PlanetBuffer->SetData(Context, PlanetConstantBuffer { lightDir, t });
+    Context->PSSetConstantBuffers(0, 1, PlanetBuffer->GetBuffer());
+    Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
+    Planet->Render();
+
     Planet->Move(-ParentLocationSpace);
 }
 
@@ -49,7 +63,14 @@ void PlanetTarget::RenderTransitionParent(float t)
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
     Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
 
-    RenderLerp(1.0f, Vector3::Zero, t, true);
+    Matrix view = Camera->GetViewMatrix();
+    Matrix viewProj = view * Camera->GetProjectionMatrix();
+
+    Vector3 lightDir = Parent->GetCentre() - Centre;
+    PlanetBuffer->SetData(Context, PlanetConstantBuffer { lightDir, t });
+    Context->PSSetConstantBuffers(0, 1, PlanetBuffer->GetBuffer());
+    Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
+    Planet->Render();
 }
 
 void PlanetTarget::MoveObjects(Vector3 v)
@@ -68,31 +89,6 @@ Vector3 PlanetTarget::GetClosestObject(Vector3 pos)
     return Vector3::Zero;
 }
 
-void PlanetTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
-{
-    Matrix view = Camera->GetViewMatrix();
-    Matrix viewProj = view * Camera->GetProjectionMatrix();
-
-    /*LerpBuffer->SetData(Context, LerpConstantBuffer { t });
-    Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
-    Context->GSSetShader(nullptr, 0, 0);
-    Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);*/
-    Planet->Render();
-}
-
-void PlanetTarget::BakeSkybox(Vector3 object)
-{
-    SkyboxGenerator->Render([&](const ICamera& cam) {
-        LerpBuffer->SetData(Context, LerpConstantBuffer{ 1.0f });
-
-        Matrix view = cam.GetViewMatrix();
-        Matrix viewProj = view * cam.GetProjectionMatrix();
-        
-        Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Parent->GetSkyBox().Draw(viewProj);
-    });
-}
-
 void PlanetTarget::ResetObjectPositions()
 {
     MoveObjects(-Planet->GetPosition());
@@ -107,7 +103,7 @@ void PlanetTarget::CreatePlanetPipeline()
     StarPipeline.CreateRasteriser(Device, ECullMode::Clockwise);
     StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
 
-    LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
+    PlanetBuffer = std::make_unique<ConstantBuffer<PlanetConstantBuffer>>(Device);
 }
 
 void PlanetTarget::StateIdle(float dt)
