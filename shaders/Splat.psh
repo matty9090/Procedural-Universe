@@ -1,16 +1,42 @@
+#include "Volumetric.hlsl"
+
+cbuffer cb0
+{
+    float3 Cam;
+};
+
 struct PS_Input
 {
 	float4 Position : SV_Position;
-    float4 Colour : COLOR;
-	float2 UV : TEXCOORD0;
+    float3 Direction : TEXCOORD0;
+    float3 RayStart : TEXCOORD1;
+    float3 RayEnd : TEXCOORD2;
+    float  Size : TEXCOORD3;
 };
 
 float4 main(in PS_Input i) : SV_TARGET
 {
-	float2 a = i.UV * 2.0 - 1.0;
-	float r2 = dot(a, a);
-	
-	if(r2 > 1.0) discard;
+    float4 c = float4(0.3f, 0.3f, 0.3f, 0.2f);
+    float3 dir = normalize(i.Direction);
+    float3 cpos = i.RayStart;
+    float3 re = i.RayEnd;
+    float tx = (dir.x > 0.0 ? i.Size + re.x : i.Size - re.x) / abs(dir.x);
+    float ty = (dir.y > 0.0 ? i.Size + re.y : i.Size - re.y) / abs(dir.y);
+    float tz = (dir.z > 0.0 ? i.Size + re.z : i.Size - re.z) / abs(dir.z);
+    float t = min(min(tx, ty), tz);
+    float dist = length(cpos);
+    float dt = (dist < t ? dist : t);
+    float3 rs = re - (dir * dt);
+    float hts = 0;
+    float hte = 0;
 
-	return float4(i.Colour.xyz, 0.1f);
+    if (!RaySphereIntersect(rs, dir, i.Size, hts, hte))
+        discard;
+
+    float rlen = hte - hts;
+    float rlenn = 0.4 * rlen / i.Size;
+
+    c *= saturate(rlenn * rlenn);
+
+    return c;
 }

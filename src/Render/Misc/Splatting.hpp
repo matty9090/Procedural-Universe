@@ -8,13 +8,14 @@
 #include <PostProcess.h>
 
 #include "Render/DX/RenderCommon.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
 
 class CSplatting
 {
 public:
     CSplatting(ID3D11DeviceContext* context, int width, int height);
 
-    void Render(unsigned int num, ID3D11ShaderResourceView *scene);
+    void Render(unsigned int num, DirectX::SimpleMath::Vector3 cam);
 
 private:
     ID3D11DeviceContext* Context;
@@ -28,4 +29,12 @@ private:
 
     RenderView Target0;
     RenderView Target1;
+
+    struct CamBuffer
+    {
+        DirectX::SimpleMath::Vector3 Eye;
+        float Custom;
+    };
+
+    std::unique_ptr<ConstantBuffer<CamBuffer>> Buffer;
 };

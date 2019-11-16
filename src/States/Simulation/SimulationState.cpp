@@ -68,13 +68,10 @@ void SimulationState::Render()
 
     Context->OMSetRenderTargets(1, &sceneTarget, dsv);
 
-    // HACK
     RenderParticles();
 
     if (bUseSplatting)
-        Splatting->Render(NumParticles, DeviceResources->GetSceneShaderResourceView());
-
-    RenderParticles();
+        Splatting->Render(NumParticles, Camera->GetPosition());
 
     Context->GSSetShader(nullptr, 0, 0);
 

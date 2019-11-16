@@ -1,4 +1,5 @@
 #include "SandboxTarget.hpp"
+#include "Render/Misc/Splatting.hpp"
 
 #include <memory>
 #include <CommonStates.h>
@@ -41,6 +42,7 @@ private:
     RenderPipeline ParticlePipeline;
 
     std::vector<Particle> Particles;
+    std::unique_ptr<CSplatting> Splatting;
     std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
     Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;

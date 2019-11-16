@@ -8,6 +8,7 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     unsigned int width = static_cast<size_t>(vp.Width);
     unsigned int height = static_cast<size_t>(vp.Height);
 
+    Splatting = std::make_unique<CSplatting>(Context, width, height);
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
@@ -54,7 +55,7 @@ void GalaxyTarget::RenderLerp(float t)
         unsigned int offset = 0;
         unsigned int stride = sizeof(Particle);
 
-        LerpBuffer->SetData(Context, LerpConstantBuffer{ 1.0f });
+        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
         GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
@@ -62,18 +63,18 @@ void GalaxyTarget::RenderLerp(float t)
         Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
 
-        auto pivot1 = static_cast<unsigned int>(CurrentClosestObjectID);
-        auto pivot2 = static_cast<unsigned int>(Particles.size() - CurrentClosestObjectID - 1);
+        auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
+        auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
 
         Context->Draw(pivot1, 0);
-        Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
+        Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
 
         // Draw object of interest separately to lerp it's size
         LerpBuffer->SetData(Context, LerpConstantBuffer { t });
-        Context->Draw(1, static_cast<unsigned int>(CurrentClosestObjectID));
+        Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
     });
 
-    Context->GSSetShader(nullptr, 0, 0);
+    Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
 }
 
 void GalaxyTarget::BakeSkybox(Vector3 object)
@@ -101,7 +102,7 @@ void GalaxyTarget::BakeSkybox(Vector3 object)
             Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
         });
 
-        Context->GSSetShader(nullptr, 0, 0);
+        Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
     });
 }
 

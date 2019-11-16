@@ -75,6 +75,12 @@ DirectX::XMMATRIX CArcballCamera::GetViewMatrix() const
     return View;
 }
 
+Vector3 CArcballCamera::GetPosition() const
+{
+    auto v = View.Invert();
+    return v.Translation();
+}
+
 bool CArcballCamera::PixelFromWorldPoint(Vector3 worldPt, int& x, int& y)
 {
     Matrix viewProj = View * Proj;

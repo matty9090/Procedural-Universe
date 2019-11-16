@@ -1,7 +1,15 @@
+#include "Common.hlsl"
+#include "Volumetric.hlsl"
+
 cbuffer cb0
 {
     row_major float4x4 ViewProjMatrix;
     row_major float4x4 InvViewMatrix;
+};
+
+cbuffer cb1
+{
+    float3 Cam;
 };
 
 struct GS_VertIn
@@ -12,9 +20,11 @@ struct GS_VertIn
 
 struct GS_VertOut
 {
-	float4 ViewportPosition : SV_Position;
-    float4 Colour : COLOR;
-    float2 UV : TEXCOORD0;
+    float4 Position : SV_Position;
+    float3 Direction : TEXCOORD0;
+    float3 RayStart : TEXCOORD1;
+    float3 RayEnd : TEXCOORD2;
+    float  Size : TEXCOORD3;
 };
 
 [maxvertexcount(4)]  
@@ -44,13 +54,17 @@ void main
 
 	for (int i = 0; i < 4; ++i)
 	{
-		const float scale = 8.0f;
+		const float scale = 30.0f;
         float3 corner = Corners[i] * scale;
-        float3 worldPosition = inParticle[0].Position + mul( corner, (float3x3)InvViewMatrix );
+        float3 worldPosition = inParticle[0].Position + mul(corner, (float3x3)InvViewMatrix);
         
-		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
-        outVert.Colour = inParticle[0].Colour;
-        outVert.UV = UVs[i];
+		outVert.Position = mul(float4(worldPosition, 1.0f), ViewProjMatrix);
+        outVert.Position.z = LogDepthBuffer(outVert.Position.w);
+        outVert.RayStart = Cam;
+        outVert.RayEnd = worldPosition;
+        outVert.Size = scale / 3.0;
+        outVert.Direction = inParticle[0].Position + outVert.RayEnd;
+
 		outStrip.Append( outVert );
 	}
     
