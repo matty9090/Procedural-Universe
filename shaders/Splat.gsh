@@ -62,7 +62,7 @@ void main
         outVert.Position.z = LogDepthBuffer(outVert.Position.w);
         outVert.RayStart = Cam;
         outVert.RayEnd = worldPosition;
-        outVert.Size = scale / 3.0;
+        outVert.Size = scale / 2;
         outVert.Direction = inParticle[0].Position + outVert.RayEnd;
 
 		outStrip.Append( outVert );

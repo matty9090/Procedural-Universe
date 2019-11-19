@@ -26,7 +26,8 @@ bool RaySphereIntersect(float3 s, float3 d, float r, out float ts, out float te)
 
     if (s2 <= r2)
     {
-        ts = 0.0;  te = FarIntersection(s, d, s2, r2);
+        ts = 0.0;
+        te = FarIntersection(s, d, s2, r2);
         return true;
     } 
 
