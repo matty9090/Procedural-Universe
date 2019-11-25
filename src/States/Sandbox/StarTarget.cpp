@@ -24,12 +24,7 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
 
 void StarTarget::Render()
 {
-    auto dsv = Resources->GetDepthStencilView();
-    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
-
-    Matrix viewProj = Camera->GetViewMatrix() * Camera->GetProjectionMatrix();
-
+    RenderParentSkybox();
     RenderLerp();
 }
 
@@ -45,10 +40,7 @@ void StarTarget::RenderTransitionChild(float t)
 
 void StarTarget::RenderTransitionParent(float t)
 {
-    auto dsv = Resources->GetDepthStencilView();
-    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
-
+    RenderParentSkybox();
     RenderLerp(1.0f, Vector3::Zero, t, true);
 }
 

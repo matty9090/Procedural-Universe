@@ -21,6 +21,7 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
 void GalaxyTarget::Render()
 {
+    RenderParentSkybox();
     RenderLerp(1.0f);
 }
 
@@ -36,6 +37,7 @@ void GalaxyTarget::RenderTransitionChild(float t)
 
 void GalaxyTarget::RenderTransitionParent(float t)
 {
+    RenderParentSkybox();
     RenderLerp(t, 1.0f, Vector3::Zero, true);
 }
 
@@ -72,7 +74,7 @@ void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single
         LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
+        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), voffset });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
         Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -95,7 +97,8 @@ void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single
         }
     });
 
-   // Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
+    Context->GSSetShader(nullptr, 0, 0);
+    //Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
 }
 
 void GalaxyTarget::BakeSkybox(Vector3 object)
@@ -123,6 +126,7 @@ void GalaxyTarget::BakeSkybox(Vector3 object)
             Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
         });
 
+        Context->GSSetShader(nullptr, 0, 0);
         //Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
     });
 }

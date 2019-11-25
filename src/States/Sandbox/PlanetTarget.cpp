@@ -24,12 +24,7 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
 void PlanetTarget::Render()
 {
-    Matrix view = Camera->GetViewMatrix();
-    Matrix viewProj = view * Camera->GetProjectionMatrix();
-
-    auto dsv = Resources->GetDepthStencilView();
-    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-    Parent->GetSkyBox().Draw(viewProj);
+    RenderParentSkybox();
 
     Vector3 lightDir = Parent->GetCentre() - Centre;
     PlanetBuffer->SetData(Context, PlanetConstantBuffer { lightDir, 1.0f });
@@ -59,12 +54,7 @@ void PlanetTarget::RenderTransitionChild(float t)
 
 void PlanetTarget::RenderTransitionParent(float t)
 {
-    auto dsv = Resources->GetDepthStencilView();
-    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-    Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
-
-    Matrix view = Camera->GetViewMatrix();
-    Matrix viewProj = view * Camera->GetProjectionMatrix();
+    RenderParentSkybox();
 
     Vector3 lightDir = Parent->GetCentre() - Centre;
     PlanetBuffer->SetData(Context, PlanetConstantBuffer { lightDir, t });

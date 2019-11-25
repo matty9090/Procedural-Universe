@@ -81,6 +81,7 @@ protected:
     virtual void BakeSkybox(Vector3 object) {}
 
     void GenerateSkybox(Vector3 location);
+    void RenderParentSkybox();
 
     CSkyBox SkyBox;
     Vector3 Centre;

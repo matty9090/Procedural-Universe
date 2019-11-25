@@ -91,3 +91,12 @@ void SandboxTarget::GenerateSkybox(Vector3 location)
     BakeSkybox(location);
     SkyBox.SetTextureReceiveOwnership(SkyboxGenerator->GetTextureTakeOwnership());
 }
+
+void SandboxTarget::RenderParentSkybox()
+{
+    if (Parent)
+    {
+        Context->OMSetRenderTargets(1, &RenderTarget, Resources->GetDepthStencilView());
+        Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
+    }
+}
