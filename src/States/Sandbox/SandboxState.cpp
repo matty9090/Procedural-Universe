@@ -4,9 +4,11 @@
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
 
+#include "UniverseTarget.hpp"
 #include "GalaxyTarget.hpp"
 #include "StarTarget.hpp"
 #include "PlanetTarget.hpp"
+
 #include "Render/Planet/Components/TerrainComponent.hpp"
 
 #include <DirectXColors.h>
@@ -282,16 +284,19 @@ void SandboxState::SetupTargets(const std::vector<Particle>& seedData)
 
     auto rtv = DeviceResources->GetSceneRenderTargetView();
 
-    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv, seedData);
-    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
-    std::unique_ptr<SandboxTarget> Planet = std::make_unique<PlanetTarget>(Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Universe = std::make_unique<UniverseTarget>(Context, DeviceResources, Camera.get(), rtv, seedData);
+    std::unique_ptr<SandboxTarget> Galaxy   = std::make_unique<GalaxyTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData);
+    std::unique_ptr<SandboxTarget> Star     = std::make_unique<StarTarget>    (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Planet   = std::make_unique<PlanetTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
 
+    Galaxy->Parent = Universe.get();
     Star->Parent = Galaxy.get();
     Planet->Parent = Star.get();
 
     Star->Child   = std::move(Planet);
     Galaxy->Child = std::move(Star);
+    Universe->Child = std::move(Galaxy);
 
-    CurrentTarget = Galaxy.get();
-    RootTarget = std::move(Galaxy);
+    CurrentTarget = Universe.get();
+    RootTarget = std::move(Universe);
 }

@@ -4,13 +4,12 @@
 #include <memory>
 #include <CommonStates.h>
 
-class GalaxyTarget : public SandboxTarget
+class UniverseTarget : public SandboxTarget
 {
 public:
-    GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData);
+    UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData);
 
     void Render() override;
-    void RenderTransitionChild(float t) override;
     void RenderTransitionParent(float t) override;
     void MoveObjects(Vector3 v) override;
 
@@ -37,7 +36,7 @@ private:
     };
 
     size_t CurrentClosestObjectID;
-    Vector3 GalaxyPosition;
+    Vector3 UniversePosition;
 
     RenderView ParticleRenderTarget;
     RenderPipeline ParticlePipeline;

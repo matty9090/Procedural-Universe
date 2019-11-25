@@ -1,9 +1,13 @@
-#include "GalaxyTarget.hpp"
+#include "UniverseTarget.hpp"
 
-GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData)
-    : SandboxTarget(context, "Galactic", resources, camera, rtv),
+UniverseTarget::UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData)
+    : SandboxTarget(context, "Universal", resources, camera, rtv),
       Particles(seedData)
 {
+    Scale = 0.006f;
+    BeginTransitionDist = 3200.0f;
+    EndTransitionDist = 300.0f;
+
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
     unsigned int height = static_cast<size_t>(vp.Height);
@@ -15,27 +19,22 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     CreateParticlePipeline();
 }
 
-void GalaxyTarget::Render()
+void UniverseTarget::Render()
 {
     RenderLerp(1.0f);
 }
 
-void GalaxyTarget::RenderTransitionChild(float t)
-{
-
-}
-
-void GalaxyTarget::RenderTransitionParent(float t)
+void UniverseTarget::RenderTransitionParent(float t)
 {
     RenderLerp(t);
 }
 
-void GalaxyTarget::MoveObjects(Vector3 v)
+void UniverseTarget::MoveObjects(Vector3 v)
 {
     for (auto& particle : Particles)
         particle.Position += v;
 
-    GalaxyPosition += v;
+    UniversePosition += v;
 
     D3D11_MAPPED_SUBRESOURCE mapped;
     Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
@@ -43,12 +42,12 @@ void GalaxyTarget::MoveObjects(Vector3 v)
     Context->Unmap(ParticleBuffer.Get(), 0);
 }
 
-Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
+Vector3 UniverseTarget::GetClosestObject(Vector3 pos)
 {
     return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
 }
 
-void GalaxyTarget::RenderLerp(float t)
+void UniverseTarget::RenderLerp(float t)
 {
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
@@ -70,7 +69,7 @@ void GalaxyTarget::RenderLerp(float t)
 
         auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
         auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
-
+        
         Context->Draw(pivot1, 0);
         Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
 
@@ -82,7 +81,7 @@ void GalaxyTarget::RenderLerp(float t)
     Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
 }
 
-void GalaxyTarget::BakeSkybox(Vector3 object)
+void UniverseTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
         LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
@@ -95,7 +94,7 @@ void GalaxyTarget::BakeSkybox(Vector3 object)
             unsigned int stride = sizeof(Particle);
 
             Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-            GSBuffer->SetData(Context, GSConstantBuffer{ viewProj, view.Invert(), Vector3::Zero });
+            GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
             Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
             Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
             Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -111,7 +110,7 @@ void GalaxyTarget::BakeSkybox(Vector3 object)
     });
 }
 
-void GalaxyTarget::CreateParticlePipeline()
+void UniverseTarget::CreateParticlePipeline()
 {
     std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },

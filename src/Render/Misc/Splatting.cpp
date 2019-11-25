@@ -42,7 +42,7 @@ void CSplatting::Render(unsigned int num, DirectX::SimpleMath::Vector3 cam)
     Context->GSSetShader(nullptr, 0, 0);
 
     /////
-   /* BasicPostProcess->SetEffect(DirectX::BasicPostProcess::GaussianBlur_5x5);
+    /*BasicPostProcess->SetEffect(DirectX::BasicPostProcess::GaussianBlur_5x5);
     BasicPostProcess->SetGaussianParameter(1.0f);
     BasicPostProcess->SetSourceTexture(Target0.Srv.Get());
     Context->OMSetBlendState(States->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
