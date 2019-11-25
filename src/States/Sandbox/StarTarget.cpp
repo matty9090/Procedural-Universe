@@ -140,7 +140,7 @@ void StarTarget::BakeSkybox(Vector3 object)
             unsigned int stride = sizeof(Particle);
 
             Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-            GSBuffer->SetData(Context, GSConstantBuffer{ viewProj, view.Invert(), Vector3::Zero });
+            GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
             Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
             Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
             Context->RSSetState(CommonStates->CullNone());

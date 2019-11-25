@@ -16,7 +16,7 @@ public:
     Vector3 GetClosestObject(Vector3 pos) override;
 
 private:
-    void RenderLerp(float t);
+    void RenderLerp(float t, bool single = false);
     void BakeSkybox(Vector3 object) override;
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
     void CreateParticlePipeline();

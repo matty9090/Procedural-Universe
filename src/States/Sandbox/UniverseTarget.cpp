@@ -26,7 +26,7 @@ void UniverseTarget::Render()
 
 void UniverseTarget::RenderTransitionParent(float t)
 {
-    RenderLerp(t);
+    RenderLerp(t, true);
 }
 
 void UniverseTarget::MoveObjects(Vector3 v)
@@ -47,7 +47,7 @@ Vector3 UniverseTarget::GetClosestObject(Vector3 pos)
     return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
 }
 
-void UniverseTarget::RenderLerp(float t)
+void UniverseTarget::RenderLerp(float t, bool single)
 {
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
@@ -67,15 +67,22 @@ void UniverseTarget::RenderLerp(float t)
         Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
 
-        auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
-        auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
-        
-        Context->Draw(pivot1, 0);
-        Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
+        if (single)
+        {
+            auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
+            auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
 
-        // Draw object of interest separately to lerp it's size
-        LerpBuffer->SetData(Context, LerpConstantBuffer { t });
-        Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
+            Context->Draw(pivot1, 0);
+            Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
+
+            // Draw object of interest separately to lerp it's size
+            LerpBuffer->SetData(Context, LerpConstantBuffer{ t });
+            Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
+        }
+        else
+        {
+            Context->Draw(static_cast<UINT>(Particles.size()), 0);
+        }
     });
 
     Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
