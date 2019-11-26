@@ -12,8 +12,10 @@ public:
     void Render() override;
     void RenderTransitionChild(float t) override;
     void RenderTransitionParent(float t) override;
+
     void MoveObjects(Vector3 v) override;
     void ScaleObjects(float scale) override;
+    void ResetObjectPositions() override;
 
     Vector3 GetClosestObject(Vector3 pos) override;
 

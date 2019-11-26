@@ -73,6 +73,7 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
 {
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
+
     view = view.Invert();
     view *= Matrix::CreateScale(scale);
 

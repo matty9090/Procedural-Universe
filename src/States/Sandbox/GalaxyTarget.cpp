@@ -4,9 +4,9 @@
 GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Galactic", resources, camera, rtv)
 {
-    Scale = 0.001f;
+    Scale = 0.0005f;
     BeginTransitionDist = 4000.0f;
-    EndTransitionDist = 80.0f;
+    EndTransitionDist = 100.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -27,7 +27,7 @@ void GalaxyTarget::Seed(uint64_t seed)
     auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
     seeder->Seed(seed);
 
-    ScaleObjects(0.002f);
+    ScaleObjects(0.001f);
 }
 
 void GalaxyTarget::Render()
@@ -41,7 +41,7 @@ void GalaxyTarget::RenderTransitionChild(float t)
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    RenderLerp(t, Scale, ParentLocationSpace);
+    RenderLerp(t, Scale, ParentLocationSpace, true);
 }
 
 void GalaxyTarget::RenderTransitionParent(float t)
@@ -67,6 +67,12 @@ void GalaxyTarget::ScaleObjects(float scale)
     RegenerateBuffer();
 }
 
+void GalaxyTarget::ResetObjectPositions()
+{
+    MoveObjects(-Centre);
+    Centre = Vector3::Zero;
+}
+
 Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
 {
     return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
@@ -80,6 +86,9 @@ void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
 
+    view = view.Invert();
+    view *= Matrix::CreateScale(scale);
+
     ParticlePipeline.SetState(Context, [&]() {
         unsigned int offset = 0;
         unsigned int stride = sizeof(Particle);
@@ -87,7 +96,7 @@ void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single
         LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), voffset });
+        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
         Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
         Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -122,6 +131,9 @@ void GalaxyTarget::BakeSkybox(Vector3 object)
 
         Matrix view = cam.GetViewMatrix();
         Matrix viewProj = view * cam.GetProjectionMatrix();
+
+        Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Parent->GetSkyBox().Draw(viewProj);
 
         ParticlePipeline.SetState(Context, [&]() {
             unsigned int offset = 0;
