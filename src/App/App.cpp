@@ -77,7 +77,7 @@ void App::Update(float dt)
         if (CurrentStateID == EState::Simulation)
         {
             auto Sim = static_cast<SimulationState*>(CurrentState);
-            SwitchState(EState::Sandbox, SandboxStateData(Sim->GetParticles()));
+            SwitchState(EState::Sandbox);
         }
         else
         {
@@ -90,7 +90,7 @@ void App::Update(float dt)
         if (CurrentStateID == EState::Simulation)
         {
             auto Sim = static_cast<SimulationState*>(CurrentState);
-            SwitchState(EState::DebugSandbox, DebugSandboxStateData(Sim->GetParticles()));
+            SwitchState(EState::DebugSandbox);
         }
         else
         {

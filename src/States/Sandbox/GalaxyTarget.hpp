@@ -7,20 +7,23 @@
 class GalaxyTarget : public SandboxTarget
 {
 public:
-    GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData);
+    GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv);
 
     void Render() override;
     void RenderTransitionChild(float t) override;
     void RenderTransitionParent(float t) override;
     void MoveObjects(Vector3 v) override;
+    void ScaleObjects(float scale) override;
 
     Vector3 GetClosestObject(Vector3 pos) override;
 
 private:
     void RenderLerp(float t, float scale = 1.0f, Vector3 voffset = Vector3::Zero, bool single = false);
     void BakeSkybox(Vector3 object) override;
+    void Seed(uint64_t seed) override;
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
     void CreateParticlePipeline();
+    void RegenerateBuffer();
 
     struct GSConstantBuffer
     {
@@ -37,7 +40,6 @@ private:
     };
 
     size_t CurrentClosestObjectID;
-    Vector3 GalaxyPosition;
 
     RenderView ParticleRenderTarget;
     RenderPipeline ParticlePipeline;

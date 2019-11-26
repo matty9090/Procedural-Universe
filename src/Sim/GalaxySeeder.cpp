@@ -14,11 +14,13 @@ GalaxySeeder::GalaxySeeder(std::vector<Particle>& particles)
 
 }
 
-void GalaxySeeder::Seed()
+void GalaxySeeder::Seed(uint64_t seed)
 {
+    Gen = std::default_random_engine { static_cast<unsigned int>(seed) };
+
     LocalNum = 0;
 
-    std::uniform_real_distribution<float> dist_pos(-1000.0f, 1000.0f);
+    std::uniform_real_distribution<float> dist_pos(-2000.0f, 2000.0f);
     std::uniform_real_distribution<double> dist_vel(0.8, 1.2);
 
     CreateSpiralArm(0.0f, ArmPDist / 2);
@@ -76,7 +78,7 @@ bool GalaxySeeder::AddParticle(
 void GalaxySeeder::CreateSpiralArm(float offset, float dist)
 {
     std::normal_distribution<float> distx(0.5f, 0.2f);
-    std::uniform_real_distribution<float> disty(0.5f, 0.2f);
+    std::uniform_real_distribution<float> disty(0.2f, 0.5f);
 
     float maxAngle = 6.0f;
     int loops = static_cast<int>(floor(maxAngle / 0.1f));

@@ -30,13 +30,8 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     CTerrainComponent::GeneratePermutations();
 
-    auto sandboxData = static_cast<SandboxStateData&>(data);
-
-    for (auto& p : sandboxData.Particles)
-        p.Position *= 2000.0f;
-
     CreateModelPipeline();
-    SetupTargets(sandboxData.Particles);
+    SetupTargets();
 
     Ship = std::make_unique<CShip>(Device, RESM.GetMesh("assets/Ship.obj"));
     Ship->Scale(0.1f);
@@ -63,11 +58,11 @@ void SandboxState::Cleanup()
     
     auto t = &RootTarget;
 
-    while(*t)
+    while (*t)
     {
         t = &t->get()->Child;
 
-        if(*t)
+        if (*t)
             t->reset();
     }
 }
@@ -214,7 +209,7 @@ void SandboxState::TransitionLogic()
 
                 LOGM("Starting down transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
                 
-                CurrentTarget->Child->StartTransitionDownChild(object);
+                CurrentTarget->Child->StartTransitionDownChild(object, CurrentTarget->GetClosestObjectIndex());
                 CurrentTarget->StartTransitionDownParent(object);
             }
         }
@@ -275,19 +270,14 @@ void SandboxState::CreateModelPipeline()
     ModelPipeline.CreateInputLayout(Device, layout);
 }
 
-void SandboxState::SetupTargets(const std::vector<Particle>& seedData)
+void SandboxState::SetupTargets()
 {
-    std::vector<Particle> seedData2 = seedData;
-    seedData2.erase(seedData2.end() - seedData2.size() + 60, seedData2.end());
-
-    for (auto& p : seedData2) p.Position /= 100;
-
     auto rtv = DeviceResources->GetSceneRenderTargetView();
 
-    std::unique_ptr<SandboxTarget> Universe = std::make_unique<UniverseTarget>(Context, DeviceResources, Camera.get(), rtv, seedData);
-    std::unique_ptr<SandboxTarget> Galaxy   = std::make_unique<GalaxyTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData);
-    std::unique_ptr<SandboxTarget> Star     = std::make_unique<StarTarget>    (Context, DeviceResources, Camera.get(), rtv, seedData2);
-    std::unique_ptr<SandboxTarget> Planet   = std::make_unique<PlanetTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Universe = std::make_unique<UniverseTarget>(Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Galaxy   = std::make_unique<GalaxyTarget>  (Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Star     = std::make_unique<StarTarget>    (Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Planet   = std::make_unique<PlanetTarget>  (Context, DeviceResources, Camera.get(), rtv);
 
     Galaxy->Parent = Universe.get();
     Star->Parent = Galaxy.get();

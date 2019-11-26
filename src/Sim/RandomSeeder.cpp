@@ -8,7 +8,7 @@ RandomSeeder::RandomSeeder(std::vector<Particle>& particles) : Particles(particl
 
 }
 
-void RandomSeeder::Seed()
+void RandomSeeder::Seed(uint64_t seed)
 {
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist(-500.0f, 500.0);

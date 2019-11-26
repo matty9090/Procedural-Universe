@@ -16,14 +16,6 @@
 #include <PostProcess.h>
 #include <CommonStates.h>
 
-
-struct DebugSandboxStateData : public StateData
-{
-    std::vector<Particle> Particles;
-
-    DebugSandboxStateData(std::vector<Particle> particles) : Particles(particles) {}
-};
-
 class DebugSandboxState : public IState
 {
 public:
@@ -37,7 +29,7 @@ public:
 private:
     void Clear();
     void RenderUI();
-    void SetupTargets(const std::vector<Particle>& seedData);
+    void SetupTargets();
     void TestTransitions();
 
     ID3D11Device* Device;

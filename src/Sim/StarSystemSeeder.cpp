@@ -13,7 +13,7 @@ StarSystemSeeder::StarSystemSeeder(std::vector<Particle>& particles) : Particles
 
 }
 
-void StarSystemSeeder::Seed()
+void StarSystemSeeder::Seed(uint64_t seed)
 {
     Particle& star = Particles[0];
     star.Colour = DirectX::SimpleMath::Color(0.6f, 1.0f, 1.0f);

@@ -1,8 +1,8 @@
 #include "UniverseTarget.hpp"
+#include "Sim/IParticleSeeder.hpp"
 
-UniverseTarget::UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData)
-    : SandboxTarget(context, "Universal", resources, camera, rtv),
-      Particles(seedData)
+UniverseTarget::UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
+    : SandboxTarget(context, "Universal", resources, camera, rtv)
 {
     Scale = 0.006f;
     BeginTransitionDist = 3200.0f;
@@ -16,6 +16,7 @@ UniverseTarget::UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
+    Seed(0);
     CreateParticlePipeline();
 }
 
@@ -34,12 +35,16 @@ void UniverseTarget::MoveObjects(Vector3 v)
     for (auto& particle : Particles)
         particle.Position += v;
 
-    UniversePosition += v;
+    Centre += v;
+    RegenerateBuffer();
+}
 
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
-    Context->Unmap(ParticleBuffer.Get(), 0);
+void UniverseTarget::ScaleObjects(float scale)
+{
+    for (auto& particle : Particles)
+        particle.Position /= scale;
+
+    RegenerateBuffer();
 }
 
 Vector3 UniverseTarget::GetClosestObject(Vector3 pos)
@@ -85,7 +90,19 @@ void UniverseTarget::RenderLerp(float t, bool single)
         }
     });
 
-    Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
+    Context->GSSetShader(nullptr, 0, 0);
+    //Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
+}
+
+void UniverseTarget::Seed(uint64_t seed)
+{
+    Particles.resize(50000);
+    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
+
+    auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random);
+    seeder->Seed(seed);
+
+    ScaleObjects(0.001f);
 }
 
 void UniverseTarget::BakeSkybox(Vector3 object)
@@ -113,7 +130,8 @@ void UniverseTarget::BakeSkybox(Vector3 object)
             Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
         });
 
-        Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
+        Context->GSSetShader(nullptr, 0, 0);
+        //Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
     });
 }
 
@@ -131,11 +149,18 @@ void UniverseTarget::CreateParticlePipeline()
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, layout);
 
-    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
 
     auto vp = Resources->GetScreenViewport();
     ParticleRenderTarget = CreateTarget(Device, static_cast<int>(vp.Width), static_cast<int>(vp.Height));
 
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
+}
+
+void UniverseTarget::RegenerateBuffer()
+{
+    D3D11_MAPPED_SUBRESOURCE mapped;
+    Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
+    Context->Unmap(ParticleBuffer.Get(), 0);
 }

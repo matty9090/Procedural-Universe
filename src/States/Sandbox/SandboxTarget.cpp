@@ -63,10 +63,11 @@ void SandboxTarget::StartTransitionUpChild()
     OnStartTransitionUpChild();
 }
 
-void SandboxTarget::StartTransitionDownChild(Vector3 location)
+void SandboxTarget::StartTransitionDownChild(Vector3 location, uint64_t seed = 0)
 {
     State = EState::TransitioningChild;
     ParentLocationSpace = location;
+    Seed(seed);
     ScaleObjects(1.0f / Scale);
     OnStartTransitionDownChild(location);
 }

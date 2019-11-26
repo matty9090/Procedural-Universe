@@ -27,8 +27,7 @@ void DebugSandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mou
     unsigned int width = static_cast<size_t>(vp.Width);
     unsigned int height = static_cast<size_t>(vp.Height);
 
-    auto sandboxData = static_cast<DebugSandboxStateData&>(data);
-    SetupTargets(sandboxData.Particles);
+    SetupTargets();
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -103,15 +102,12 @@ void DebugSandboxState::RenderUI()
 
 }
 
-void DebugSandboxState::SetupTargets(const std::vector<Particle>& seedData)
+void DebugSandboxState::SetupTargets()
 {
-    std::vector<Particle> seedData2 = seedData;
-    seedData2.erase(seedData2.end() - seedData2.size() + 60, seedData2.end());
-
     auto rtv = DeviceResources->GetRenderTargetView();
 
-    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv, seedData2);
-    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv, seedData2);
+    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv);
 
     Star->Parent = Galaxy.get();
     Galaxy->Child = std::move(Star);
@@ -133,7 +129,7 @@ void DebugSandboxState::TestTransitions()
             {
                 if (CurrentTarget->Child)
                 {
-                    CurrentTarget->Child->StartTransitionDownChild(object);
+                    CurrentTarget->Child->StartTransitionDownChild(object, CurrentTarget->GetClosestObjectIndex());
                     CurrentTarget->StartTransitionDownParent(object);
                     CurrentTarget->EndTransitionDownParent(object);
                     CurrentTarget->Child->EndTransitionDownChild();

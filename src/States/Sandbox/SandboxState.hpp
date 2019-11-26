@@ -19,14 +19,6 @@
 #include <PostProcess.h>
 #include <CommonStates.h>
 
-
-struct SandboxStateData : public StateData
-{
-    std::vector<Particle> Particles;
-
-    SandboxStateData(std::vector<Particle> particles) : Particles(particles) {}
-};
-
 class SandboxState : public IState
 {
 public:
@@ -42,7 +34,7 @@ private:
     void FloatingOrigin();
     void TransitionLogic();
     void CreateModelPipeline();
-    void SetupTargets(const std::vector<Particle>& seedData);
+    void SetupTargets();
 
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;

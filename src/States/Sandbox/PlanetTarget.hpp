@@ -7,7 +7,7 @@
 class PlanetTarget : public SandboxTarget
 {
 public:
-    PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData);
+    PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv);
 
     void Render() override;
     void RenderTransitionChild(float t) override;

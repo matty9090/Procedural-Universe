@@ -6,7 +6,7 @@
 class StarTarget : public SandboxTarget
 {
 public:
-    StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData);
+    StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv);
 
     void Render() override;
     void RenderTransitionChild(float t) override;
@@ -22,6 +22,7 @@ private:
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
     void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f, bool single = false);
     void BakeSkybox(Vector3 object) override;
+    void Seed(uint64_t seed) override;
     void UpdateParticleBuffer();
 
     void CreateStarPipeline();

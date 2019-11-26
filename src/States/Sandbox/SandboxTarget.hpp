@@ -42,7 +42,8 @@ public:
     virtual void ScaleObjects(float scale) {}
     virtual void ResetObjectPositions() {}
 
-    virtual Vector3 GetClosestObject(Vector3 pos) = 0;
+    virtual Vector3  GetClosestObject(Vector3 pos) = 0;
+    virtual uint64_t GetClosestObjectIndex() const { return 0; };
 
     void StartTransitionUpParent();
     void StartTransitionDownParent(Vector3 object);
@@ -51,7 +52,7 @@ public:
     void EndTransitionDownParent(Vector3 object);
 
     void StartTransitionUpChild();
-    void StartTransitionDownChild(Vector3 location);
+    void StartTransitionDownChild(Vector3 location, uint64_t seed);
 
     void EndTransitionUpChild();
     void EndTransitionDownChild();
@@ -78,6 +79,7 @@ protected:
 
     virtual void StateIdle(float dt) {}
     virtual void StateTransitioning(float dt) {}
+    virtual void Seed(uint64_t seed) {}
     virtual void BakeSkybox(Vector3 object) {}
 
     void GenerateSkybox(Vector3 location);

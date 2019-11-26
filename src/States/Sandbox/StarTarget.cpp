@@ -1,14 +1,15 @@
 #include "StarTarget.hpp"
 
+#include "Sim/IParticleSeeder.hpp"
+
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
 
-StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv, const std::vector<Particle>& seedData)
-    : SandboxTarget(context, "Stellar", resources, camera, rtv),
-      Particles(seedData)
+StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
+    : SandboxTarget(context, "Stellar", resources, camera, rtv)
 {
     Scale = 0.006f;
-    BeginTransitionDist = 3200.0f;
+    BeginTransitionDist = 4000.0f;
     EndTransitionDist = 300.0f;
 
     auto vp = Resources->GetScreenViewport();
@@ -34,7 +35,7 @@ void StarTarget::RenderTransitionChild(float t)
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
     Star->Move(ParentLocationSpace);
-    RenderLerp(Scale, ParentLocationSpace, t);
+    RenderLerp(Scale, ParentLocationSpace, t, true);
     Star->Move(-ParentLocationSpace);
 }
 
@@ -97,6 +98,7 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
 
             // Draw object of interest separately to lerp it's size
             LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+            Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
             Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
         }
         else
@@ -119,7 +121,7 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
 void StarTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
-        LerpBuffer->SetData(Context, LerpConstantBuffer{ 1.0f });
+        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
         Matrix view = cam.GetViewMatrix();
         Matrix viewProj = view * cam.GetProjectionMatrix();
@@ -154,6 +156,17 @@ void StarTarget::BakeSkybox(Vector3 object)
     });
 }
 
+void StarTarget::Seed(uint64_t seed)
+{
+    Particles.resize(10);
+    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
+
+    auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
+    seeder->Seed(seed);
+
+    ScaleObjects(0.1f);
+}
+
 void StarTarget::UpdateParticleBuffer()
 {
     D3D11_MAPPED_SUBRESOURCE mapped;
@@ -171,7 +184,7 @@ void StarTarget::ResetObjectPositions()
 void StarTarget::CreateStarPipeline()
 {
     Star = std::make_unique<CModel>(Device, RESM.GetMesh("assets/Sphere.obj"));
-    Star->Scale(200.0f);
+    Star->Scale(60.0f);
 
     StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     StarPipeline.LoadVertex(L"shaders/Position.vsh");
@@ -191,7 +204,6 @@ void StarTarget::CreateParticlePipeline()
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
 
-    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
 
     auto vp = Resources->GetScreenViewport();
