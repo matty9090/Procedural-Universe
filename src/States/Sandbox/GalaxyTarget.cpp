@@ -1,5 +1,4 @@
 #include "GalaxyTarget.hpp"
-#include "Sim/IParticleSeeder.hpp"
 
 GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Galactic", resources, camera, rtv)
@@ -15,19 +14,12 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     Splatting = std::make_unique<CSplatting>(Context, width, height);
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
-
-    CreateParticlePipeline();
+    GalaxyRenderer = std::make_unique<Galaxy>(Context);
 }
 
 void GalaxyTarget::Seed(uint64_t seed)
 {
-    Particles.resize(40000);
-    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
-
-    auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
-    seeder->Seed(seed);
-
-    ScaleObjects(0.001f);
+    GalaxyRenderer->Seed(seed);
 }
 
 void GalaxyTarget::Render()
@@ -52,19 +44,13 @@ void GalaxyTarget::RenderTransitionParent(float t)
 
 void GalaxyTarget::MoveObjects(Vector3 v)
 {
-    for (auto& particle : Particles)
-        particle.Position += v;
-
     Centre += v;
-    RegenerateBuffer();
+    GalaxyRenderer->Move(v);
 }
 
 void GalaxyTarget::ScaleObjects(float scale)
 {
-    for (auto& particle : Particles)
-        particle.Position /= scale;
-
-    RegenerateBuffer();
+    GalaxyRenderer->Scale(scale);
 }
 
 void GalaxyTarget::ResetObjectPositions()
@@ -75,114 +61,21 @@ void GalaxyTarget::ResetObjectPositions()
 
 Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
 {
-    return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
+    return GalaxyRenderer->GetClosestObject(pos);
 }
 
 void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single)
 {
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+    GalaxyRenderer->Render(*Camera, t, scale, voffset, single);
 
-    Matrix view = Camera->GetViewMatrix();
-    Matrix viewProj = view * Camera->GetProjectionMatrix();
-
-    view = view.Invert();
-    view *= Matrix::CreateScale(scale);
-
-    ParticlePipeline.SetState(Context, [&]() {
-        unsigned int offset = 0;
-        unsigned int stride = sizeof(Particle);
-
-        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
-
-        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
-        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-        Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-
-        if (single)
-        {
-            auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
-            auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
-
-            Context->Draw(pivot1, 0);
-            Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
-
-            // Draw object of interest separately to lerp it's size
-            LerpBuffer->SetData(Context, LerpConstantBuffer { t });
-            Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-            Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
-        }
-        else
-        {
-            Context->Draw(static_cast<UINT>(Particles.size()), 0);
-        }
-    });
-
-    Context->GSSetShader(nullptr, 0, 0);
     //Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
 }
 
 void GalaxyTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
-        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
-
-        Matrix view = cam.GetViewMatrix();
-        Matrix viewProj = view * cam.GetProjectionMatrix();
-
-        Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Parent->GetSkyBox().Draw(viewProj);
-
-        ParticlePipeline.SetState(Context, [&]() {
-            unsigned int offset = 0;
-            unsigned int stride = sizeof(Particle);
-
-            Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-            GSBuffer->SetData(Context, GSConstantBuffer{ viewProj, view.Invert(), Vector3::Zero });
-            Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-            Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-            Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-
-            auto pivot1 = static_cast<unsigned int>(CurrentClosestObjectID);
-            auto pivot2 = static_cast<unsigned int>(Particles.size() - CurrentClosestObjectID - 1);
-
-            Context->Draw(pivot1, 0);
-            Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
-        });
-
-        Context->GSSetShader(nullptr, 0, 0);
-        //Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
+        GalaxyRenderer->Render(cam, 1.0f);
     });
-}
-
-void GalaxyTarget::CreateParticlePipeline()
-{
-    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
-    ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-    ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(L"shaders/GalaxyParticle.gsh");
-    ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
-    ParticlePipeline.CreateInputLayout(Device, layout);
-
-    GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
-
-    auto vp = Resources->GetScreenViewport();
-    ParticleRenderTarget = CreateTarget(Device, static_cast<int>(vp.Width), static_cast<int>(vp.Height));
-
-    LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
-}
-
-void GalaxyTarget::RegenerateBuffer()
-{
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
-    Context->Unmap(ParticleBuffer.Get(), 0);
 }
