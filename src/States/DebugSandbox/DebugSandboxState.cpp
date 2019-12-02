@@ -4,6 +4,7 @@
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
 
+#include "States/Sandbox/UniverseTarget.hpp"
 #include "States/Sandbox/GalaxyTarget.hpp"
 #include "States/Sandbox/StarTarget.hpp"
 
@@ -106,14 +107,18 @@ void DebugSandboxState::SetupTargets()
 {
     auto rtv = DeviceResources->GetRenderTargetView();
 
-    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv);
-    std::unique_ptr<SandboxTarget> Star   = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Universe = std::make_unique<UniverseTarget>(Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Galaxy   = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Star     = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv);
 
+    Galaxy->Parent = Universe.get();
     Star->Parent = Galaxy.get();
-    Galaxy->Child = std::move(Star);
 
-    CurrentTarget = Galaxy.get();
-    RootTarget = std::move(Galaxy);
+    Galaxy->Child = std::move(Star);
+    Universe->Child = std::move(Galaxy);
+
+    CurrentTarget = Universe.get();
+    RootTarget = std::move(Universe);
 }
 
 void DebugSandboxState::TestTransitions()
@@ -129,7 +134,7 @@ void DebugSandboxState::TestTransitions()
             {
                 if (CurrentTarget->Child)
                 {
-                    CurrentTarget->Child->StartTransitionDownChild(object, CurrentTarget->GetClosestObjectIndex());
+                    CurrentTarget->Child->StartTransitionDownChild(object, 0);
                     CurrentTarget->StartTransitionDownParent(object);
                     CurrentTarget->EndTransitionDownParent(object);
                     CurrentTarget->Child->EndTransitionDownChild();
@@ -156,7 +161,7 @@ void DebugSandboxState::TestTransitions()
         }
     };
     
-    for (int i = 0; i < 20; ++i)
+    for (int i = 0; i < 4; ++i)
     {
         TransitionDown();
         TransitionUp();

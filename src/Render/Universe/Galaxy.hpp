@@ -22,6 +22,7 @@ public:
     void Scale(float scale);
     void Render(const ICamera& cam, float t, float scale = 1.0f, DirectX::SimpleMath::Vector3 voffset = DirectX::SimpleMath::Vector3::Zero, bool single = false);
 
+    DirectX::SimpleMath::Vector3 GetPosition() const { return Position; }
     DirectX::SimpleMath::Vector3 GetClosestObject(DirectX::SimpleMath::Vector3 pos);
 
 private:
@@ -46,6 +47,7 @@ private:
     };
 
     size_t CurrentClosestObjectID = 0;
+    DirectX::SimpleMath::Vector3 Position;
     std::vector<Particle> Particles;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
     Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;

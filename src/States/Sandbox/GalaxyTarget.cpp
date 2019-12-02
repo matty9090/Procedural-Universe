@@ -1,9 +1,10 @@
 #include "GalaxyTarget.hpp"
+#include "Sim/IParticleSeeder.hpp"
 
 GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Galactic", resources, camera, rtv)
 {
-    Scale = 0.0005f;
+    Scale = 0.01f;
     BeginTransitionDist = 4000.0f;
     EndTransitionDist = 100.0f;
 
@@ -14,6 +15,7 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     Splatting = std::make_unique<CSplatting>(Context, width, height);
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
+
     GalaxyRenderer = std::make_unique<Galaxy>(Context);
 }
 
@@ -33,7 +35,9 @@ void GalaxyTarget::RenderTransitionChild(float t)
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    RenderLerp(t, Scale, ParentLocationSpace, true);
+    //Star->Move(ParentLocationSpace);
+    RenderLerp(t, Scale, ParentLocationSpace);
+    //Star->Move(-ParentLocationSpace);
 }
 
 void GalaxyTarget::RenderTransitionParent(float t)
@@ -44,19 +48,7 @@ void GalaxyTarget::RenderTransitionParent(float t)
 
 void GalaxyTarget::MoveObjects(Vector3 v)
 {
-    Centre += v;
     GalaxyRenderer->Move(v);
-}
-
-void GalaxyTarget::ScaleObjects(float scale)
-{
-    GalaxyRenderer->Scale(scale);
-}
-
-void GalaxyTarget::ResetObjectPositions()
-{
-    MoveObjects(-Centre);
-    Centre = Vector3::Zero;
 }
 
 Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
@@ -68,9 +60,8 @@ void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single
 {
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-    GalaxyRenderer->Render(*Camera, t, scale, voffset, single);
 
-    //Splatting->Render(static_cast<UINT>(Particles.size()), Camera->GetPosition());
+    GalaxyRenderer->Render(*Camera, 1.0f);
 }
 
 void GalaxyTarget::BakeSkybox(Vector3 object)

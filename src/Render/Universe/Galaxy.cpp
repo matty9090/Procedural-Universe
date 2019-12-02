@@ -42,6 +42,8 @@ void Galaxy::Move(Vector3 v)
     for (auto& particle : Particles)
         particle.Position += v;
 
+    Position += v;
+
     RegenerateBuffer();
 }
 
