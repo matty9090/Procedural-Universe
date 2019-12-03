@@ -7,6 +7,11 @@ cbuffer cb0
     float3 Translation;
 };
 
+cbuffer cb1
+{
+    float Lerp;
+};
+
 struct GS_VertIn
 {
 	float3 Position : POSITION;
@@ -55,6 +60,7 @@ void main
         outVert.ViewportPosition.z = LogDepthBuffer(outVert.ViewportPosition.w);
 
         outVert.Colour = inParticle[0].Colour;
+        outVert.Colour.a = Lerp;
         outVert.UV = UVs[i];
 		outStrip.Append( outVert );
 	}

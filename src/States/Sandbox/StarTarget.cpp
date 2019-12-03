@@ -10,7 +10,7 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
 {
     Scale = 0.006f;
     BeginTransitionDist = 4000.0f;
-    EndTransitionDist = 300.0f;
+    EndTransitionDist = 200.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);

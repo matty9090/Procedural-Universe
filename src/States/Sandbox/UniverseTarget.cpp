@@ -43,6 +43,14 @@ void UniverseTarget::ScaleObjects(float scale)
         galaxy->Scale(scale);
 }
 
+void UniverseTarget::ResetObjectPositions()
+{
+    for (auto& galaxy : Galaxies)
+        galaxy->Move(-UniversePosition);
+
+    UniversePosition = Vector3::Zero;
+}
+
 Vector3 UniverseTarget::GetClosestObject(Vector3 pos)
 {
     return Maths::ClosestObject(pos, Galaxies, &CurrentClosestObjectID)->GetPosition();
@@ -81,7 +89,10 @@ void UniverseTarget::Seed(uint64_t seed)
 void UniverseTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
-        for (auto& galaxy : Galaxies)
-            galaxy->Render(cam, 1.0f);
+        for (size_t i = 0; i < Galaxies.size(); ++i)
+        {
+            if(i != CurrentClosestObjectID)
+                Galaxies[i]->Render(cam, 1.0f);
+        }
     });
 }

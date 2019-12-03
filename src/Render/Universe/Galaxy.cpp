@@ -28,7 +28,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
 
 void Galaxy::Seed(uint64_t seed)
 {
-    Particles.resize(40000);
+    Particles.resize(1000);
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 
     auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
@@ -43,7 +43,6 @@ void Galaxy::Move(Vector3 v)
         particle.Position += v;
 
     Position += v;
-
     RegenerateBuffer();
 }
 
@@ -67,7 +66,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
         unsigned int offset = 0;
         unsigned int stride = sizeof(Particle);
 
-        LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
         Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
         GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
@@ -83,7 +82,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
             Context->Draw(pivot1, 0);
             Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
 
-            LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+            LerpBuffer->SetData(Context, LerpConstantBuffer { t });
             Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
             Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
         }
