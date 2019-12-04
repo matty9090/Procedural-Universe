@@ -196,6 +196,19 @@ void SandboxState::TransitionLogic()
     {
         // Transition down calculations
         auto object = CurrentTarget->GetClosestObject(Ship->GetPosition()); // TODO: Store object as member
+        auto newIndex = CurrentTarget->GetClosestObjectIndex();
+
+        // Cancel transition if there's another close object
+        if (CurrentTarget->IsTransitioning() && newIndex != ClosestObjIndex)
+        {
+            ClosestObjIndex = newIndex;
+            LOGM("There's another close object, switching to new one")
+
+            CurrentTarget->EndTransitionUpParent();
+            CurrentTarget->Child->EndTransitionUpChild();
+            Ship->VelocityScale = 1.0f;
+        }
+
         float objectDist = Vector3::Distance(Ship->GetPosition(), object);
         float scaledDistToObject = (objectDist - CurrentTarget->Child->EndTransitionDist) / CurrentTarget->Child->BeginTransitionDist;
 

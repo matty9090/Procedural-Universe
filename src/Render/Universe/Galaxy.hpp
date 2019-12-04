@@ -24,6 +24,7 @@ public:
 
     DirectX::SimpleMath::Vector3 GetPosition() const { return Position; }
     DirectX::SimpleMath::Vector3 GetClosestObject(DirectX::SimpleMath::Vector3 pos);
+    size_t GetClosestObjectIndex() const { return CurrentClosestObjectID; }
 
 private:
     void RegenerateBuffer();

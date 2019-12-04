@@ -59,4 +59,5 @@ private:
     float CurrentTransitionT = 0.0f;
 
     bool bShowClosestObject = false;
+    size_t ClosestObjIndex;
 };

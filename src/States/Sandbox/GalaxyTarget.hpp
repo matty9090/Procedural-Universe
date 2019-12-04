@@ -19,6 +19,7 @@ public:
     void ResetObjectPositions() override;
 
     Vector3 GetClosestObject(Vector3 pos) override;
+    size_t GetClosestObjectIndex() const override { return GalaxyRenderer->GetClosestObjectIndex(); }
 
 private:
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }

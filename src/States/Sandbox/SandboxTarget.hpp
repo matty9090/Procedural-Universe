@@ -43,7 +43,7 @@ public:
     virtual void ResetObjectPositions() {}
 
     virtual Vector3  GetClosestObject(Vector3 pos) = 0;
-    virtual uint64_t GetClosestObjectIndex() const { return 0; };
+    virtual size_t GetClosestObjectIndex() const { return 0; };
 
     void StartTransitionUpParent();
     void StartTransitionDownParent(Vector3 object);
