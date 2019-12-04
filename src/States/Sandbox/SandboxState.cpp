@@ -131,6 +131,7 @@ void SandboxState::Render()
     if (bShowClosestObject)
     {
         auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
+        //LOGM(Vector3::Distance(closest, Ship->GetPosition()))
         ClosestObjCube->Render(closest, 100.0f, Camera->GetViewMatrix() * Camera->GetProjectionMatrix(), false);
     }
 }
@@ -194,7 +195,7 @@ void SandboxState::TransitionLogic()
     if (CurrentTarget->Child)
     {
         // Transition down calculations
-        auto object = CurrentTarget->GetClosestObject(Ship->GetPosition());
+        auto object = CurrentTarget->GetClosestObject(Ship->GetPosition()); // TODO: Store object as member
         float objectDist = Vector3::Distance(Ship->GetPosition(), object);
         float scaledDistToObject = (objectDist - CurrentTarget->Child->EndTransitionDist) / CurrentTarget->Child->BeginTransitionDist;
 
