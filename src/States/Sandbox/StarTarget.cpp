@@ -185,7 +185,7 @@ void StarTarget::ResetObjectPositions()
 void StarTarget::CreateStarPipeline()
 {
     Star = std::make_unique<CModel>(Device, RESM.GetMesh("assets/Sphere.obj"));
-    Star->Scale(60.0f);
+    Star->Scale(2.0f);
 
     StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     StarPipeline.LoadVertex(L"shaders/Position.vsh");

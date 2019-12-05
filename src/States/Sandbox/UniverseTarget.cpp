@@ -61,8 +61,19 @@ void UniverseTarget::RenderLerp(float t, bool single)
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    for (auto& galaxy : Galaxies)
-        galaxy->Render(*Camera, t, 1.0f, Vector3::Zero, single);
+    if (single)
+    {
+        for (size_t i = 0; i < Galaxies.size(); ++i)
+        {
+            if (i != CurrentClosestObjectID)
+                Galaxies[i]->Render(*Camera, t);
+        }
+    }
+    else
+    {
+        for (auto& galaxy : Galaxies)
+            galaxy->Render(*Camera, t);
+    }
 }
 
 void UniverseTarget::Seed(uint64_t seed)

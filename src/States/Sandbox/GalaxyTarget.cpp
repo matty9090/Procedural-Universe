@@ -74,6 +74,7 @@ void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single
 void GalaxyTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
+        //GetClosestObject(cam.GetPosition());
         GalaxyRenderer->Render(cam, 1.0f, 1.0f, Vector3::Zero, true);
     });
 }

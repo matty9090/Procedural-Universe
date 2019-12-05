@@ -68,6 +68,7 @@ void SandboxTarget::StartTransitionDownChild(Vector3 location, uint64_t seed = 0
     State = EState::TransitioningChild;
     ParentLocationSpace = location;
     Seed(seed);
+    GetClosestObject(Camera->GetPosition());
     ScaleObjects(1.0f / Scale);
     OnStartTransitionDownChild(location);
 }
