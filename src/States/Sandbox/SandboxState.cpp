@@ -205,7 +205,7 @@ void SandboxState::TransitionLogic()
         if (CurrentTarget->IsTransitioning() && newIndex != ClosestObjIndex)
         {
             ClosestObjIndex = newIndex;
-            LOGM("There's another close object, switching to new one")
+            LOGV("There's another close object, switching to new one")
 
             CurrentTarget->EndTransitionUpParent();
             CurrentTarget->Child->EndTransitionUpChild();
