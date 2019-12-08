@@ -92,7 +92,7 @@
             "installRoot": "${projectDir}\\out\\install\\${name}",
             "cmakeCommandArgs": "",
             "buildCommandArgs": "-v",
-            "ctestCommandArgs": "",
+            "ctestCommandArgs": "-VV",
             "inheritEnvironments": [ "msvc_x64_x64" ],
             "variables": [
                 {
@@ -107,6 +107,16 @@
                 },
                 {
                     "name": "ASSIMP_NO_EXPORT",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ENABLE_TESTING",
+                    "value": "True",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "gtest_force_shared_crt",
                     "value": "True",
                     "type": "BOOL"
                 }
