@@ -22,12 +22,12 @@ BruteForceGPU::BruteForceGPU(ID3D11DeviceContext* context)
         { nullptr, nullptr }
     };
 
-    if(!LoadComputeShader(Device, L"shaders/Gravity.csh", GravityShader.ReleaseAndGetAddressOf(), defines))
+    if(!LoadComputeShader(Device, L"shaders/Compute/Gravity.csh", GravityShader.ReleaseAndGetAddressOf(), defines))
     {
         LOGM("Could not load compute shader")
     }
 
-    if(!LoadComputeShader(Device, L"shaders/Update.csh", UpdateShader.ReleaseAndGetAddressOf(), defines))
+    if(!LoadComputeShader(Device, L"shaders/Compute/Update.csh", UpdateShader.ReleaseAndGetAddressOf(), defines))
     {
         LOGM("Could not load compute shader")
     }

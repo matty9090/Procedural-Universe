@@ -1,5 +1,5 @@
 #include "Scatter.hlsl"
-#include "Common.hlsl"
+#include "../Common.hlsl"
 
 cbuffer MatrixBuffer : register(b0) {
     row_major matrix worldViewProj;

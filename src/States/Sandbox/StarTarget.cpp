@@ -188,8 +188,8 @@ void StarTarget::CreateStarPipeline()
     Star->Scale(2.0f);
 
     StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    StarPipeline.LoadVertex(L"shaders/Position.vsh");
-    StarPipeline.LoadPixel(L"shaders/Star.psh");
+    StarPipeline.LoadVertex(L"shaders/Standard/Position.vsh");
+    StarPipeline.LoadPixel(L"shaders/Particles/Star.psh");
     StarPipeline.CreateRasteriser(Device, ECullMode::Clockwise);
     StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
 
@@ -200,8 +200,8 @@ void StarTarget::CreateParticlePipeline()
 {
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(L"shaders/PlanetParticle.gsh");
+    ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
+    ParticlePipeline.LoadGeometry(L"shaders/Particles/PlanetParticle.gsh");
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
 

@@ -14,8 +14,8 @@ CTerrainComponent::CTerrainComponent(CPlanet* planet) : Planet(planet)
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
 
-    TerrainPipeline.LoadVertex(L"shaders/Planet.vsh");
-    TerrainPipeline.LoadPixel(L"shaders/Planet.psh");
+    TerrainPipeline.LoadVertex(L"shaders/Particles/Planet.vsh");
+    TerrainPipeline.LoadPixel(L"shaders/Particles/Planet.psh");
     TerrainPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
     TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 

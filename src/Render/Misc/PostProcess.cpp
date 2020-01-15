@@ -31,7 +31,7 @@ CPostProcess::CPostProcess(ID3D11Device* device, ID3D11DeviceContext* context, i
     Device->CreateTexture2D(&desc, nullptr, SceneTexture.GetAddressOf());
     Device->CreateShaderResourceView(SceneTexture.Get(), nullptr, SceneSrv.ReleaseAndGetAddressOf());
 
-    DepthShader = RESM.GetPixelShader(L"shaders/Depth.psh");
+    DepthShader = RESM.GetPixelShader(L"shaders/Misc/Depth.psh");
     RegisterEvents();
 }
 

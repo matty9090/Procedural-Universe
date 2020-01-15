@@ -1,4 +1,4 @@
-#include "Volumetric.hlsl"
+#include "../Volumetric/Volumetric.hlsl"
 
 cbuffer cb0
 {

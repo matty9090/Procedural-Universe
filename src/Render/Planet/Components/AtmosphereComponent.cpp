@@ -9,8 +9,8 @@ CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, float height)
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
 
-    Pipeline.LoadVertex(L"shaders/Atmosphere.vsh");
-    Pipeline.LoadPixel(L"shaders/Atmosphere.psh");
+    Pipeline.LoadVertex(L"shaders/Volumetric/Atmosphere.vsh");
+    Pipeline.LoadPixel(L"shaders/Volumetric/Atmosphere.psh");
     Pipeline.CreateRasteriser(Planet->GetDevice(), ECullMode::Anticlockwise);
     Pipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPosition());
     Pipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;

@@ -1,15 +1,9 @@
-#include "Common.hlsl"
+#include "../Common.hlsl"
 
 cbuffer cb0
 {
     row_major float4x4 ViewProjMatrix;
     row_major float4x4 InvViewMatrix;
-    float3 Translation;
-};
-
-cbuffer cb1
-{
-    float Lerp;
 };
 
 struct GS_VertIn
@@ -52,15 +46,14 @@ void main
 
 	for (int i = 0; i < 4; ++i)
 	{
-		const float scale = 3.0f;
+		const float scale = 1.2f;
         float3 corner = Corners[i] * scale;
-        float3 worldPosition = inParticle[0].Position + mul(corner, (float3x3)InvViewMatrix) + Translation;
+        float3 worldPosition = inParticle[0].Position + mul( corner, (float3x3)InvViewMatrix );
         
-		outVert.ViewportPosition = mul(float4(worldPosition, 1.0f), ViewProjMatrix);
+		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
         outVert.ViewportPosition.z = LogDepthBuffer(outVert.ViewportPosition.w);
 
         outVert.Colour = inParticle[0].Colour;
-        outVert.Colour.a = Lerp;
         outVert.UV = UVs[i];
 		outStrip.Append( outVert );
 	}

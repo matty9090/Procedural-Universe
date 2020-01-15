@@ -87,8 +87,8 @@ void PlanetTarget::ResetObjectPositions()
 void PlanetTarget::CreatePlanetPipeline()
 {
     StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    StarPipeline.LoadVertex(L"shaders/Position.vsh");
-    StarPipeline.LoadPixel(L"shaders/Star.psh");
+    StarPipeline.LoadVertex(L"shaders/Standard/Position.vsh");
+    StarPipeline.LoadPixel(L"shaders/Particles/Star.psh");
     StarPipeline.CreateRasteriser(Device, ECullMode::Clockwise);
     StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
 

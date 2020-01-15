@@ -15,8 +15,8 @@ CSplatting::CSplatting(ID3D11DeviceContext* context, int width, int height)
     DualPostProcess  = std::make_unique<DirectX::DualPostProcess>(device);
     BasicPostProcess = std::make_unique<DirectX::BasicPostProcess>(device);
 
-    PixelShader = RESM.GetPixelShader(L"shaders/Splat.psh");
-    GeometryShader = RESM.GetGeometryShader(L"shaders/Splat.gsh");
+    PixelShader = RESM.GetPixelShader(L"shaders/Misc/Splat.psh");
+    GeometryShader = RESM.GetGeometryShader(L"shaders/Misc/Splat.gsh");
 
     Target0 = CreateTarget(device, width, height);
     Target1 = CreateTarget(device, width, height);

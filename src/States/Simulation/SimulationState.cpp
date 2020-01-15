@@ -108,8 +108,8 @@ void SimulationState::CreateDeviceDependentResources()
 
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(L"shaders/DrawParticle.gsh");
+    ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
+    ParticlePipeline.LoadGeometry(L"shaders/Particles/DrawParticle.gsh");
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
 

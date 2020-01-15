@@ -280,8 +280,8 @@ void SandboxState::CreateModelPipeline()
     };
 
     ModelPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    ModelPipeline.LoadVertex(L"shaders/PositionTexture.vsh");
-    ModelPipeline.LoadPixel(L"shaders/Texture.psh");
+    ModelPipeline.LoadVertex(L"shaders/Standard/PositionTexture.vsh");
+    ModelPipeline.LoadPixel(L"shaders/Standard/Texture.psh");
     ModelPipeline.CreateRasteriser(Device, ECullMode::Clockwise);
     ModelPipeline.CreateInputLayout(Device, layout);
 }

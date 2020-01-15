@@ -1,4 +1,4 @@
-#include "Common.hlsl"
+#include "../Common.hlsl"
 
 cbuffer cb0
 {
@@ -52,14 +52,15 @@ void main
 
 	for (int i = 0; i < 4; ++i)
 	{
-		const float scale = 22.0f;
-        float3 corner = Corners[i] * scale * Lerp;
+		const float scale = 3.0f;
+        float3 corner = Corners[i] * scale;
         float3 worldPosition = inParticle[0].Position + mul(corner, (float3x3)InvViewMatrix) + Translation;
         
-		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );
+		outVert.ViewportPosition = mul(float4(worldPosition, 1.0f), ViewProjMatrix);
         outVert.ViewportPosition.z = LogDepthBuffer(outVert.ViewportPosition.w);
 
-        outVert.Colour = float4(inParticle[0].Colour.rgb, Lerp);
+        outVert.Colour = inParticle[0].Colour;
+        outVert.Colour.a = Lerp;
         outVert.UV = UVs[i];
 		outStrip.Append( outVert );
 	}

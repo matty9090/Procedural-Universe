@@ -16,8 +16,8 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
 
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(L"shaders/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(L"shaders/GalaxyParticle.gsh");
+    ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
+    ParticlePipeline.LoadGeometry(L"shaders/Particles/GalaxyParticle.gsh");
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, layout);
 

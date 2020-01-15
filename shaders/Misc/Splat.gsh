@@ -1,5 +1,5 @@
-#include "Common.hlsl"
-#include "Volumetric.hlsl"
+#include "../Common.hlsl"
+#include "../Volumetric/Volumetric.hlsl"
 
 cbuffer cb0
 {

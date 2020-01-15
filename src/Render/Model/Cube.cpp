@@ -9,8 +9,8 @@ Cube::Cube(ID3D11DeviceContext* context) : Context(context)
     ID3D11Device* device;
     Context->GetDevice(&device);
 
-    Pipeline.LoadVertex(L"shaders/Position.vsh");
-    Pipeline.LoadPixel(L"shaders/Tint.psh");
+    Pipeline.LoadVertex(L"shaders/Standard/Position.vsh");
+    Pipeline.LoadPixel(L"shaders/Standard/Tint.psh");
     Pipeline.CreateInputLayout(device, CreateInputLayoutPosition());
     Pipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 
