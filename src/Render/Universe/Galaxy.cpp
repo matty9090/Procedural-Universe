@@ -7,7 +7,9 @@ using namespace DirectX::SimpleMath;
 
 float Galaxy::ImposterThreshold = 12000.0f * 12000.0f;
 
-Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
+Galaxy::Galaxy(ID3D11DeviceContext* context)
+    : Context(context),
+      Colour(Maths::RandFloat(), Maths::RandFloat(), Maths::RandFloat(), 1.0f)
 {
     context->GetDevice(&Device);
 
@@ -26,7 +28,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
-    Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png", Position, 240.0f);
+    Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png", Position, 240.0f, Colour);
 }
 
 void Galaxy::Seed(uint64_t seed)

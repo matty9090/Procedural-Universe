@@ -7,7 +7,7 @@
 class CBillboard
 {
 public:
-    CBillboard(ID3D11DeviceContext* context, std::wstring tex, Vector3 pos, float scale);
+    CBillboard(ID3D11DeviceContext* context, std::wstring tex, Vector3 pos, float scale, Color tint);
     ~CBillboard();
 
     void Render(const ICamera& cam);
@@ -31,6 +31,7 @@ private:
     float Scale;
     Vector3 Position;
     Matrix World;
+    Color Tint;
 
     ID3D11DeviceContext* Context;
 
@@ -40,4 +41,5 @@ private:
     ComPtr<ID3D11ShaderResourceView> Texture;
 
     std::unique_ptr<ConstantBuffer<VSBuffer>> VertexCB;
+    std::unique_ptr<ConstantBuffer<Color>> PixelCB;
 };

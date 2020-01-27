@@ -1,3 +1,8 @@
+cbuffer cb0
+{
+    float4 Tint;
+};
+
 struct PS_Input
 {
     float4 Position : SV_POSITION;
@@ -9,5 +14,5 @@ SamplerState Sampler : s0;
 
 float4 main(in PS_Input i) : SV_TARGET
 {
-	return Tex.Sample(Sampler, i.TexCoord);
+	return Tex.Sample(Sampler, i.TexCoord) * Tint;
 }

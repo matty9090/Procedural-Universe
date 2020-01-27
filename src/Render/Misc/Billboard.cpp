@@ -1,9 +1,10 @@
 #include "Billboard.hpp"
 #include "Services/ResourceManager.hpp"
 
-CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, Vector3 pos, float scale)
+CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, Vector3 pos, float scale, Color tint)
     : Context(context),
-      Scale(scale)
+      Scale(scale),
+      Tint(tint)
 {
     ID3D11Device* device;
     Context->GetDevice(&device);
@@ -46,6 +47,8 @@ CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, Vector3 p
     device->CreateBuffer(&buffer, &init, IndexBuffer.ReleaseAndGetAddressOf());
 
     VertexCB = std::make_unique<ConstantBuffer<VSBuffer>>(device);
+    PixelCB = std::make_unique<ConstantBuffer<Color>>(device);
+    PixelCB->SetData(Context, Tint);
 }
 
 CBillboard::~CBillboard()
@@ -68,6 +71,7 @@ void CBillboard::Render(const ICamera& cam)
         VertexCB->SetData(Context, { World * cam.GetViewMatrix() * cam.GetProjectionMatrix(), Scale });
 
         Context->VSSetConstantBuffers(0, 1, VertexCB->GetBuffer());
+        Context->PSSetConstantBuffers(0, 1, PixelCB->GetBuffer());
         Context->PSSetShaderResources(0, 1, Texture.GetAddressOf());
 
         Context->DrawIndexed(6, 0, 0);

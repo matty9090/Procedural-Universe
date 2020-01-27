@@ -18,6 +18,9 @@ namespace Maths
         return v;
     }
 
+    float RandFloat();
+    float RandFloat(float min, float max);
+
     const Particle& ClosestParticle(const DirectX::SimpleMath::Vector3& pos, const std::vector<Particle>& particles, size_t* outID = nullptr);
 
     template <class T>

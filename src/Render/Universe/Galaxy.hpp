@@ -52,6 +52,7 @@ private:
         float Custom1, Custom2, Custom3;
     };
 
+    Color Colour;
     size_t CurrentClosestObjectID = 0;
     DirectX::SimpleMath::Vector3 Position;
 

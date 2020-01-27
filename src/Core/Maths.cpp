@@ -1,5 +1,15 @@
 #include "Maths.hpp"
 
+float Maths::RandFloat()
+{
+    return static_cast<float>(rand()) / RAND_MAX;
+}
+
+float Maths::RandFloat(float min, float max)
+{
+    return (static_cast<float>(rand()) / RAND_MAX)* (max - min) + min;
+}
+
 const Particle& Maths::ClosestParticle(const DirectX::SimpleMath::Vector3& pos, const std::vector<Particle>& particles, size_t* outID)
 {
     const Particle* closest;

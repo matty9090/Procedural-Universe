@@ -2,8 +2,8 @@
 
 cbuffer cb0
 {
-    row_major matrix viewProj;
-	float scale;
+    row_major matrix ViewProj;
+	float Scale;
 };
 
 struct VS_Input
@@ -20,7 +20,7 @@ struct VS_Output
 
 void main(in VS_Input v_in, out VS_Output v_out)
 {
-    v_out.Position = mul(float4(v_in.Position * scale, 1.0f), viewProj);
+    v_out.Position = mul(float4(v_in.Position * Scale, 1.0f), ViewProj);
     v_out.Position.z = LogDepthBuffer(v_out.Position.w);
 	v_out.UV = v_in.UV;
 }
