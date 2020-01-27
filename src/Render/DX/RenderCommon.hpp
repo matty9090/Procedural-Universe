@@ -9,6 +9,7 @@
 
 #include "Core/Except.hpp"
 #include "Render/Misc/Particle.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
 
 enum class ECullMode { None, Clockwise, Anticlockwise };
 

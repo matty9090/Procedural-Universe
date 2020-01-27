@@ -17,7 +17,7 @@ CSkyboxGenerator::CSkyboxGenerator(ID3D11Device* device, ID3D11DeviceContext* co
     {
         for (int i = 0; i < 6; ++i)
         {
-            Views[i] = CreateTarget(Device, 2048, 2048);
+            Views[i] = CreateTarget(Device, 4096, 4096);
         }
 
         D3D11_TEXTURE2D_DESC texElementDesc;

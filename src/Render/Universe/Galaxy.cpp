@@ -1,9 +1,11 @@
 #include "Galaxy.hpp"
-
 #include "Core/Maths.hpp"
+#include "Services/Log.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
 using namespace DirectX::SimpleMath;
+
+float Galaxy::ImposterThreshold = 12000.0f * 12000.0f;
 
 Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
 {
@@ -24,6 +26,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
+    Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png", Position, 240.0f);
 }
 
 void Galaxy::Seed(uint64_t seed)
@@ -43,6 +46,7 @@ void Galaxy::Move(Vector3 v)
         particle.Position += v;
 
     Position += v;
+    Imposter->SetPosition(Position);
     RegenerateBuffer();
 }
 
@@ -59,40 +63,47 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
     Matrix view = cam.GetViewMatrix();
     Matrix viewProj = view * cam.GetProjectionMatrix();
 
-    view = view.Invert();
-    view *= Matrix::CreateScale(scale);
+    if (Vector3::DistanceSquared(cam.GetPosition(), Position) < ImposterThreshold)
+    {
+        view = view.Invert();
+        view *= Matrix::CreateScale(scale);
 
-    ParticlePipeline.SetState(Context, [&]() {
-        unsigned int offset = 0;
-        unsigned int stride = sizeof(Particle);
+        ParticlePipeline.SetState(Context, [&]() {
+            unsigned int offset = 0;
+            unsigned int stride = sizeof(Particle);
 
-        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+            LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
-        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
-        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-        Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-
-        if (single)
-        {
-            auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
-            auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
-
-            Context->Draw(pivot1, 0);
-            Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
-
-            LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+            Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
+            GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
+            Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
             Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-            Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
-        }
-        else
-        {
-            Context->Draw(static_cast<UINT>(Particles.size()), 0);
-        }
-    });
+            Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
 
-    Context->GSSetShader(nullptr, 0, 0);
+            if (single)
+            {
+                auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
+                auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
+
+                Context->Draw(pivot1, 0);
+                Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
+
+                LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+                Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
+                Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
+            }
+            else
+            {
+                Context->Draw(static_cast<UINT>(Particles.size()), 0);
+            }
+        });
+
+        Context->GSSetShader(nullptr, 0, 0);
+    }
+    else
+    {
+        Imposter->Render(cam);
+    }
 }
 
 Vector3 Galaxy::GetClosestObject(Vector3 pos)
