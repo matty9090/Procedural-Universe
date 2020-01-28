@@ -62,7 +62,7 @@ private:
     std::unique_ptr<CBillboard> Imposter;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
-    ComPtr<ID3D11Buffer> ParticleBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
 
     std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
     std::unique_ptr<ConstantBuffer<LerpConstantBuffer>> LerpBuffer;

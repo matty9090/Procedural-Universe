@@ -37,9 +37,9 @@ private:
     ID3D11DeviceContext* Context;
 
     RenderPipeline Pipeline;
-    ComPtr<ID3D11Buffer> VertexBuffer;
-    ComPtr<ID3D11Buffer> IndexBuffer;
-    ComPtr<ID3D11ShaderResourceView> Texture;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Texture;
 
     std::unique_ptr<ConstantBuffer<VSBuffer>> VertexCB;
     std::unique_ptr<ConstantBuffer<Color>> PixelCB;
