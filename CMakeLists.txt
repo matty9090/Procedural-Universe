@@ -13,9 +13,9 @@ add_subdirectory(lib/DirectXTK)
 include_directories(SYSTEM lib/DirectXTK/Inc)
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
-    link_directories(bin/CMake)
+    link_directories(${CMAKE_SOURCE_DIR}/bin/CMake)
 else()
-    link_directories(bin/CMake/Release)
+    link_directories(${CMAKE_SOURCE_DIR}/bin/CMake/Release)
 endif()
 
 # ImGui
