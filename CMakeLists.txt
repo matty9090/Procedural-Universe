@@ -12,6 +12,12 @@ include_directories(SYSTEM lib/CxxOpts/include)
 add_subdirectory(lib/DirectXTK)
 include_directories(SYSTEM lib/DirectXTK/Inc)
 
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    link_directories(bin/CMake)
+else()
+    link_directories(bin/CMake/Release)
+endif()
+
 # ImGui
 include_directories(SYSTEM lib/imgui)
 
@@ -40,7 +46,13 @@ list(REMOVE_ITEM SRC_FILES src/App/NBody.cpp)
 
 add_library(nbody_lib STATIC ${SRC_FILES})
 target_compile_options(nbody_lib PRIVATE /WX)
-target_link_libraries(nbody_lib directxtk d3d11 dxgi imgui assimp)
+target_link_libraries(nbody_lib d3d11 dxgi imgui assimp)
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+    target_link_libraries(nbody_lib directxtkd)
+else()
+    target_link_libraries(nbody_lib directxtk)
+endif()
 
 add_executable(nbody WIN32 src/App/NBody.cpp resources/Resource.rc)
 target_link_libraries(nbody nbody_lib)

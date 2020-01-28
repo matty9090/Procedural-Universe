@@ -25,6 +25,16 @@
                     "name": "ASSIMP_NO_EXPORT",
                     "value": "True",
                     "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_TESTS",
+                    "value": "False",
+                    "type": "BOOL"
                 }
             ]
         },
@@ -53,6 +63,16 @@
                     "name": "ASSIMP_NO_EXPORT",
                     "value": "True",
                     "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_TESTS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+                    "value": "False",
+                    "type": "BOOL"
                 }
             ]
         },
@@ -80,6 +100,16 @@
                 {
                     "name": "ASSIMP_NO_EXPORT",
                     "value": "True",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_TESTS",
+                    "value": "False",
                     "type": "BOOL"
                 }
             ]
@@ -118,6 +148,16 @@
                 {
                     "name": "gtest_force_shared_crt",
                     "value": "True",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_TESTS",
+                    "value": "False",
+                    "type": "BOOL"
+                },
+                {
+                    "name": "ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT",
+                    "value": "False",
                     "type": "BOOL"
                 }
             ]
