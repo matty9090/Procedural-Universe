@@ -1,7 +1,7 @@
 #pragma once
 
-#include <d3d11.h>
 #include <memory>
+#include <d3d11.h>
 #include <SimpleMath.h>
 
 using DirectX::SimpleMath::Color;

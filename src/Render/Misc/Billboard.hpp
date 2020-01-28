@@ -3,6 +3,7 @@
 #include "Core/Common.hpp"
 #include "Render/Cameras/Camera.hpp"
 #include "Render/DX/RenderCommon.hpp"
+#include "Render/DX/ConstantBuffer.hpp"
 
 class CBillboard
 {
