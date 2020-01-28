@@ -13,6 +13,7 @@ public:
     void Render(const ICamera& cam);
     void SetPosition(const Vector3& pos) { Position = pos; }
     void SetScale(float scale) { Scale = scale; }
+    void SetTint(const Color& tint) { Tint = tint; PixelCB->SetData(Context, Tint); }
 
 private:
     struct Vertex

@@ -30,6 +30,8 @@ public:
     size_t GetClosestObjectIndex() const { return CurrentClosestObjectID; }
 
     static float ImposterThreshold;
+    static float ImposterFadeDist;
+    static float ImposterOffsetPercent;
 
 private:
     void RegenerateBuffer();

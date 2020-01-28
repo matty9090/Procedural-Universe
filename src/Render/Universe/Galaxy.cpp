@@ -5,7 +5,9 @@
 
 using namespace DirectX::SimpleMath;
 
-float Galaxy::ImposterThreshold = 12000.0f * 12000.0f;
+float Galaxy::ImposterThreshold = 12000.0f;
+float Galaxy::ImposterFadeDist = 600.0f;
+float Galaxy::ImposterOffsetPercent = 0.4f;
 
 Galaxy::Galaxy(ID3D11DeviceContext* context)
     : Context(context),
@@ -28,7 +30,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context)
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
-    Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png", Position, 240.0f, Colour);
+    Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png", Position, 500.0f, Colour);
 }
 
 void Galaxy::Seed(uint64_t seed)
@@ -65,7 +67,11 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
     Matrix view = cam.GetViewMatrix();
     Matrix viewProj = view * cam.GetProjectionMatrix();
 
-    if (Vector3::DistanceSquared(cam.GetPosition(), Position) < ImposterThreshold)
+    float dist = ((Vector3::Distance(cam.GetPosition(), Position) - ImposterFadeDist) / ImposterThreshold) - 1.0f;
+    float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
+    float galaxyT = Maths::Clamp(1.0f - dist, 0.0f, 1.0f);
+
+    if (galaxyT > 0.0f)
     {
         view = view.Invert();
         view *= Matrix::CreateScale(scale);
@@ -74,7 +80,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
             unsigned int offset = 0;
             unsigned int stride = sizeof(Particle);
 
-            LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+            LerpBuffer->SetData(Context, LerpConstantBuffer { galaxyT });
 
             Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
             GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
@@ -102,8 +108,10 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
 
         Context->GSSetShader(nullptr, 0, 0);
     }
-    else
+    
+    if (imposterT > 0.0f)
     {
+        Imposter->SetTint(Color(Colour.R(), Colour.G(), Colour.B(), imposterT));
         Imposter->Render(cam);
     }
 }
