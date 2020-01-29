@@ -12,6 +12,10 @@ class GalaxySeeder : public IParticleSeeder
 
         void Seed(uint64_t seed);
 
+        virtual void SetRedDist(float low, float hi);
+        virtual void SetGreenDist(float low, float hi);
+        virtual void SetBlueDist(float low, float hi);
+
     private:
         std::vector<Particle>& Particles;
         int LocalNum = 0;
@@ -27,8 +31,7 @@ class GalaxySeeder : public IParticleSeeder
         const float ArmPDist = 0.8f;
         
         std::normal_distribution<float> DistZ;
-        std::uniform_real_distribution<float> DistCol;
-        std::uniform_real_distribution<float> DistRed;
+        std::uniform_real_distribution<float> DistR, DistG, DistB;
         std::uniform_real_distribution<double> DistMass;
         
         std::default_random_engine Gen;

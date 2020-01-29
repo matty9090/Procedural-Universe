@@ -1,4 +1,6 @@
 #include "GalaxySeeder.hpp"
+#include "Core/Maths.hpp"
+
 #include <DirectXColors.h>
 
 using DirectX::SimpleMath::Vector3;
@@ -7,11 +9,27 @@ using DirectX::SimpleMath::Color;
 GalaxySeeder::GalaxySeeder(std::vector<Particle>& particles)
     : Particles(particles),
       DistZ(0.0f, 16.0f),
-      DistCol(0.2f, 1.0f),
-      DistRed(0.0f, 0.3f),
+      DistR(0.0f, 1.0f),
+      DistG(0.0f, 1.0f),
+      DistB(0.0f, 1.0f),
       DistMass(1e28, 1e30)
 {
 
+}
+
+void GalaxySeeder::SetRedDist(float low, float hi)
+{
+    DistR = std::uniform_real_distribution<float>(Maths::Clamp(low, 0.0f, 1.0f), Maths::Clamp(hi, 0.0f, 1.0f));
+}
+
+void GalaxySeeder::SetGreenDist(float low, float hi)
+{
+    DistG = std::uniform_real_distribution<float>(Maths::Clamp(low, 0.0f, 1.0f), Maths::Clamp(hi, 0.0f, 1.0f));
+}
+
+void GalaxySeeder::SetBlueDist(float low, float hi)
+{
+    DistB = std::uniform_real_distribution<float>(Maths::Clamp(low, 0.0f, 1.0f), Maths::Clamp(hi, 0.0f, 1.0f));
 }
 
 void GalaxySeeder::Seed(uint64_t seed)
@@ -63,7 +81,7 @@ bool GalaxySeeder::AddParticle(
         Particles[LocalNum].Position = Pos;
         Particles[LocalNum].Velocity = Vel;
         Particles[LocalNum].Mass = Mass;
-        Particles[LocalNum].Colour = Color(DistRed(Gen), DistCol(Gen), DistCol(Gen));
+        Particles[LocalNum].Colour = Color(DistR(Gen), DistG(Gen), DistB(Gen));
         Particles[LocalNum].OriginalColour = Particles[LocalNum].Colour;
         Particles[LocalNum].Forces = Vec3d();
 

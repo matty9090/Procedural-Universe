@@ -38,7 +38,12 @@ void Galaxy::Seed(uint64_t seed)
     Particles.resize(1000);
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 
+    const float Variation = 0.26f;
+
     auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
+    seeder->SetRedDist(Colour.R() - Variation, Colour.R() + Variation);
+    seeder->SetGreenDist(Colour.G() - Variation, Colour.G() + Variation);
+    seeder->SetBlueDist(Colour.B() - Variation, Colour.B() + Variation);
     seeder->Seed(seed);
 
     Scale(0.001f);
@@ -111,6 +116,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
     
     if (imposterT > 0.0f)
     {
+        Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
         Imposter->SetTint(Color(Colour.R(), Colour.G(), Colour.B(), imposterT));
         Imposter->Render(cam);
     }
