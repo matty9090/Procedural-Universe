@@ -166,9 +166,15 @@ void SandboxState::Render()
             ImGui::SetNextWindowBgAlpha(0.5f);
 
             ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-            ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
-            if(CurrentTarget->Parent) ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());
-            ImGui::Text("Distance: %i", static_cast<int>(Vector3::Distance(Ship->GetPosition(), closest)));
+                ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
+
+                if (CurrentTarget->Parent)
+                    ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());
+
+                ImGui::Text("Distance: %i", static_cast<int>(Vector3::Distance(Ship->GetPosition(), closest)));
+
+                if(CurrentTarget->IsTransitioning())
+                    ImGui::Text("Transition: %i%%", static_cast<int>(CurrentTransitionT * 100.0f));
             ImGui::End();
 
             ImGui::Render();
