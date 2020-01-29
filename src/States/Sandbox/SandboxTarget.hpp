@@ -26,7 +26,7 @@ using DirectX::SimpleMath::Vector3;
 class SandboxTarget
 {
 public:
-    SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv);
+    SandboxTarget(ID3D11DeviceContext* context, std::string name, std::string objName, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv);
     virtual ~SandboxTarget() {}
 
     void Update(float dt);
@@ -57,7 +57,7 @@ public:
     void EndTransitionUpChild();
     void EndTransitionDownChild();
 
-    std::string Name;
+    std::string Name, ObjName;
     float Scale = 1.0f;
     float VelocityMultiplier = 1.0f;
     Vector3 ParentLocationSpace;

@@ -1,9 +1,10 @@
 #include "SandboxTarget.hpp"
 #include "Services/Log.hpp"
 
-SandboxTarget::SandboxTarget(ID3D11DeviceContext* context, std::string name, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
+SandboxTarget::SandboxTarget(ID3D11DeviceContext* context, std::string name, std::string objName, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
     : Context(context),
       Name(name),
+      ObjName(objName),
       State(EState::Idle),
       Resources(resources),
       Camera(camera),

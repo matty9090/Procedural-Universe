@@ -23,10 +23,6 @@ void DebugSandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mou
     Keyboard = keyboard;
 
     Camera = std::make_unique<CShipCamera>();
-    
-    auto vp = DeviceResources->GetScreenViewport();
-    unsigned int width = static_cast<size_t>(vp.Width);
-    unsigned int height = static_cast<size_t>(vp.Height);
 
     SetupTargets();
 

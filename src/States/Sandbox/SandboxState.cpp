@@ -13,6 +13,10 @@
 
 #include <DirectXColors.h>
 
+#include <imgui.h>
+#include <UI/ImGuiDx11.h>
+#include <UI/ImGuiWin32.h>
+
 void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, DirectX::Keyboard* keyboard, StateData& data)
 {
     Device = resources->GetD3DDevice();
@@ -47,10 +51,23 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     Planet = std::make_unique<CPlanet>(Context, Camera.get());
     //Planet->SetPosition(Vector3(0.0f, 0.0f, 20000.0f));
+
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+
+    io.IniFilename = nullptr;
+    io.LogFilename = nullptr;
+
+    ImGui_ImplWin32_Init(resources->GetWindow());
+    ImGui_ImplDX11_Init(Device, Context);
 }
 
 void SandboxState::Cleanup()
 {
+    ImGui_ImplDX11_Shutdown();
+    ImGui_ImplWin32_Shutdown();
+    ImGui::DestroyContext();
+
     PostProcess.reset();
     CommonStates.reset();
     Ship.reset();
@@ -133,6 +150,30 @@ void SandboxState::Render()
         auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
         //LOGM(Vector3::Distance(closest, Ship->GetPosition()))
         ClosestObjCube->Render(closest, 100.0f, Camera->GetViewMatrix() * Camera->GetProjectionMatrix(), false);
+
+        ImGui_ImplDX11_NewFrame();
+        ImGui_ImplWin32_NewFrame();
+        ImGui::NewFrame();
+
+        int x, y;
+        Camera->PixelFromWorldPoint(closest, x, y);
+
+        if (x > 0 && y > 0 &&
+            x < DeviceResources->GetScreenViewport().Width && y < DeviceResources->GetScreenViewport().Height)
+        {
+            ImGui::SetNextWindowPos(ImVec2(static_cast<float>(x - 200), static_cast<float>(y - 160)));
+            ImGui::SetNextWindowSize(ImVec2(160, 100));
+            ImGui::SetNextWindowBgAlpha(0.5f);
+
+            ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+            ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
+            if(CurrentTarget->Parent) ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());
+            ImGui::Text("Distance: %i", static_cast<int>(Vector3::Distance(Ship->GetPosition(), closest)));
+            ImGui::End();
+
+            ImGui::Render();
+            ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+        }
     }
 }
 

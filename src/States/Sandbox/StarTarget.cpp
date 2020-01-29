@@ -6,7 +6,7 @@
 #include "Services/ResourceManager.hpp"
 
 StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
-    : SandboxTarget(context, "Stellar", resources, camera, rtv)
+    : SandboxTarget(context, "Stellar", "Planet", resources, camera, rtv)
 {
     Scale = 0.006f;
     BeginTransitionDist = 4000.0f;

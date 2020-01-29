@@ -2,7 +2,7 @@
 #include "Sim/IParticleSeeder.hpp"
 
 UniverseTarget::UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
-    : SandboxTarget(context, "Universal", resources, camera, rtv)
+    : SandboxTarget(context, "Universal", "Galaxy", resources, camera, rtv)
 {
     Scale = 0.006f;
     BeginTransitionDist = 3200.0f;

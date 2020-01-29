@@ -4,7 +4,7 @@
 #include "Services/ResourceManager.hpp"
 
 PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
-    : SandboxTarget(context, "Planetary", resources, camera, rtv)
+    : SandboxTarget(context, "Planetary", "N/A", resources, camera, rtv)
 {
     Scale = 0.02f;
     BeginTransitionDist = 1200.0f;

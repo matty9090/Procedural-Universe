@@ -2,7 +2,7 @@
 #include "Sim/IParticleSeeder.hpp"
 
 GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
-    : SandboxTarget(context, "Galactic", resources, camera, rtv)
+    : SandboxTarget(context, "Galactic", "Star", resources, camera, rtv)
 {
     Scale = 0.01f;
     BeginTransitionDist = 4000.0f;
