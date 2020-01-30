@@ -69,15 +69,15 @@ void Galaxy::Scale(float scale)
 
 void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, bool single)
 {
-    Matrix view = cam.GetViewMatrix();
-    Matrix viewProj = view * cam.GetProjectionMatrix();
-
     float dist = ((Vector3::Distance(cam.GetPosition(), Position) - ImposterFadeDist) / ImposterThreshold) - 1.0f;
     float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
     float galaxyT = 1.0f - dist;
 
     if (galaxyT > 0.0f)
     {
+        Matrix view = cam.GetViewMatrix();
+        Matrix viewProj = view * cam.GetProjectionMatrix();
+
         view = view.Invert();
         view *= Matrix::CreateScale(scale);
 

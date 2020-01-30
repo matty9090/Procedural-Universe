@@ -51,8 +51,8 @@ void CSkyboxGenerator::Render(std::function<void(const ICamera&)> renderFunc)
     Context->RSGetViewports(&numVp, &oldVp);
 
     D3D11_VIEWPORT vp = oldVp;
-    vp.Width = 2048.0f;
-    vp.Height = 2048.0f;
+    vp.Width = 4096.0f;
+    vp.Height = 4096.0f;
 
     Context->RSSetViewports(1, &vp);
 
