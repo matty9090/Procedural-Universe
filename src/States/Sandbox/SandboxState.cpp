@@ -145,7 +145,7 @@ void SandboxState::Render()
 
     Ship->Draw(Context, viewProj, ModelPipeline);
 
-    if (bShowClosestObject)
+    if (bShowClosestObject && CurrentTarget->Child != nullptr)
     {
         auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
         //LOGM(Vector3::Distance(closest, Ship->GetPosition()))
@@ -158,28 +158,28 @@ void SandboxState::Render()
         int x, y;
         Camera->PixelFromWorldPoint(closest, x, y);
 
-        if (x > 0 && y > 0 &&
-            x < DeviceResources->GetScreenViewport().Width && y < DeviceResources->GetScreenViewport().Height)
-        {
-            ImGui::SetNextWindowPos(ImVec2(static_cast<float>(x - 200), static_cast<float>(y - 160)));
-            ImGui::SetNextWindowSize(ImVec2(160, 100));
-            ImGui::SetNextWindowBgAlpha(0.5f);
+        const auto vp = DeviceResources->GetScreenViewport();
+        const int w = static_cast<int>(vp.Width);
+        const int h = static_cast<int>(vp.Height);
 
-            ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-                ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
+        ImGui::SetNextWindowPos(ImVec2(static_cast<float>(Maths::Clamp(x - 200, 10, w - 170)), static_cast<float>(Maths::Clamp(y - 160, 16, h - 110))));
+        ImGui::SetNextWindowSize(ImVec2(160, 100));
+        ImGui::SetNextWindowBgAlpha(0.5f);
 
-                if (CurrentTarget->Parent)
-                    ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());
+        ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+            ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
 
-                ImGui::Text("Distance: %i", static_cast<int>(Vector3::Distance(Ship->GetPosition(), closest)));
+            if (CurrentTarget->Parent)
+                ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());
 
-                if(CurrentTarget->IsTransitioning())
-                    ImGui::Text("Transition: %i%%", static_cast<int>(CurrentTransitionT * 100.0f));
-            ImGui::End();
+            ImGui::Text("Distance: %i", static_cast<int>(Vector3::Distance(Ship->GetPosition(), closest)));
 
-            ImGui::Render();
-            ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-        }
+            if(CurrentTarget->IsTransitioning())
+                ImGui::Text("Transition: %i%%", static_cast<int>(CurrentTransitionT * 100.0f));
+        ImGui::End();
+
+        ImGui::Render();
+        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
     }
 }
 

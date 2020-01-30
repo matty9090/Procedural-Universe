@@ -74,7 +74,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
 
     float dist = ((Vector3::Distance(cam.GetPosition(), Position) - ImposterFadeDist) / ImposterThreshold) - 1.0f;
     float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
-    float galaxyT = Maths::Clamp(1.0f - dist, 0.0f, 1.0f);
+    float galaxyT = 1.0f - dist;
 
     if (galaxyT > 0.0f)
     {
@@ -85,7 +85,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
             unsigned int offset = 0;
             unsigned int stride = sizeof(Particle);
 
-            LerpBuffer->SetData(Context, LerpConstantBuffer { galaxyT });
+            LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
             Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
             GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
