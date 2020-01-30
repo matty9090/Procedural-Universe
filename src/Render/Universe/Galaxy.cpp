@@ -73,7 +73,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
     float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
     float galaxyT = 1.0f - dist;
 
-    if (galaxyT > 0.0f)
+    if (galaxyT > 0.0f || t > 0.0f)
     {
         Matrix view = cam.GetViewMatrix();
         Matrix viewProj = view * cam.GetProjectionMatrix();
