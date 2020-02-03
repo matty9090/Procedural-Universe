@@ -91,7 +91,7 @@ void UniverseTarget::Seed(uint64_t seed)
     for (const auto& particle : particles)
     {
         Galaxies.push_back(std::make_unique<Galaxy>(Context));
-        Galaxies.back()->Seed(++i);
+        Galaxies.back()->Seed(i++);
         Galaxies.back()->Scale(4000.0f);
         Galaxies.back()->Move(particle.Position / 0.02f);
     }

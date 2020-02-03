@@ -3,15 +3,15 @@
 #include "Services/Log.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
+#include <random>
+
 using namespace DirectX::SimpleMath;
 
 float Galaxy::ImposterThreshold = 12000.0f;
 float Galaxy::ImposterFadeDist = 600.0f;
 float Galaxy::ImposterOffsetPercent = 0.4f;
 
-Galaxy::Galaxy(ID3D11DeviceContext* context)
-    : Context(context),
-      Colour(Maths::RandFloat(), Maths::RandFloat(), Maths::RandFloat(), 1.0f)
+Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
 {
     context->GetDevice(&Device);
 
@@ -38,13 +38,20 @@ void Galaxy::Seed(uint64_t seed)
     Particles.resize(1000);
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 
-    const float Variation = 0.26f;
+    std::default_random_engine gen { static_cast<unsigned int>(seed) };
+    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+
+    Colour = Color(dist(gen), dist(gen), dist(gen));
+
+    const float Variation = 0.12f;
 
     auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
     seeder->SetRedDist(Colour.R() - Variation, Colour.R() + Variation);
     seeder->SetGreenDist(Colour.G() - Variation, Colour.G() + Variation);
     seeder->SetBlueDist(Colour.B() - Variation, Colour.B() + Variation);
     seeder->Seed(seed);
+
+    Imposter->SetTint(Colour);
 
     Scale(0.001f);
 }

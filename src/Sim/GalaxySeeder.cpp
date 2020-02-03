@@ -1,5 +1,6 @@
 #include "GalaxySeeder.hpp"
 #include "Core/Maths.hpp"
+#include "Services/Log.hpp"
 
 #include <DirectXColors.h>
 

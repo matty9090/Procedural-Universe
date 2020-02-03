@@ -46,6 +46,7 @@ public:
     void Log(Vec3d v, ELogType logLevel = Info);
     void Log(DirectX::SimpleMath::Vector2 v, ELogType logLevel = Info);
     void Log(DirectX::SimpleMath::Vector3 v, ELogType logLevel = Info);
+    void Log(DirectX::SimpleMath::Color v, ELogType logLevel = Info);
 
 private:
     FLog() {}

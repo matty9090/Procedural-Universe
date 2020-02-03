@@ -64,3 +64,13 @@ void FLog::Log(DirectX::SimpleMath::Vector3 v, ELogType logLevel)
         std::cout << "[" << LogTypes[logLevel] << "] (" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
 #endif
 }
+
+void FLog::Log(DirectX::SimpleMath::Color v, ELogType logLevel)
+{
+#ifdef _DEBUG
+    std::cout << "[" << LogTypes[logLevel] << "] (" << v.x << ", " << v.y << ", " << v.z << ")" << std::endl;
+#else
+    if (logLevel != Verbose)
+        std::cout << "[" << LogTypes[logLevel] << "] (" << v.R() << ", " << v.G() << ", " << v.B() << ", " << v.A() << ")" << std::endl;
+#endif
+}
