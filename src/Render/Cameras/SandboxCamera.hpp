@@ -112,6 +112,8 @@ class CSandboxCamera : public ICamera
         size_t GetWidth() const { return Width; }
         size_t GetHeight() const { return Height; }
 
+        float VelocityScale = 1.0f;
+
     private:
         Matrix View, Proj;
         size_t Width, Height;

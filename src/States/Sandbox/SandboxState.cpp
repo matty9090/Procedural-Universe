@@ -100,8 +100,8 @@ void SandboxState::Update(float dt)
     FloatingOrigin();
     TransitionLogic();
 
-    //if (!CurrentTarget->IsTransitioning())
-    //    Ship->VelocityScale = CurrentTarget->VelocityMultiplier;
+    if (!CurrentTarget->IsTransitioning())
+        Camera->VelocityScale = CurrentTarget->VelocityMultiplier;
 
     Camera->Events(Mouse, Mouse->GetState(), Keyboard->GetState(), dt);
     Camera->Update(dt);
@@ -260,7 +260,7 @@ void SandboxState::TransitionLogic()
             CurrentTarget->Child->EndTransitionUpChild();
 
             CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, 1.0f, scaledDistToObject);
-            // Ship->VelocityScale = CurrentTransitionT;
+            Camera->VelocityScale = CurrentTransitionT;
         }
 
         if (!CurrentTarget->IsTransitioning())
@@ -288,7 +288,7 @@ void SandboxState::TransitionLogic()
 
                 CurrentTarget->EndTransitionUpParent();
                 CurrentTarget->Child->EndTransitionUpChild();
-                // Ship->VelocityScale = 1.0f;
+                Camera->VelocityScale = 1.0f;
 
                 LOGM("Ending up transition from " + CurrentTarget->Child->Name + " to " + CurrentTarget->Name)
             }
@@ -297,7 +297,7 @@ void SandboxState::TransitionLogic()
             {
                 // Parent stops rendering
                 // Current target becomes child and starts rendering normally
-                // Ship to child space
+                // Convert to child space
 
                 CurrentTarget->EndTransitionDownParent(object);
                 CurrentTarget->Child->EndTransitionDownChild();
@@ -307,7 +307,7 @@ void SandboxState::TransitionLogic()
 
                 Camera->Move(-CurrentTarget->ParentLocationSpace);
                 Camera->SetPosition(Camera->GetPosition() / CurrentTarget->Scale);
-                // Camera->VelocityScale = 1.0f;
+                Camera->VelocityScale = 1.0f;
 
                 LOGM("Ending down transition from " + CurrentTarget->Parent->Name + " to " + CurrentTarget->Name)
             }
@@ -315,7 +315,7 @@ void SandboxState::TransitionLogic()
             else
             {
                 CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, 1.0f, scaledDistToObject);
-                // Ship->VelocityScale = CurrentTransitionT;
+                Camera->VelocityScale = CurrentTransitionT;
             }
         }
     }

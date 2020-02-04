@@ -49,7 +49,7 @@ void App::Initialize(HWND window, int width, int height)
 
     Mouse->SetWindow(DeviceResources->GetWindow());
 
-    SwitchState(EState::Simulation);
+    SwitchState(EState::Sandbox);
 
     LOGM("Initialized")
 }

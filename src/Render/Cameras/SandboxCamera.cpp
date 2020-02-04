@@ -57,7 +57,7 @@ void CSandboxCamera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, Di
 
     Quaternion q = Quaternion::CreateFromYawPitchRoll(Yaw, -Pitch, 0.0f);
     move = Vector3::Transform(move, q);
-    move *= dt * 10000.0f * Speed;
+    move *= dt * 10000.0f * Speed * VelocityScale;
     Position += move;
 }
 
