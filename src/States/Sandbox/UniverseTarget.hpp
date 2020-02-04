@@ -8,7 +8,7 @@
 class UniverseTarget : public SandboxTarget
 {
 public:
-    UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv);
+    UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv);
 
     void Render() override;
     void RenderTransitionParent(float t) override;

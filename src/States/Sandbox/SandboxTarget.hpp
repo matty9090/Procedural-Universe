@@ -7,7 +7,7 @@
 
 #include "Render/Model/Model.hpp"
 #include "Render/Model/Skybox.hpp"
-#include "Render/Cameras/ShipCamera.hpp"
+#include "Render/Cameras/Camera.hpp"
 #include "Render/DX/ConstantBuffer.hpp"
 #include "Render/DX/RenderCommon.hpp"
 #include "Render/Misc/PostProcess.hpp"
@@ -21,12 +21,13 @@
 
 #include "Services/Log.hpp"
 
+using DirectX::SimpleMath::Matrix;
 using DirectX::SimpleMath::Vector3;
 
 class SandboxTarget
 {
 public:
-    SandboxTarget(ID3D11DeviceContext* context, std::string name, std::string objName, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv);
+    SandboxTarget(ID3D11DeviceContext* context, std::string name, std::string objName, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv);
     virtual ~SandboxTarget() {}
 
     void Update(float dt);
@@ -87,7 +88,7 @@ protected:
 
     CSkyBox SkyBox;
     Vector3 Centre;
-    CShipCamera* Camera = nullptr;
+    ICamera* Camera = nullptr;
     ID3D11Device* Device = nullptr;
     ID3D11DeviceContext* Context = nullptr;
     ID3D11RenderTargetView* RenderTarget = nullptr;

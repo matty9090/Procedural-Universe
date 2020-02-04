@@ -1,7 +1,7 @@
 #include "GalaxyTarget.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
-GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
+GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Galactic", "Star", resources, camera, rtv)
 {
     Scale = 0.01f;

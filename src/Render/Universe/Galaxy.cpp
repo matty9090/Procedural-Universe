@@ -8,7 +8,7 @@
 
 using namespace DirectX::SimpleMath;
 
-float Galaxy::ImposterThreshold = 12000.0f;
+float Galaxy::ImposterThreshold = 8000.0f;
 float Galaxy::ImposterFadeDist = 600.0f;
 float Galaxy::ImposterOffsetPercent = 0.4f;
 
@@ -37,7 +37,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
 
 void Galaxy::Seed(uint64_t seed)
 {
-    Particles.resize(1000000);
+    Particles.resize(10000);
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 
     std::default_random_engine gen { static_cast<unsigned int>(seed) };
@@ -82,6 +82,8 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
     float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
     float galaxyT = 1.0f - dist;
 
+    Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
+
     if (galaxyT > 0.0f || t > 0.0f)
     {
         Matrix view = cam.GetViewMatrix();
@@ -101,7 +103,6 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
             Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
             Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
             Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-            Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
             Context->PSSetShaderResources(0, 1, StarTexture.GetAddressOf());
 
             if (single)
@@ -122,16 +123,18 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
             }
         });
 
-        Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
+        
         Context->GSSetShader(nullptr, 0, 0);
     }
     
     if (imposterT > 0.0f)
     {
-        Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
         Imposter->SetTint(Color(Colour.R(), Colour.G(), Colour.B(), imposterT));
         Imposter->Render(cam);
     }
+
+    Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
 }
 
 Vector3 Galaxy::GetClosestObject(Vector3 pos)

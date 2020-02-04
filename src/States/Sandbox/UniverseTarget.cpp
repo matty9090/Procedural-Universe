@@ -1,7 +1,7 @@
 #include "UniverseTarget.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
-UniverseTarget::UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
+UniverseTarget::UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Universal", "Galaxy", resources, camera, rtv)
 {
     Scale = 0.006f;
@@ -81,7 +81,7 @@ void UniverseTarget::Seed(uint64_t seed)
     Galaxies.clear();
 
     std::vector<Particle> particles;
-    particles.resize(1);
+    particles.resize(100);
 
     auto seeder = CreateParticleSeeder(particles, EParticleSeeder::Random);
     seeder->Seed(seed);

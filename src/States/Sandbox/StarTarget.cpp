@@ -5,7 +5,7 @@
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
 
-StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
+StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Stellar", "Planet", resources, camera, rtv)
 {
     Scale = 0.0002f;

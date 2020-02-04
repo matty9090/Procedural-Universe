@@ -3,12 +3,11 @@
 #include "Core/State.hpp"
 #include "SandboxTarget.hpp"
 
-#include "Render/Cameras/ShipCamera.hpp"
+#include "Render/Cameras/SandboxCamera.hpp"
 #include "Render/Misc/Particle.hpp"
 #include "Render/Misc/PostProcess.hpp"
 #include "Render/DX/ConstantBuffer.hpp"
 #include "Render/Model/Cube.hpp"
-#include "Render/Model/Ship.hpp"
 #include "Render/Planet/Planet.hpp"
 
 #include <list>
@@ -47,9 +46,8 @@ private:
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
     std::unique_ptr<Cube>             ClosestObjCube;
-    std::unique_ptr<CShip>            Ship;
     std::unique_ptr<CPlanet>          Planet;
-    std::unique_ptr<CShipCamera>      Camera;
+    std::unique_ptr<CSandboxCamera>   Camera;
     std::unique_ptr<SandboxTarget>    RootTarget;
 
     SandboxTarget* CurrentTarget;

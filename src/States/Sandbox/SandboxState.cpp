@@ -29,19 +29,13 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     unsigned int width = static_cast<size_t>(vp.Width);
     unsigned int height = static_cast<size_t>(vp.Height);
 
-    Camera = std::make_unique<CShipCamera>(width, height);
-    Camera->SetPosition(Vector3(0.0f, 4.0f, -30.0f));
+    Camera = std::make_unique<CSandboxCamera>(width, height);
+    Camera->SetPosition(Vector3(0.0f, 0.0f, 5000.0f));
 
     CTerrainComponent::GeneratePermutations();
 
     CreateModelPipeline();
     SetupTargets();
-
-    Ship = std::make_unique<CShip>(Device, RESM.GetMesh("assets/Ship.obj"));
-    Ship->Scale(0.1f);
-    Ship->Move(Vector3(0.0f, 0.0f, 5000.0f));
-
-    Camera->Attach(Ship.get());
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     ClosestObjCube = std::make_unique<Cube>(Context);
@@ -70,7 +64,6 @@ void SandboxState::Cleanup()
 
     PostProcess.reset();
     CommonStates.reset();
-    Ship.reset();
     Camera.reset();
     
     auto t = &RootTarget;
@@ -97,15 +90,13 @@ void SandboxState::Update(float dt)
     FloatingOrigin();
     TransitionLogic();
 
-    if (!CurrentTarget->IsTransitioning())
-        Ship->VelocityScale = CurrentTarget->VelocityMultiplier;
+    //if (!CurrentTarget->IsTransitioning())
+    //    Ship->VelocityScale = CurrentTarget->VelocityMultiplier;
 
-    Camera->Events(Mouse, Mouse->GetState(), dt);
-    CurrentTarget->Update(dt);
-
-    Ship->Control(Mouse, Keyboard, dt);
-    Ship->Update(dt);
+    Camera->Events(Mouse, Mouse->GetState(), Keyboard->GetState(), dt);
     Camera->Update(dt);
+
+    CurrentTarget->Update(dt);
 
     if (CurrentTarget->Parent)
         CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
@@ -143,12 +134,9 @@ void SandboxState::Render()
     Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
     Context->PSSetSamplers(0, 1, &sampler);
 
-    Ship->Draw(Context, viewProj, ModelPipeline);
-
     if (bShowClosestObject && CurrentTarget->Child != nullptr)
     {
-        auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
-        //LOGM(Vector3::Distance(closest, Ship->GetPosition()))
+        auto closest = CurrentTarget->GetClosestObject(Camera->GetPosition());
         ClosestObjCube->Render(closest, 2.0f, Camera->GetViewMatrix() * Camera->GetProjectionMatrix(), false);
 
         ImGui_ImplDX11_NewFrame();
@@ -162,24 +150,28 @@ void SandboxState::Render()
         const int w = static_cast<int>(vp.Width);
         const int h = static_cast<int>(vp.Height);
 
-        ImGui::SetNextWindowPos(ImVec2(static_cast<float>(Maths::Clamp(x - 200, 10, w - 170)), static_cast<float>(Maths::Clamp(y - 160, 16, h - 110))));
-        ImGui::SetNextWindowSize(ImVec2(160, 100));
-        ImGui::SetNextWindowBgAlpha(0.5f);
+        // Don't show closest if behind the camera
+        if (Camera->GetForward().Dot(closest) > 0.0f)
+        {
+            ImGui::SetNextWindowPos(ImVec2(static_cast<float>(Maths::Clamp(x - 200, 10, w - 170)), static_cast<float>(Maths::Clamp(y - 160, 16, h - 110))));
+            ImGui::SetNextWindowSize(ImVec2(160, 100));
+            ImGui::SetNextWindowBgAlpha(0.5f);
 
-        ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+            ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
             ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
 
             if (CurrentTarget->Parent)
                 ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());
 
-            ImGui::Text("Distance: %i", static_cast<int>(Vector3::Distance(Ship->GetPosition(), closest)));
+            ImGui::Text("Distance: %i", static_cast<int>(Vector3::Distance(Camera->GetPosition(), closest)));
 
-            if(CurrentTarget->IsTransitioning())
+            if (CurrentTarget->IsTransitioning())
                 ImGui::Text("Transition: %i%%", static_cast<int>(CurrentTransitionT * 100.0f));
-        ImGui::End();
+            ImGui::End();
 
-        ImGui::Render();
-        ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+            ImGui::Render();
+            ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+        }
     }
 }
 
@@ -203,13 +195,13 @@ void SandboxState::Clear()
 
 void SandboxState::FloatingOrigin()
 {
-    auto shipPos = Ship->GetPosition();
+    auto camPos = Camera->GetPosition();
 
-    if (!CurrentTarget->IsTransitioning() && shipPos.Length() > CamOriginSnapThreshold)
+    if (!CurrentTarget->IsTransitioning() && camPos.Length() > CamOriginSnapThreshold)
     {
-        Ship->SetPosition(Vector3::Zero);
-        Planet->Move(-shipPos);
-        CurrentTarget->MoveObjects(-shipPos);
+        Camera->SetPosition(Vector3::Zero);
+        Planet->Move(-camPos);
+        CurrentTarget->MoveObjects(-camPos);
     }
 }
 
@@ -218,7 +210,7 @@ void SandboxState::TransitionLogic()
     if (CurrentTarget->Parent && !CurrentTarget->IsTransitioning())
     {
         // Transition up calculations
-        float parentDist = Vector3::Distance(Ship->GetPosition(), CurrentTarget->GetCentre()) * CurrentTarget->Scale;
+        float parentDist = Vector3::Distance(Camera->GetPosition(), CurrentTarget->GetCentre()) * CurrentTarget->Scale;
         float scaledDistToParent = (parentDist - CurrentTarget->EndTransitionDist) / CurrentTarget->BeginTransitionDist;
 
         if (scaledDistToParent > 0.0f && CurrentTarget->Parent)
@@ -230,9 +222,9 @@ void SandboxState::TransitionLogic()
 
             CurrentTarget = CurrentTarget->Parent;
 
-            Ship->Move(-CurrentTarget->Child->GetCentre());
-            Ship->SetPosition(Ship->GetPosition() * CurrentTarget->Child->Scale);
-            Ship->Move(CurrentTarget->Child->ParentLocationSpace);
+            Camera->Move(-CurrentTarget->Child->GetCentre());
+            Camera->SetPosition(Camera->GetPosition() * CurrentTarget->Child->Scale);
+            Camera->Move(CurrentTarget->Child->ParentLocationSpace);
 
             CurrentTarget->StartTransitionUpParent();
             CurrentTarget->Child->StartTransitionUpChild();
@@ -242,10 +234,10 @@ void SandboxState::TransitionLogic()
     if (CurrentTarget->Child)
     {
         // Transition down calculations
-        auto object = CurrentTarget->GetClosestObject(Ship->GetPosition());
+        auto object = CurrentTarget->GetClosestObject(Camera->GetPosition());
         auto newIndex = CurrentTarget->GetClosestObjectIndex();
 
-        float objectDist = Vector3::Distance(Ship->GetPosition(), object);
+        float objectDist = Vector3::Distance(Camera->GetPosition(), object);
         float scaledDistToObject = (objectDist - CurrentTarget->Child->EndTransitionDist) / CurrentTarget->Child->BeginTransitionDist;
 
         // Cancel transition if there's another close object
@@ -258,7 +250,7 @@ void SandboxState::TransitionLogic()
             CurrentTarget->Child->EndTransitionUpChild();
 
             CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, 1.0f, scaledDistToObject);
-            Ship->VelocityScale = CurrentTransitionT;
+            // Ship->VelocityScale = CurrentTransitionT;
         }
 
         if (!CurrentTarget->IsTransitioning())
@@ -286,7 +278,7 @@ void SandboxState::TransitionLogic()
 
                 CurrentTarget->EndTransitionUpParent();
                 CurrentTarget->Child->EndTransitionUpChild();
-                Ship->VelocityScale = 1.0f;
+                // Ship->VelocityScale = 1.0f;
 
                 LOGM("Ending up transition from " + CurrentTarget->Child->Name + " to " + CurrentTarget->Name)
             }
@@ -303,9 +295,9 @@ void SandboxState::TransitionLogic()
 
                 CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
 
-                Ship->Move(-CurrentTarget->ParentLocationSpace);
-                Ship->SetPosition(Ship->GetPosition() / CurrentTarget->Scale);
-                Ship->VelocityScale = 1.0f;
+                Camera->Move(-CurrentTarget->ParentLocationSpace);
+                Camera->SetPosition(Camera->GetPosition() / CurrentTarget->Scale);
+                // Camera->VelocityScale = 1.0f;
 
                 LOGM("Ending down transition from " + CurrentTarget->Parent->Name + " to " + CurrentTarget->Name)
             }
@@ -313,7 +305,7 @@ void SandboxState::TransitionLogic()
             else
             {
                 CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, 1.0f, scaledDistToObject);
-                Ship->VelocityScale = CurrentTransitionT;
+                // Ship->VelocityScale = CurrentTransitionT;
             }
         }
     }
