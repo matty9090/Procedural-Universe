@@ -104,9 +104,8 @@ void SandboxState::Update(float dt)
         Camera->VelocityScale = CurrentTarget->VelocityMultiplier;
 
     Camera->Events(Mouse, Mouse->GetState(), Keyboard->GetState(), dt);
-    Camera->Update(dt);
-
     CurrentTarget->Update(dt);
+    Camera->Update(dt);
 
     if (CurrentTarget->Parent)
         CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
@@ -149,10 +148,6 @@ void SandboxState::Render()
         auto closest = CurrentTarget->GetClosestObject(Camera->GetPosition());
         ClosestObjCube->Render(closest, 2.0f, Camera->GetViewMatrix() * Camera->GetProjectionMatrix(), false);
 
-        ImGui_ImplDX11_NewFrame();
-        ImGui_ImplWin32_NewFrame();
-        ImGui::NewFrame();
-
         int x, y;
         Camera->PixelFromWorldPoint(closest, x, y);
 
@@ -163,6 +158,10 @@ void SandboxState::Render()
         // Don't show closest if behind the camera
         if (Camera->GetForward().Dot(closest) > 0.0f)
         {
+            ImGui_ImplDX11_NewFrame();
+            ImGui_ImplWin32_NewFrame();
+            ImGui::NewFrame();
+
             ImGui::SetNextWindowPos(ImVec2(static_cast<float>(Maths::Clamp(x - 200, 10, w - 170)), static_cast<float>(Maths::Clamp(y - 160, 16, h - 110))));
             ImGui::SetNextWindowSize(ImVec2(160, 100));
             ImGui::SetNextWindowBgAlpha(0.5f);
@@ -177,6 +176,7 @@ void SandboxState::Render()
 
             if (CurrentTarget->IsTransitioning())
                 ImGui::Text("Transition: %i%%", static_cast<int>(CurrentTransitionT * 100.0f));
+
             ImGui::End();
 
             ImGui::Render();
@@ -210,8 +210,8 @@ void SandboxState::FloatingOrigin()
     if (!CurrentTarget->IsTransitioning() && camPos.Length() > CamOriginSnapThreshold)
     {
         Camera->SetPosition(Vector3::Zero);
-        Planet->Move(-camPos);
         CurrentTarget->MoveObjects(-camPos);
+        //Planet->Move(-camPos);
     }
 }
 

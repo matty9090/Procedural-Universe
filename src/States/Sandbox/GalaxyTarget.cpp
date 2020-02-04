@@ -55,7 +55,8 @@ void GalaxyTarget::ScaleObjects(float scale)
 
 void GalaxyTarget::ResetObjectPositions()
 {
-    GalaxyRenderer->Move(-GalaxyRenderer->GetPosition());
+    GalaxyRenderer->Move(-Centre);
+    Centre = Vector3::Zero;
 }
 
 Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)

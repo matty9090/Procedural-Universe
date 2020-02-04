@@ -9,8 +9,8 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     : SandboxTarget(context, "Stellar", "Planet", resources, camera, rtv)
 {
     Scale = 0.0002f;
-    BeginTransitionDist = 40.0f;
-    EndTransitionDist = 1.0f;
+    BeginTransitionDist = 400.0f;
+    EndTransitionDist = 20.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -180,6 +180,7 @@ void StarTarget::ResetObjectPositions()
 {
     MoveObjects(-Star->GetPosition());
     Star->SetPosition(Vector3::Zero);
+    Centre = Vector3::Zero;
 }
 
 void StarTarget::CreateStarPipeline()

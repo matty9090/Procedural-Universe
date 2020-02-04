@@ -79,7 +79,7 @@ class CSandboxCamera : public ICamera
          * 
          * @return Vector3 
          */
-        Vector3 GetPosition() const { return View.Invert().Translation(); }
+        Vector3 GetPosition() const { return Position; }
 
         /**
         * @brief Get the forward vector of the camera
@@ -123,5 +123,4 @@ class CSandboxCamera : public ICamera
         float Speed = 1.0f;
 
         Vector3 Position;
-        Matrix Orientation;
 };

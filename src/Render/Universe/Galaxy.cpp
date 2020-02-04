@@ -105,6 +105,9 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
             Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
             Context->PSSetShaderResources(0, 1, StarTexture.GetAddressOf());
 
+            auto sampler = CommonStates->AnisotropicClamp();
+            Context->PSSetSamplers(0, 1, &sampler);
+
             if (single)
             {
                 auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
