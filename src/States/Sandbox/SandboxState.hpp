@@ -55,6 +55,8 @@ private:
 
     float CamOriginSnapThreshold = 5000.0f;
     float CurrentTransitionT = 0.0f;
+    int Frames = 0;
+    float FrameTimer = 0.0f;
 
     bool bShowClosestObject = false;
     size_t ClosestObjIndex;

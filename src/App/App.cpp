@@ -103,6 +103,11 @@ void App::Update(float dt)
         PostQuitMessage(0);
     }
 
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::V))
+    {
+        DeviceResources->ToggleVSync();
+    }
+
     CurrentState->Update(dt);
 }
 #pragma endregion

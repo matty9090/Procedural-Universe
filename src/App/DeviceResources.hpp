@@ -40,6 +40,7 @@ namespace DX
         void HandleDeviceLost();
         void RegisterDeviceNotify(IDeviceNotify* deviceNotify) { m_deviceNotify = deviceNotify; }
         void Present();
+        void ToggleVSync() { m_vSync = m_vSync == 0 ? 1 : 0; }
 
         // Device Accessors.
         RECT GetOutputSize() const { return m_outputSize; }
@@ -126,5 +127,8 @@ namespace DX
 
         // The IDeviceNotify can be held directly as it owns the DeviceResources.
         IDeviceNotify*                                      m_deviceNotify;
+
+        // VSync
+        UINT                                                m_vSync;
     };
 }

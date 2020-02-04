@@ -65,7 +65,8 @@ DeviceResources::DeviceResources(
         m_outputSize{0, 0, 1, 1},
         m_colorSpace(DXGI_COLOR_SPACE_RGB_FULL_G22_NONE_P709),
         m_options(flags | c_FlipPresent),
-        m_deviceNotify(nullptr)
+        m_deviceNotify(nullptr),
+        m_vSync(1)
 {
 }
 
@@ -489,7 +490,7 @@ void DeviceResources::Present()
         // The first argument instructs DXGI to block until VSync, putting the application
         // to sleep until the next VSync. This ensures we don't waste any cycles rendering
         // frames that will never be displayed to the screen.
-        hr = m_swapChain->Present(1, 0);
+        hr = m_swapChain->Present(m_vSync, 0);
     }
 
     // Discard the contents of the render target.
