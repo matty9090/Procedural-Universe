@@ -8,9 +8,9 @@
 StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, CShipCamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Stellar", "Planet", resources, camera, rtv)
 {
-    Scale = 0.006f;
-    BeginTransitionDist = 4000.0f;
-    EndTransitionDist = 200.0f;
+    Scale = 0.0002f;
+    BeginTransitionDist = 40.0f;
+    EndTransitionDist = 1.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);

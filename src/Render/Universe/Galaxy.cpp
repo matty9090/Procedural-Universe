@@ -1,6 +1,7 @@
 #include "Galaxy.hpp"
 #include "Core/Maths.hpp"
 #include "Services/Log.hpp"
+#include "Services/ResourceManager.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
 #include <random>
@@ -22,20 +23,21 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
 
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
+    ParticlePipeline.LoadPixel(L"shaders/Particles/StarParticle.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/GalaxyParticle.gsh");
-    ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
+    ParticlePipeline.CreateRasteriser(Device, ECullMode::Anticlockwise);
     ParticlePipeline.CreateInputLayout(Device, layout);
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
     Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png", Position, 500.0f, Colour);
+    StarTexture = RESM.GetTexture(L"assets/StarImposter.png");
 }
 
 void Galaxy::Seed(uint64_t seed)
 {
-    Particles.resize(1000);
+    Particles.resize(1000000);
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 
     std::default_random_engine gen { static_cast<unsigned int>(seed) };
@@ -99,6 +101,8 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
             Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
             Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
             Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
+            Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
+            Context->PSSetShaderResources(0, 1, StarTexture.GetAddressOf());
 
             if (single)
             {
@@ -118,6 +122,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
             }
         });
 
+        Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
         Context->GSSetShader(nullptr, 0, 0);
     }
     

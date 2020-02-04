@@ -63,6 +63,7 @@ private:
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> StarTexture;
 
     std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
     std::unique_ptr<ConstantBuffer<LerpConstantBuffer>> LerpBuffer;

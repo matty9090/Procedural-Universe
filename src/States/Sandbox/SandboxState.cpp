@@ -149,7 +149,7 @@ void SandboxState::Render()
     {
         auto closest = CurrentTarget->GetClosestObject(Ship->GetPosition());
         //LOGM(Vector3::Distance(closest, Ship->GetPosition()))
-        ClosestObjCube->Render(closest, 100.0f, Camera->GetViewMatrix() * Camera->GetProjectionMatrix(), false);
+        ClosestObjCube->Render(closest, 2.0f, Camera->GetViewMatrix() * Camera->GetProjectionMatrix(), false);
 
         ImGui_ImplDX11_NewFrame();
         ImGui_ImplWin32_NewFrame();

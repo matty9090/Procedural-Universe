@@ -1,0 +1,14 @@
+struct PS_Input
+{
+    float4 Position : SV_POSITION;
+    float4 Colour : COLOR;
+    float2 TexCoord : TEXCOORD;
+};
+
+Texture2D Tex : t0;
+SamplerState Sampler : s0;
+
+float4 main(in PS_Input i) : SV_TARGET
+{
+	return Tex.Sample(Sampler, i.TexCoord) * i.Colour;
+}

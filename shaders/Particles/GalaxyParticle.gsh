@@ -22,7 +22,7 @@ struct GS_VertOut
 {
 	float4 ViewportPosition : SV_Position;
     float4 Colour : COLOR;
-    float2 UV : TEXCOORD0;
+    float2 UV : TEXCOORD;
 };
 
 [maxvertexcount(4)]  
@@ -52,7 +52,7 @@ void main
 
 	for (int i = 0; i < 4; ++i)
 	{
-		const float scale = 3.0f;
+		const float scale = 0.12f;
         float3 corner = Corners[i] * scale;
         float3 worldPosition = inParticle[0].Position + mul(corner, (float3x3)InvViewMatrix) + Translation;
         
