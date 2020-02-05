@@ -6,9 +6,9 @@
 PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Planetary", "N/A", resources, camera, rtv)
 {
-    Scale = 0.02f;
-    BeginTransitionDist = 1200.0f;
-    EndTransitionDist = 200.0f;
+    Scale = 0.0004f;
+    BeginTransitionDist = 10.0f;
+    EndTransitionDist = 2.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);

@@ -23,7 +23,7 @@ public:
     void Seed(uint64_t seed);
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float scale);
-    void Render(const ICamera& cam, float t, float scale = 1.0f, DirectX::SimpleMath::Vector3 voffset = DirectX::SimpleMath::Vector3::Zero, bool single = false);
+    void Render(const ICamera& cam, float t, float scale = 1.0f, DirectX::SimpleMath::Vector3 voffset = DirectX::SimpleMath::Vector3::Zero, bool single = false, bool imposter = true, bool forceStars = false);
 
     DirectX::SimpleMath::Vector3 GetPosition() const { return Position; }
     DirectX::SimpleMath::Vector3 GetClosestObject(DirectX::SimpleMath::Vector3 pos);

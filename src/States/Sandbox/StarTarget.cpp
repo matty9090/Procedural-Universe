@@ -8,9 +8,9 @@
 StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Stellar", "Planet", resources, camera, rtv)
 {
-    Scale = 0.0002f;
-    BeginTransitionDist = 400.0f;
-    EndTransitionDist = 2.0f;
+    Scale = 0.0005f;
+    BeginTransitionDist = 10.0f;
+    EndTransitionDist = 0.2f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -60,7 +60,6 @@ void StarTarget::ScaleObjects(float scale)
     for (auto& particle : Particles)
         particle.Position /= scale;
 
-    Star->Scale(1.0f / scale);
     UpdateParticleBuffer();
 }
 
@@ -112,10 +111,11 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
         LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
     else
         LerpBuffer->SetData(Context, LerpConstantBuffer { t });
-
+    
     Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
     Context->GSSetShader(nullptr, 0, 0);
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+    Star->SetScale(scale);
     Star->Draw(Context, viewProj, StarPipeline);
 }
 
@@ -165,7 +165,7 @@ void StarTarget::Seed(uint64_t seed)
     auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
     seeder->Seed(seed);
 
-    ScaleObjects(0.1f);
+    ScaleObjects(2.4f);
 }
 
 void StarTarget::UpdateParticleBuffer()
@@ -186,7 +186,7 @@ void StarTarget::ResetObjectPositions()
 void StarTarget::CreateStarPipeline()
 {
     Star = std::make_unique<CModel>(Device, RESM.GetMesh("assets/Sphere.obj"));
-    Star->Scale(2.0f);
+    Star->Scale(0.003f);
 
     StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     StarPipeline.LoadVertex(L"shaders/Standard/Position.vsh");

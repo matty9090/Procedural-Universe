@@ -19,7 +19,7 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
     Noise.SetFractalOctaves(6);
 
     Components.push_back(std::make_unique<CTerrainComponent>(this));
-    Components.push_back(std::make_unique<CAtmosphereComponent>(this, 200.0f));
+    //Components.push_back(std::make_unique<CAtmosphereComponent>(this, 200.0f));
 }
 
 CPlanet::~CPlanet()

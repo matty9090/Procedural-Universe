@@ -37,7 +37,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
 
 void Galaxy::Seed(uint64_t seed)
 {
-    Particles.resize(10000);
+    Particles.resize(1000000);
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 
     std::default_random_engine gen { static_cast<unsigned int>(seed) };
@@ -76,7 +76,7 @@ void Galaxy::Scale(float scale)
     RegenerateBuffer();
 }
 
-void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, bool single)
+void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, bool single, bool imposter, bool forceStars)
 {
     float dist = ((Vector3::Distance(cam.GetPosition(), Position) - ImposterFadeDist) / ImposterThreshold) - 1.0f;
     float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
@@ -84,7 +84,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
 
     Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
 
-    if (galaxyT > 0.0f || t > 0.0f)
+    if (galaxyT > 0.0f || t > 0.0f || forceStars)
     {
         Matrix view = cam.GetViewMatrix();
         Matrix viewProj = view * cam.GetProjectionMatrix();
@@ -129,8 +129,8 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
         
         Context->GSSetShader(nullptr, 0, 0);
     }
-    
-    if (imposterT > 0.0f)
+
+    if (imposter && imposterT > 0.0f)
     {
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
         Imposter->SetTint(Color(Colour.R(), Colour.G(), Colour.B(), imposterT));

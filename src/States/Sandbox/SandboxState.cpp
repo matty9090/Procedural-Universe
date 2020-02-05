@@ -162,7 +162,7 @@ void SandboxState::Render()
         const int h = static_cast<int>(vp.Height);
 
         // Don't show closest if behind the camera
-        if (Camera->GetForward().Dot(closest) > 0.0f)
+        //if (Camera->GetForward().Dot(closest) > 0.0f)
         {
             ImGui_ImplDX11_NewFrame();
             ImGui_ImplWin32_NewFrame();
@@ -190,7 +190,7 @@ void SandboxState::Render()
         }
     }
 
-    auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale * 1.0));
+    auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale));
 
     SpriteBatch->Begin();
     Font->DrawString(SpriteBatch.get(), (std::string("Speed: ") + speed).c_str(), Vector3(2.0f, 2.0, 0.0f));

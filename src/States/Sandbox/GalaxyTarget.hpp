@@ -23,6 +23,9 @@ public:
 
 private:
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
+    void OnEndTransitionUpChild() override { bImposter = true; }
+    void OnEndTransitionDownChild() override { bImposter = false; }
+
     void RenderLerp(float t = 1.0f, float scale = 1.0f, Vector3 voffset = Vector3::Zero, bool single = false);
     void BakeSkybox(Vector3 object) override;
     void Seed(uint64_t seed) override;
@@ -40,6 +43,8 @@ private:
         float Alpha;
         float Custom1, Custom2, Custom3;
     };
+
+    bool bImposter = true;
 
     RenderView ParticleRenderTarget;
     RenderPipeline ParticlePipeline;
