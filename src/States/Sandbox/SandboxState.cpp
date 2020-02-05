@@ -39,6 +39,9 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     ClosestObjCube = std::make_unique<Cube>(Context);
+    
+    Font = std::make_unique<DirectX::SpriteFont>(Device, L"assets/SegoeUI.font");
+    SpriteBatch = std::make_unique<DirectX::SpriteBatch>(Context);
 
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     PostProcess->GaussianBlur = 5.0f;
@@ -62,9 +65,11 @@ void SandboxState::Cleanup()
     ImGui_ImplWin32_Shutdown();
     ImGui::DestroyContext();
 
+    Font.reset();
     PostProcess.reset();
     CommonStates.reset();
     Camera.reset();
+    SpriteBatch.reset();
     
     auto t = &RootTarget;
 
@@ -183,6 +188,12 @@ void SandboxState::Render()
             ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         }
     }
+
+    auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale * 10000.0));
+
+    SpriteBatch->Begin();
+    Font->DrawString(SpriteBatch.get(), (std::string("Speed: ") + speed).c_str(), Vector3(2.0f, 2.0, 0.0f));
+    SpriteBatch->End();
 }
 
 void SandboxState::Clear()
@@ -348,10 +359,36 @@ void SandboxState::SetupTargets()
     Star->Parent = Galaxy.get();
     Planet->Parent = Star.get();
 
+    Universe->GlobalScale = Universe->Scale * Galaxy->Scale * Star->Scale * Planet->Scale;
+    Galaxy->GlobalScale = Galaxy->Scale * Star->Scale * Planet->Scale;
+    Star->GlobalScale = Star->Scale * Planet->Scale;
+    Planet->GlobalScale = Planet->Scale;
+
     Star->Child   = std::move(Planet);
     Galaxy->Child = std::move(Star);
     Universe->Child = std::move(Galaxy);
 
     CurrentTarget = Universe.get();
     RootTarget = std::move(Universe);
+}
+
+std::string SandboxState::GetSpeedStr(double speed)
+{
+    int power = static_cast<int>(log10(speed));
+    std::string str;
+
+    if (power <= 3)
+        str = "m/s";
+    else if (power <= 6)
+    {
+        speed /= 3;
+        str = "km/s";
+    }
+    else
+    {
+        speed /= 299792458.0f;
+        str = "c";
+    }
+
+    return std::to_string(speed) + " " + str;
 }

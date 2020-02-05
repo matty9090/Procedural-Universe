@@ -43,7 +43,7 @@ public:
     virtual void ScaleObjects(float scale) {}
     virtual void ResetObjectPositions() {}
 
-    virtual Vector3  GetClosestObject(Vector3 pos) = 0;
+    virtual Vector3 GetClosestObject(Vector3 pos) = 0;
     virtual size_t GetClosestObjectIndex() const { return 0; };
 
     void StartTransitionUpParent();
@@ -59,8 +59,11 @@ public:
     void EndTransitionDownChild();
 
     std::string Name, ObjName;
+
+    double GlobalScale = 0.0;
     float Scale = 1.0f;
     float VelocityMultiplier = 1.0f;
+
     Vector3 ParentLocationSpace;
     SandboxTarget* Parent = nullptr;
     std::unique_ptr<SandboxTarget> Child = nullptr;

@@ -103,6 +103,13 @@ class CSandboxCamera : public ICamera
         Vector3 WorldPointFromPixel(int x, int y);
 
         /**
+         * @brief Get the current speed of the camera
+         *
+         * @return Vector3
+         */
+        float GetSpeed() const { return Speed; }
+
+        /**
          * @brief Return camera position as a string
          * 
          * @return std::string 
@@ -120,7 +127,7 @@ class CSandboxCamera : public ICamera
 
         float NearPlane = 0.01f, FarPlane = 2000.0f;
         float Yaw = 0.0f, Pitch = 0.0f, Roll = 0.0f;
-        float Speed = 1.0f;
+        float InitialSpeed = 10000.0f, Speed;
 
         Vector3 Position;
 };

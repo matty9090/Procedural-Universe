@@ -14,6 +14,8 @@
 #include <vector>
 #include <Mouse.h>
 #include <Keyboard.h>
+#include <SpriteFont.h>
+#include <SpriteBatch.h>
 #include <SimpleMath.h>
 #include <PostProcess.h>
 #include <CommonStates.h>
@@ -34,6 +36,7 @@ private:
     void TransitionLogic();
     void CreateModelPipeline();
     void SetupTargets();
+    std::string GetSpeedStr(double speed);
 
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
@@ -43,6 +46,8 @@ private:
     DirectX::Keyboard::KeyboardStateTracker Tracker;
 
     std::unique_ptr<CPostProcess> PostProcess;
+    std::unique_ptr<DirectX::SpriteFont> Font;
+    std::unique_ptr<DirectX::SpriteBatch> SpriteBatch;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
     std::unique_ptr<Cube>             ClosestObjCube;

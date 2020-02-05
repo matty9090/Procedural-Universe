@@ -10,7 +10,8 @@ using namespace DirectX::SimpleMath;
 
 CSandboxCamera::CSandboxCamera(size_t width, size_t height)
     : Width(width),
-      Height(height)
+      Height(height),
+      Speed(InitialSpeed)
 {
     Proj = Matrix::CreatePerspectiveFieldOfView(XM_PI / 4.f, float(width) / float(height), NearPlane, FarPlane);
 }
@@ -43,6 +44,10 @@ void CSandboxCamera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, Di
         else if (Yaw < -XM_PI)
             Yaw += XM_PI * 2.0f;
     }
+    else
+    {
+        Speed = (std::max)(InitialSpeed + ms.scrollWheelValue, 0.0f);
+    }
 
     mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
 
@@ -57,7 +62,8 @@ void CSandboxCamera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, Di
 
     Quaternion q = Quaternion::CreateFromYawPitchRoll(Yaw, -Pitch, 0.0f);
     move = Vector3::Transform(move, q);
-    move *= dt * 10000.0f * Speed * VelocityScale;
+    move *= dt * Speed * VelocityScale;
+    
     Position += move;
 }
 
