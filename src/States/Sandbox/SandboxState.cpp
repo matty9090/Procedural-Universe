@@ -11,6 +11,7 @@
 
 #include "Render/Planet/Components/TerrainComponent.hpp"
 
+#include <sstream>
 #include <DirectXColors.h>
 
 #include <imgui.h>
@@ -189,7 +190,7 @@ void SandboxState::Render()
         }
     }
 
-    auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale * 10000.0));
+    auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale * 1.0));
 
     SpriteBatch->Begin();
     Font->DrawString(SpriteBatch.get(), (std::string("Speed: ") + speed).c_str(), Vector3(2.0f, 2.0, 0.0f));
@@ -375,20 +376,26 @@ void SandboxState::SetupTargets()
 std::string SandboxState::GetSpeedStr(double speed)
 {
     int power = static_cast<int>(log10(speed));
-    std::string str;
+    std::ostringstream str;
 
     if (power <= 3)
-        str = "m/s";
+    {
+        str << static_cast<int>(speed);
+        str << " m/s";
+    }
     else if (power <= 6)
     {
         speed /= 3;
-        str = "km/s";
+        str << static_cast<int>(speed);
+        str << " km/s";
     }
     else
     {
         speed /= 299792458.0f;
-        str = "c";
+        str.precision(2);
+        str << std::fixed << speed;
+        str << " c";
     }
 
-    return std::to_string(speed) + " " + str;
+    return str.str();
 }

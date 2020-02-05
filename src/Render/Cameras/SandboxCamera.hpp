@@ -107,7 +107,7 @@ class CSandboxCamera : public ICamera
          *
          * @return Vector3
          */
-        float GetSpeed() const { return Speed; }
+        float GetSpeed() const { return Speed * VelocityScale; }
 
         /**
          * @brief Return camera position as a string

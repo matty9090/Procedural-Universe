@@ -46,7 +46,10 @@ void CSandboxCamera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, Di
     }
     else
     {
-        Speed = (std::max)(InitialSpeed + ms.scrollWheelValue, 0.0f);
+        double t = -1.0f * ((static_cast<double>(-ms.scrollWheelValue) / 8000.0) - 1.0f);
+        t *= t * t * t;
+
+        Speed = (std::max)(InitialSpeed * static_cast<float>(t), 0.0f);
     }
 
     mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
