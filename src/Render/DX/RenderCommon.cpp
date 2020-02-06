@@ -49,6 +49,18 @@ void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std
     DX::ThrowIfFailed(device->CreateBuffer(&desc, &init, buffer));
 }
 
+void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, unsigned int size)
+{
+    D3D11_BUFFER_DESC desc;
+    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    desc.Usage = D3D11_USAGE_DYNAMIC;
+    desc.ByteWidth = size * sizeof(Particle);
+    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    desc.MiscFlags = 0;
+
+    DX::ThrowIfFailed(device->CreateBuffer(&desc, nullptr, buffer));
+}
+
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPosition()
 {
     std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {

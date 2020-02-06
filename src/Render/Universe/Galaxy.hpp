@@ -21,21 +21,25 @@ public:
     Galaxy(ID3D11DeviceContext* context);
 
     void InitialSeed(uint64_t seed);
-    void FullSeed();
 
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float scale);
 
-    void Render(const ICamera& cam, float t, float scale = 1.0f, DirectX::SimpleMath::Vector3 voffset = DirectX::SimpleMath::Vector3::Zero, bool single = false, bool forceStars = false);
+    void Render(const ICamera& cam, float t, float scale = 1.0f, DirectX::SimpleMath::Vector3 voffset = DirectX::SimpleMath::Vector3::Zero, bool single = false);
     void RenderImposter(const ICamera& cam);
 
+    DirectX::SimpleMath::Color GetColour() const { return Colour; }
     DirectX::SimpleMath::Vector3 GetPosition() const { return Position; }
     DirectX::SimpleMath::Vector3 GetClosestObject(DirectX::SimpleMath::Vector3 pos);
+    
     size_t GetClosestObjectIndex() const { return CurrentClosestObjectID; }
+    uint64_t GetSeed() const { return Seed; }
 
     static float ImposterThreshold;
     static float ImposterFadeDist;
     static float ImposterOffsetPercent;
+
+    std::vector<Particle> Particles;
 
 private:
     void RegenerateBuffer();
@@ -63,7 +67,6 @@ private:
     uint64_t Seed = 0U;
     DirectX::SimpleMath::Vector3 Position;
 
-    std::vector<Particle> Particles;
     std::unique_ptr<CBillboard> Imposter;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 

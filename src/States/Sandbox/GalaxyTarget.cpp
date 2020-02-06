@@ -17,12 +17,12 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
     GalaxyRenderer = std::make_unique<Galaxy>(Context);
+    SeedParticles.resize(1000000);
 }
 
 void GalaxyTarget::Seed(uint64_t seed)
 {
     GalaxyRenderer->InitialSeed(seed);
-    GalaxyRenderer->Scale(4000.0f * Scale);
 }
 
 void GalaxyTarget::Render()
@@ -64,18 +64,42 @@ Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
     return GalaxyRenderer->GetClosestObject(pos);
 }
 
+void GalaxyTarget::OnStartTransitionDownChild(Vector3 location)
+{
+    auto seed = GalaxyRenderer->GetSeed();
+    auto col = GalaxyRenderer->GetColour();
+
+    DispatchTask(EWorkerTask::Seed, [&]() {
+        const float Variation = 0.12f;
+
+        auto seeder = CreateParticleSeeder(SeedParticles, EParticleSeeder::Galaxy);
+        seeder->SetRedDist(col.R() - Variation, col.R() + Variation);
+        seeder->SetGreenDist(col.G() - Variation, col.G() + Variation);
+        seeder->SetBlueDist(col.B() - Variation, col.B() + Variation);
+        seeder->Seed(seed);
+    });
+}
+
+void GalaxyTarget::OnEndTransitionDownChild()
+{
+    FinishTask(EWorkerTask::Seed);
+    
+    GalaxyRenderer->Particles = SeedParticles;
+    GalaxyRenderer->Scale(5.0f * Scale);
+}
+
 void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single)
 {
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    GalaxyRenderer->Render(*Camera, t, scale, voffset, single, bImposter);
+    GalaxyRenderer->Render(*Camera, t, scale, voffset, single);
 }
 
 void GalaxyTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
         Parent->GetSkyBox().Draw(cam.GetViewMatrix() * cam.GetProjectionMatrix());
-        GalaxyRenderer->Render(cam, 0.0f, 1.0f / Scale, Vector3::Zero, true, false);
+        GalaxyRenderer->Render(cam, 0.0f, 1.0f / Scale, Vector3::Zero, true);
     });
 }

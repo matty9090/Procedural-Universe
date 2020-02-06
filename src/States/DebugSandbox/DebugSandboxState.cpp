@@ -7,6 +7,7 @@
 #include "States/Sandbox/UniverseTarget.hpp"
 #include "States/Sandbox/GalaxyTarget.hpp"
 #include "States/Sandbox/StarTarget.hpp"
+#include "States/Sandbox/PlanetTarget.hpp"
 
 #include <DirectXColors.h>
 
@@ -74,6 +75,18 @@ void DebugSandboxState::Render()
     if (ImGui::Button("Test transitions"))
         TestTransitions();
 
+    if (ImGui::Button("Test universe -> galaxy"))
+    {
+        for (int i = 0; i < 8; ++i)
+        {
+            RootTarget->Child->StartTransitionDownChild(Vector3::Zero, 0);
+            RootTarget->StartTransitionDownParent(Vector3::Zero);
+            RootTarget->EndTransitionDownParent(Vector3::Zero);
+            RootTarget->Child->EndTransitionDownChild();
+            CurrentTarget = RootTarget->Child.get();
+        }
+    }
+
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 }
@@ -101,15 +114,23 @@ void DebugSandboxState::RenderUI()
 
 void DebugSandboxState::SetupTargets()
 {
-    auto rtv = DeviceResources->GetRenderTargetView();
+    auto rtv = DeviceResources->GetSceneRenderTargetView();
 
     std::unique_ptr<SandboxTarget> Universe = std::make_unique<UniverseTarget>(Context, DeviceResources, Camera.get(), rtv);
-    std::unique_ptr<SandboxTarget> Galaxy   = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv);
-    std::unique_ptr<SandboxTarget> Star     = std::make_unique<StarTarget>  (Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Galaxy = std::make_unique<GalaxyTarget>(Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Star = std::make_unique<StarTarget>(Context, DeviceResources, Camera.get(), rtv);
+    std::unique_ptr<SandboxTarget> Planet = std::make_unique<PlanetTarget>(Context, DeviceResources, Camera.get(), rtv);
 
     Galaxy->Parent = Universe.get();
     Star->Parent = Galaxy.get();
+    Planet->Parent = Star.get();
 
+    Universe->GlobalScale = Universe->Scale * Galaxy->Scale * Star->Scale * Planet->Scale;
+    Galaxy->GlobalScale = Galaxy->Scale * Star->Scale * Planet->Scale;
+    Star->GlobalScale = Star->Scale * Planet->Scale;
+    Planet->GlobalScale = Planet->Scale;
+
+    Star->Child = std::move(Planet);
     Galaxy->Child = std::move(Star);
     Universe->Child = std::move(Galaxy);
 

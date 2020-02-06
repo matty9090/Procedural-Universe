@@ -72,6 +72,8 @@ public:
     float EndTransitionDist = 400.0f;
     
 protected:
+    enum class EWorkerTask { Seed };
+
     virtual void OnStartTransitionUpParent() {}
     virtual void OnStartTransitionDownParent(Vector3 object) {}
     virtual void OnEndTransitionUpParent() {}
@@ -88,6 +90,8 @@ protected:
 
     void GenerateSkybox(Vector3 location);
     void RenderParentSkybox();
+    void DispatchTask(EWorkerTask task, std::function<void()> func);
+    void FinishTask(EWorkerTask task);
 
     CSkyBox SkyBox;
     Vector3 Centre;
@@ -106,4 +110,8 @@ private:
         TransitioningParent,
         TransitioningChild
     } State;
+    
+    CThreadPool<std::function<void()>> Pool;
+
+    void Worker(std::function<void()> func);
 };

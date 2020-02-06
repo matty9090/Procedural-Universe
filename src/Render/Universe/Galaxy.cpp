@@ -28,6 +28,8 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     ParticlePipeline.CreateRasteriser(Device, ECullMode::Anticlockwise);
     ParticlePipeline.CreateInputLayout(Device, layout);
 
+    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), 1000000);
+
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
@@ -43,24 +45,7 @@ void Galaxy::InitialSeed(uint64_t seed)
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
     Colour = Color(dist(gen), dist(gen), dist(gen));
-
     Imposter->SetTint(Colour);
-
-    Scale(0.001f);
-}
-
-void Galaxy::FullSeed()
-{
-    Particles.resize(1000000);
-    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
-
-    const float Variation = 0.12f;
-
-    auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
-    seeder->SetRedDist(Colour.R() - Variation, Colour.R() + Variation);
-    seeder->SetGreenDist(Colour.G() - Variation, Colour.G() + Variation);
-    seeder->SetBlueDist(Colour.B() - Variation, Colour.B() + Variation);
-    seeder->Seed(Seed);
 }
 
 void Galaxy::Move(Vector3 v)
@@ -81,8 +66,11 @@ void Galaxy::Scale(float scale)
     RegenerateBuffer();
 }
 
-void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, bool single, bool forceStars)
+void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, bool single)
 {
+    if (Particles.size() <= 0)
+        return;
+
     Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
 
     Matrix view = cam.GetViewMatrix();

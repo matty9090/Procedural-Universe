@@ -51,6 +51,7 @@ private:
 RenderView CreateTarget(ID3D11Device* device, int width, int height);
 void SetRenderTarget(ID3D11DeviceContext* context, RenderView& view);
 void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std::vector<Particle>& particles);
+void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, unsigned int size);
 
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPosition();
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPositionColour();

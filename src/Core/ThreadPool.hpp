@@ -15,7 +15,9 @@ public:
     void SetNumWorkers(uint32_t num) { NumWorkers = num; }
 
     void Dispatch(uint32_t thread, const T& info);
+    
     void Join();
+    void Join(uint32_t thread);
 
 private:
     void Work(uint32_t thread);
@@ -79,6 +81,17 @@ inline void CThreadPool<T>::Join()
         {
             WorkReady[i].wait(lock);
         }
+    }
+}
+
+template<class T>
+inline void CThreadPool<T>::Join(uint32_t thread)
+{
+    std::unique_lock<std::mutex> lock(Mutex[thread]);
+
+    while (HaveWork[thread])
+    {
+        WorkReady[thread].wait(lock);
     }
 }
 

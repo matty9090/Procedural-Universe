@@ -9,10 +9,11 @@ SandboxTarget::SandboxTarget(ID3D11DeviceContext* context, std::string name, std
       Resources(resources),
       Camera(camera),
       SkyBox(context),
-      RenderTarget(rtv)
+      RenderTarget(rtv),
+      Pool(std::bind(&SandboxTarget::Worker, this, std::placeholders::_1))
 {
     Context->GetDevice(&Device);
-        
+    
     auto size = resources->GetOutputSize();
     SkyboxGenerator = std::make_unique<CSkyboxGenerator>(Device, Context, size.right - size.left, size.bottom - size.top);
 }
@@ -69,7 +70,6 @@ void SandboxTarget::StartTransitionDownChild(Vector3 location, uint64_t seed = 0
     State = EState::TransitioningChild;
     ParentLocationSpace = location;
     Seed(seed);
-    GetClosestObject(Camera->GetPosition());
     ScaleObjects(1.0f / Scale);
     OnStartTransitionDownChild(location);
 }
@@ -79,6 +79,7 @@ void SandboxTarget::EndTransitionUpChild()
     State = EState::Idle;
     ScaleObjects(Scale);
     OnEndTransitionUpChild();
+    GetClosestObject(Camera->GetPosition());
 }
 
 void SandboxTarget::EndTransitionDownChild()
@@ -102,4 +103,19 @@ void SandboxTarget::RenderParentSkybox()
         Context->OMSetRenderTargets(1, &RenderTarget, Resources->GetDepthStencilView());
         Parent->GetSkyBox().Draw(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
     }
+}
+
+void SandboxTarget::DispatchTask(EWorkerTask task, std::function<void()> func)
+{
+    Pool.Dispatch(static_cast<uint32_t>(task), func);
+}
+
+void SandboxTarget::FinishTask(EWorkerTask task)
+{
+    Pool.Join(static_cast<uint32_t>(task));
+}
+
+void SandboxTarget::Worker(std::function<void()> func)
+{
+    func();
 }
