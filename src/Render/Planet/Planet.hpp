@@ -37,7 +37,7 @@ public:
     ID3D11DeviceContext* GetContext() const { return Context; }
     
     ICamera* Camera;
-    float Radius = 1000.0f;
+    float Radius = 250.0f;
     float SplitDistance = 1500.0f;
     DirectX::SimpleMath::Matrix World;
 

@@ -8,7 +8,7 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 {
     Scale = 0.0004f;
     BeginTransitionDist = 10.0f;
-    EndTransitionDist = 2.0f;
+    EndTransitionDist = 0.3f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);

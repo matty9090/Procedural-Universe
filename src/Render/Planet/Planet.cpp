@@ -59,7 +59,7 @@ void CPlanet::SetPosition(DirectX::SimpleMath::Vector3 p)
 
 float CPlanet::GetHeight(DirectX::SimpleMath::Vector3 normal)
 {
-    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * 100.0f;
+    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * 20.0f;
 }
 
 void CPlanet::UpdateMatrix()

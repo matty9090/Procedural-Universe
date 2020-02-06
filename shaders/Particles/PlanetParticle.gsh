@@ -52,7 +52,7 @@ void main
 
 	for (int i = 0; i < 4; ++i)
 	{
-		const float scale = 0.5f;
+		const float scale = 0.1f;
         float3 corner = Corners[i] * scale * Lerp;
         float3 worldPosition = inParticle[0].Position + mul(corner, (float3x3)InvViewMatrix) + Translation;
         
