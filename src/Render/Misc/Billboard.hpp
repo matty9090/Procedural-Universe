@@ -5,43 +5,42 @@
 #include "Render/DX/RenderCommon.hpp"
 #include "Render/DX/ConstantBuffer.hpp"
 
+struct BillboardInstance
+{
+    Vector3 Position;
+    float Scale;
+    Color Tint;
+};
+
 class CBillboard
 {
 public:
-    CBillboard(ID3D11DeviceContext* context, std::wstring tex, Vector3 pos, float scale, Color tint);
+    CBillboard(ID3D11DeviceContext* context, std::wstring tex, unsigned int reserve = 1, std::vector<BillboardInstance> instances = {});
     ~CBillboard();
 
     void Render(const ICamera& cam);
-    void SetPosition(const Vector3& pos) { Position = pos; }
-    void SetScale(float scale) { Scale = scale; }
-    void SetTint(const Color& tint) { Tint = tint; PixelCB->SetData(Context, Tint); }
+    void Render(const ICamera& cam, float scale, Vector3 offset);
+
+    void Scale(float s) { RelativeScale *= s; }
+    void SetPosition(Vector3 pos);
+    void UpdateInstances(std::vector<BillboardInstance> instances);
 
 private:
-    struct Vertex
-    {
-        Vector3 Position;
-        Vector2 UV;
-    };
-
     struct VSBuffer
     {
         Matrix ViewProj;
-        float Scale;
-        Vector3 _Pad;
+        Matrix InvView;
     };
 
-    float Scale;
-    Vector3 Position;
-    Matrix World;
-    Color Tint;
+    float RelativeScale = 1.0f;
+    Vector3 Position = Vector3::Zero;
 
     ID3D11DeviceContext* Context;
+    std::vector<BillboardInstance> Instances;
 
     RenderPipeline Pipeline;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> InstanceBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Texture;
 
     std::unique_ptr<ConstantBuffer<VSBuffer>> VertexCB;
-    std::unique_ptr<ConstantBuffer<Color>> PixelCB;
 };

@@ -1,26 +1,11 @@
-#include "../Common.hlsl"
-
-cbuffer cb0
+struct VS_InputOutput
 {
-    row_major matrix ViewProj;
-	float Scale;
+	float3 Position : POSITION;
+	float Scale : TEXCOORD;
+	float4 Colour : COLOR;
 };
 
-struct VS_Input
+void main(in VS_InputOutput i, out VS_InputOutput o)
 {
-    float3 Position : POSITION;
-	float2 UV : TEXCOORD;
-};
-
-struct VS_Output
-{
-    float4 Position : SV_POSITION;
-	float2 UV : TEXCOORD;
-};
-
-void main(in VS_Input v_in, out VS_Output v_out)
-{
-    v_out.Position = mul(float4(v_in.Position * Scale, 1.0f), ViewProj);
-    v_out.Position.z = LogDepthBuffer(v_out.Position.w);
-	v_out.UV = v_in.UV;
+	o = i;
 }

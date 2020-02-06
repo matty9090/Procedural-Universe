@@ -21,6 +21,7 @@ public:
     Galaxy(ID3D11DeviceContext* context);
 
     void InitialSeed(uint64_t seed);
+    void FinishSeed(const std::vector<Particle>& particles);
 
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float scale);
@@ -39,9 +40,9 @@ public:
     static float ImposterFadeDist;
     static float ImposterOffsetPercent;
 
-    std::vector<Particle> Particles;
 
 private:
+    void RenderDust(const ICamera& cam);
     void RegenerateBuffer();
 
     ID3D11Device* Device;
@@ -62,16 +63,22 @@ private:
         float Custom1, Custom2, Custom3;
     };
 
+    float ImposterSize = 250.0f;
     Color Colour;
     size_t CurrentClosestObjectID = 0;
     uint64_t Seed = 0U;
     DirectX::SimpleMath::Vector3 Position;
 
+    std::vector<Particle> Particles;
+    std::vector<BillboardInstance> DustClouds;
+
     std::unique_ptr<CBillboard> Imposter;
+    std::unique_ptr<CBillboard> DustRenderer;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
     Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> StarTexture;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> DustTexture;
 
     std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
     std::unique_ptr<ConstantBuffer<LerpConstantBuffer>> LerpBuffer;

@@ -76,7 +76,7 @@ void GalaxyTarget::OnStartTransitionDownChild(Vector3 location)
         seeder->SetRedDist(col.R() - Variation, col.R() + Variation);
         seeder->SetGreenDist(col.G() - Variation, col.G() + Variation);
         seeder->SetBlueDist(col.B() - Variation, col.B() + Variation);
-        seeder->Seed(seed);
+        seeder->Seed(seed);        
     });
 }
 
@@ -84,7 +84,7 @@ void GalaxyTarget::OnEndTransitionDownChild()
 {
     FinishTask(EWorkerTask::Seed);
     
-    GalaxyRenderer->Particles = SeedParticles;
+    GalaxyRenderer->FinishSeed(SeedParticles);
     GalaxyRenderer->Scale(5.0f * Scale);
 }
 

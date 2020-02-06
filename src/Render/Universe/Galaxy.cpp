@@ -28,12 +28,15 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     ParticlePipeline.CreateRasteriser(Device, ECullMode::Anticlockwise);
     ParticlePipeline.CreateInputLayout(Device, layout);
 
+    // TODO: Create on transition down then free up after
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), 1000000);
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
-    Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png", Position, 500.0f, Colour);
+    Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png");
+    DustRenderer = std::make_unique<CBillboard>(Context, L"assets/Fog.png", 860);
+
     StarTexture = RESM.GetTexture(L"assets/StarImposter.png");
 }
 
@@ -45,13 +48,34 @@ void Galaxy::InitialSeed(uint64_t seed)
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
     Colour = Color(dist(gen), dist(gen), dist(gen));
-    Imposter->SetTint(Colour);
+
+    BillboardInstance inst = { Vector3::Zero, ImposterSize, Colour };
+    Imposter->UpdateInstances(std::vector<BillboardInstance> { inst });
+    Imposter->SetPosition(Position);
+}
+
+void Galaxy::FinishSeed(const std::vector<Particle>& particles)
+{
+    Particles = particles;
+    DustClouds.clear();
+
+    std::default_random_engine gen { static_cast<unsigned int>(Seed) };
+    std::uniform_real_distribution<double> dist(0, 1000000);
+    std::uniform_real_distribution<float> distScale(4.0f, 18.0f);
+    std::uniform_real_distribution<float> distAlpha(0.04f, 0.16f);
+
+    for (int i = 0; i < Particles.size() && i < 860; ++i)
+    {
+        DustClouds.push_back(BillboardInstance { Particles[static_cast<int>(dist(gen))].Position, distScale(gen), Color(1.0f, 1.0f, 1.0f, distAlpha(gen)) });
+    }
+
+    DustRenderer->UpdateInstances(DustClouds);
 }
 
 void Galaxy::Move(Vector3 v)
 {
-    for (auto& particle : Particles)
-        particle.Position += v;
+    for (auto& particle : Particles) particle.Position += v;
+    for (auto& cloud : DustClouds) cloud.Position += v;
 
     Position += v;
     Imposter->SetPosition(Position);
@@ -60,8 +84,8 @@ void Galaxy::Move(Vector3 v)
 
 void Galaxy::Scale(float scale)
 {
-    for (auto& particle : Particles)
-        particle.Position /= scale;
+    for (auto& particle : Particles) particle.Position /= scale;
+    for (auto& cloud : DustClouds) cloud.Position /= scale;
 
     RegenerateBuffer();
 }
@@ -112,6 +136,9 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
             Context->Draw(static_cast<UINT>(Particles.size()), 0);
         }
     });
+
+    Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+    DustRenderer->Render(cam, scale, voffset);
         
     Context->GSSetShader(nullptr, 0, 0);
     Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
@@ -122,14 +149,21 @@ void Galaxy::RenderImposter(const ICamera& cam)
     float dist = ((Vector3::Distance(cam.GetPosition(), Position) - ImposterFadeDist) / ImposterThreshold) - 1.0f;
     float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
 
+    Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
+
     if (imposterT > 0.0f)
     {
-        Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
+        BillboardInstance inst = { Vector3::Zero, ImposterSize, Color(Colour.R(), Colour.G(), Colour.B(), imposterT) };
+
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Imposter->SetTint(Color(Colour.R(), Colour.G(), Colour.B(), imposterT));
+        Imposter->UpdateInstances(std::vector<BillboardInstance> { inst });
         Imposter->Render(cam);
-        Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
     }
+
+    Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+    DustRenderer->Render(cam);
+
+    Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
 }
 
 Vector3 Galaxy::GetClosestObject(Vector3 pos)
@@ -146,4 +180,6 @@ void Galaxy::RegenerateBuffer()
     Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
     memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
     Context->Unmap(ParticleBuffer.Get(), 0);
+
+    DustRenderer->UpdateInstances(DustClouds);
 }

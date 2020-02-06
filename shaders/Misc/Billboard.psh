@@ -1,12 +1,8 @@
-cbuffer cb0
-{
-    float4 Tint;
-};
-
 struct PS_Input
 {
-    float4 Position : SV_POSITION;
-    float2 TexCoord : TEXCOORD;
+    float4 Position : SV_Position;
+    float2 UV : TEXCOORD;
+    float4 Colour : COLOR;
 };
 
 Texture2D Tex : t0;
@@ -14,5 +10,5 @@ SamplerState Sampler : s0;
 
 float4 main(in PS_Input i) : SV_TARGET
 {
-	return Tex.Sample(Sampler, i.TexCoord) * Tint;
+	return Tex.Sample(Sampler, i.UV) * i.Colour;
 }
