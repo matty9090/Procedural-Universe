@@ -21,7 +21,7 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
 void GalaxyTarget::Seed(uint64_t seed)
 {
-    GalaxyRenderer->Seed(seed);
+    GalaxyRenderer->InitialSeed(seed);
     GalaxyRenderer->Scale(4000.0f * Scale);
 }
 
@@ -76,6 +76,6 @@ void GalaxyTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
         Parent->GetSkyBox().Draw(cam.GetViewMatrix() * cam.GetProjectionMatrix());
-        GalaxyRenderer->Render(cam, 0.0f, 1.0f / Scale, Vector3::Zero, true, false, true);
+        GalaxyRenderer->Render(cam, 0.0f, 1.0f / Scale, Vector3::Zero, true, false);
     });
 }

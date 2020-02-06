@@ -72,7 +72,7 @@ void UniverseTarget::RenderLerp(float t, bool single)
     else
     {
         for (auto& galaxy : Galaxies)
-            galaxy->Render(*Camera, t);
+            galaxy->RenderImposter(*Camera);
     }
 }
 
@@ -91,7 +91,7 @@ void UniverseTarget::Seed(uint64_t seed)
     for (const auto& particle : particles)
     {
         Galaxies.push_back(std::make_unique<Galaxy>(Context));
-        Galaxies.back()->Seed(i++);
+        Galaxies.back()->InitialSeed(i++);
         Galaxies.back()->Scale(4000.0f);
         Galaxies.back()->Move(particle.Position / 0.02f);
     }
@@ -103,7 +103,7 @@ void UniverseTarget::BakeSkybox(Vector3 object)
         for (size_t i = 0; i < Galaxies.size(); ++i)
         {
             if(i != CurrentClosestObjectID)
-                Galaxies[i]->Render(cam, 1.0f);
+                Galaxies[i]->RenderImposter(cam);
         }
     });
 }

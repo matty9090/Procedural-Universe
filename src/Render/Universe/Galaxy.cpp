@@ -35,15 +35,24 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     StarTexture = RESM.GetTexture(L"assets/StarImposter.png");
 }
 
-void Galaxy::Seed(uint64_t seed)
+void Galaxy::InitialSeed(uint64_t seed)
 {
-    Particles.resize(1000000);
-    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
+    Seed = seed;
 
-    std::default_random_engine gen { static_cast<unsigned int>(seed) };
+    std::default_random_engine gen { static_cast<unsigned int>(Seed) };
     std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
     Colour = Color(dist(gen), dist(gen), dist(gen));
+
+    Imposter->SetTint(Colour);
+
+    Scale(0.001f);
+}
+
+void Galaxy::FullSeed()
+{
+    Particles.resize(1000000);
+    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 
     const float Variation = 0.12f;
 
@@ -51,11 +60,7 @@ void Galaxy::Seed(uint64_t seed)
     seeder->SetRedDist(Colour.R() - Variation, Colour.R() + Variation);
     seeder->SetGreenDist(Colour.G() - Variation, Colour.G() + Variation);
     seeder->SetBlueDist(Colour.B() - Variation, Colour.B() + Variation);
-    seeder->Seed(seed);
-
-    Imposter->SetTint(Colour);
-
-    Scale(0.001f);
+    seeder->Seed(Seed);
 }
 
 void Galaxy::Move(Vector3 v)
@@ -76,77 +81,79 @@ void Galaxy::Scale(float scale)
     RegenerateBuffer();
 }
 
-void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, bool single, bool imposter, bool forceStars)
+void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, bool single, bool forceStars)
+{
+    Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
+
+    Matrix view = cam.GetViewMatrix();
+    Matrix viewProj = view * cam.GetProjectionMatrix();
+
+    view = view.Invert();
+    view *= Matrix::CreateScale(scale);
+
+    ParticlePipeline.SetState(Context, [&]() {
+        unsigned int offset = 0;
+        unsigned int stride = sizeof(Particle);
+
+        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+
+        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
+        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
+        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
+        Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
+        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->PSSetShaderResources(0, 1, StarTexture.GetAddressOf());
+
+        auto sampler = CommonStates->AnisotropicClamp();
+        Context->PSSetSamplers(0, 1, &sampler);
+
+        if (single)
+        {
+            auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
+            auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
+
+            Context->Draw(pivot1, 0);
+            Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
+
+            LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+            Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
+            Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
+        }
+        else
+        {
+            Context->Draw(static_cast<UINT>(Particles.size()), 0);
+        }
+    });
+        
+    Context->GSSetShader(nullptr, 0, 0);
+    Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
+}
+
+void Galaxy::RenderImposter(const ICamera& cam)
 {
     float dist = ((Vector3::Distance(cam.GetPosition(), Position) - ImposterFadeDist) / ImposterThreshold) - 1.0f;
     float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
-    float galaxyT = 1.0f - dist;
 
-    Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
-
-    if (galaxyT > 0.0f || t > 0.0f || forceStars)
+    if (imposterT > 0.0f)
     {
-        Matrix view = cam.GetViewMatrix();
-        Matrix viewProj = view * cam.GetProjectionMatrix();
-
-        view = view.Invert();
-        view *= Matrix::CreateScale(scale);
-
-        ParticlePipeline.SetState(Context, [&]() {
-            unsigned int offset = 0;
-            unsigned int stride = sizeof(Particle);
-
-            LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
-
-            Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-            GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
-            Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-            Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-            Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-            Context->PSSetShaderResources(0, 1, StarTexture.GetAddressOf());
-
-            auto sampler = CommonStates->AnisotropicClamp();
-            Context->PSSetSamplers(0, 1, &sampler);
-
-            if (single)
-            {
-                auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
-                auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
-
-                Context->Draw(pivot1, 0);
-                Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
-
-                LerpBuffer->SetData(Context, LerpConstantBuffer { t });
-                Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-                Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
-            }
-            else
-            {
-                Context->Draw(static_cast<UINT>(Particles.size()), 0);
-            }
-        });
-
-        
-        Context->GSSetShader(nullptr, 0, 0);
-    }
-
-    if (imposter && imposterT > 0.0f)
-    {
+        Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
         Imposter->SetTint(Color(Colour.R(), Colour.G(), Colour.B(), imposterT));
         Imposter->Render(cam);
+        Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
     }
-
-    Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
 }
 
 Vector3 Galaxy::GetClosestObject(Vector3 pos)
 {
-    return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
+    return Particles.size() > 0 ? Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position : Vector3::Zero;
 }
 
 void Galaxy::RegenerateBuffer()
 {
+    if (Particles.size() <= 0)
+        return;
+
     D3D11_MAPPED_SUBRESOURCE mapped;
     Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
     memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));

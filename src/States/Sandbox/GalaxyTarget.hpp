@@ -23,6 +23,7 @@ public:
 
 private:
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
+    void OnStartTransitionDownChild(Vector3 location) override { GalaxyRenderer->FullSeed(); }
     void OnEndTransitionUpChild() override { bImposter = true; }
     void OnEndTransitionDownChild() override { bImposter = false; }
 

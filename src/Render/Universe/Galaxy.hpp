@@ -20,10 +20,14 @@ class Galaxy
 public:
     Galaxy(ID3D11DeviceContext* context);
 
-    void Seed(uint64_t seed);
+    void InitialSeed(uint64_t seed);
+    void FullSeed();
+
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float scale);
-    void Render(const ICamera& cam, float t, float scale = 1.0f, DirectX::SimpleMath::Vector3 voffset = DirectX::SimpleMath::Vector3::Zero, bool single = false, bool imposter = true, bool forceStars = false);
+
+    void Render(const ICamera& cam, float t, float scale = 1.0f, DirectX::SimpleMath::Vector3 voffset = DirectX::SimpleMath::Vector3::Zero, bool single = false, bool forceStars = false);
+    void RenderImposter(const ICamera& cam);
 
     DirectX::SimpleMath::Vector3 GetPosition() const { return Position; }
     DirectX::SimpleMath::Vector3 GetClosestObject(DirectX::SimpleMath::Vector3 pos);
@@ -56,6 +60,7 @@ private:
 
     Color Colour;
     size_t CurrentClosestObjectID = 0;
+    uint64_t Seed = 0U;
     DirectX::SimpleMath::Vector3 Position;
 
     std::vector<Particle> Particles;
