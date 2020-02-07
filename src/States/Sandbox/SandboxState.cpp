@@ -50,7 +50,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     Planet = std::make_unique<CPlanet>(Context, Camera.get());
     //Planet->SetPosition(Vector3(0.0f, 0.0f, 20000.0f));
 
-    CreateParticleBuffer(Device, Galaxy::ParticleBuffer.ReleaseAndGetAddressOf(), 1000000);
+    CreateParticleBuffer(Device, Galaxy::ParticleBuffer.ReleaseAndGetAddressOf(), PARTICLES_PER_GALAXY);
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();

@@ -15,6 +15,12 @@
 #include "Render/DX/RenderCommon.hpp"
 #include "Render/DX/ConstantBuffer.hpp"
 
+#ifdef _DEBUG
+    #define PARTICLES_PER_GALAXY  100000
+#else
+    #define PARTICLES_PER_GALAXY 1000000
+#endif
+
 class Galaxy
 {
 public:

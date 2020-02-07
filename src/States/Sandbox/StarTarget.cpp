@@ -88,7 +88,7 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
         Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
 
-        if (single)
+        if (single && CurrentClosestObjectID < Particles.size())
         {
             auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
             auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);

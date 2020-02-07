@@ -7,8 +7,8 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     : SandboxTarget(context, "Galactic", "Star", resources, camera, rtv)
 {
     Scale = 0.01f;
-    BeginTransitionDist = 4000.0f;
-    EndTransitionDist = 400.0f;
+    BeginTransitionDist = 1600.0f;
+    EndTransitionDist = 200.0f;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -19,7 +19,7 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
     GalaxyRenderer = std::make_unique<Galaxy>(Context);
-    SeedParticles.resize(1000000);
+    SeedParticles.resize(PARTICLES_PER_GALAXY);
 }
 
 void GalaxyTarget::Seed(uint64_t seed)
