@@ -77,7 +77,7 @@ bool GalaxySeeder::AddParticle(
     double Mass
 )
 {
-    if(LocalNum < Particles.size())
+    if (LocalNum < Particles.size())
     {
         Particles[LocalNum].Position = Pos;
         Particles[LocalNum].Velocity = Vel;

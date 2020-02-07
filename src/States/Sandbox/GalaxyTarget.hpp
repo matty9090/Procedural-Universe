@@ -48,6 +48,7 @@ private:
     RenderPipeline ParticlePipeline;
 
     std::vector<Particle> SeedParticles;
+    std::vector<BillboardInstance> SeedDustClouds;
 
     std::unique_ptr<Galaxy> GalaxyRenderer;
     std::unique_ptr<CSplatting> Splatting;

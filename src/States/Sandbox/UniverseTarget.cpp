@@ -65,8 +65,10 @@ void UniverseTarget::RenderLerp(float t, bool single)
     {
         for (size_t i = 0; i < Galaxies.size(); ++i)
         {
-            if (i != CurrentClosestObjectID)
+            if (i == CurrentClosestObjectID)
                 Galaxies[i]->Render(*Camera, t);
+            else
+                Galaxies[i]->RenderImposter(*Camera);
         }
     }
     else
@@ -81,7 +83,7 @@ void UniverseTarget::Seed(uint64_t seed)
     Galaxies.clear();
 
     std::vector<Particle> particles;
-    particles.resize(10);
+    particles.resize(200);
 
     auto seeder = CreateParticleSeeder(particles, EParticleSeeder::Random);
     seeder->Seed(seed);

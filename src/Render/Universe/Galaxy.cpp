@@ -12,6 +12,8 @@ float Galaxy::ImposterThreshold = 8000.0f;
 float Galaxy::ImposterFadeDist = 600.0f;
 float Galaxy::ImposterOffsetPercent = 0.4f;
 
+Microsoft::WRL::ComPtr<ID3D11Buffer> Galaxy::ParticleBuffer;
+
 Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
 {
     context->GetDevice(&Device);
@@ -26,10 +28,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     ParticlePipeline.LoadPixel(L"shaders/Particles/StarParticle.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/GalaxyParticle.gsh");
     ParticlePipeline.CreateRasteriser(Device, ECullMode::Anticlockwise);
-    ParticlePipeline.CreateInputLayout(Device, layout);
-
-    // TODO: Create on transition down then free up after
-    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), 1000000);
+    ParticlePipeline.CreateInputLayout(Device, layout);    
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
@@ -54,20 +53,10 @@ void Galaxy::InitialSeed(uint64_t seed)
     Imposter->SetPosition(Position);
 }
 
-void Galaxy::FinishSeed(const std::vector<Particle>& particles)
+void Galaxy::FinishSeed(const std::vector<Particle>& particles, const std::vector<BillboardInstance>& clouds)
 {
     Particles = particles;
-    DustClouds.clear();
-
-    std::default_random_engine gen { static_cast<unsigned int>(Seed) };
-    std::uniform_real_distribution<double> dist(0, 1000000);
-    std::uniform_real_distribution<float> distScale(4.0f, 18.0f);
-    std::uniform_real_distribution<float> distAlpha(0.04f, 0.16f);
-
-    for (int i = 0; i < Particles.size() && i < 860; ++i)
-    {
-        DustClouds.push_back(BillboardInstance { Particles[static_cast<int>(dist(gen))].Position, distScale(gen), Color(1.0f, 1.0f, 1.0f, distAlpha(gen)) });
-    }
+    DustClouds = clouds;
 
     DustRenderer->UpdateInstances(DustClouds);
 }
@@ -154,6 +143,9 @@ void Galaxy::RenderImposter(const ICamera& cam)
     if (imposterT > 0.0f)
     {
         BillboardInstance inst = { Vector3::Zero, ImposterSize, Color(Colour.R(), Colour.G(), Colour.B(), imposterT) };
+
+        auto sampler = CommonStates->AnisotropicClamp();
+        Context->PSSetSamplers(0, 1, &sampler);
 
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
         Imposter->UpdateInstances(std::vector<BillboardInstance> { inst });

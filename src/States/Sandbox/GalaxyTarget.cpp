@@ -1,6 +1,8 @@
 #include "GalaxyTarget.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
+#include <random>
+
 GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Galactic", "Star", resources, camera, rtv)
 {
@@ -72,11 +74,27 @@ void GalaxyTarget::OnStartTransitionDownChild(Vector3 location)
     DispatchTask(EWorkerTask::Seed, [&]() {
         const float Variation = 0.12f;
 
+        SeedDustClouds.clear();
+
         auto seeder = CreateParticleSeeder(SeedParticles, EParticleSeeder::Galaxy);
         seeder->SetRedDist(col.R() - Variation, col.R() + Variation);
         seeder->SetGreenDist(col.G() - Variation, col.G() + Variation);
         seeder->SetBlueDist(col.B() - Variation, col.B() + Variation);
-        seeder->Seed(seed);        
+        seeder->Seed(seed);
+
+        std::default_random_engine gen { static_cast<unsigned int>(seed) };
+        std::uniform_real_distribution<double> dist(0, static_cast<double>(SeedParticles.size()));
+        std::uniform_real_distribution<float> distScale(4.0f, 18.0f);
+        std::uniform_real_distribution<float> distAlpha(0.04f, 0.16f);
+
+        for (int i = 0; i < SeedParticles.size() && i < GalaxyRenderer->NumDustClouds; ++i)
+        {
+            SeedDustClouds.push_back(BillboardInstance {
+                SeedParticles[static_cast<int>(dist(gen))].Position,
+                distScale(gen),
+                Color(1.0f, 1.0f, 1.0f, distAlpha(gen))
+            });
+        }
     });
 }
 
@@ -84,7 +102,7 @@ void GalaxyTarget::OnEndTransitionDownChild()
 {
     FinishTask(EWorkerTask::Seed);
     
-    GalaxyRenderer->FinishSeed(SeedParticles);
+    GalaxyRenderer->FinishSeed(SeedParticles, SeedDustClouds);
     GalaxyRenderer->Scale(5.0f * Scale);
 }
 

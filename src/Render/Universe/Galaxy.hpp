@@ -21,7 +21,7 @@ public:
     Galaxy(ID3D11DeviceContext* context);
 
     void InitialSeed(uint64_t seed);
-    void FinishSeed(const std::vector<Particle>& particles);
+    void FinishSeed(const std::vector<Particle>& particles, const std::vector<BillboardInstance>& clouds);
 
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float scale);
@@ -40,6 +40,10 @@ public:
     static float ImposterFadeDist;
     static float ImposterOffsetPercent;
 
+    size_t NumDustClouds = 840;
+
+    // Only one galaxy should render stars at any time
+    static Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
 
 private:
     void RenderDust(const ICamera& cam);
@@ -76,7 +80,6 @@ private:
     std::unique_ptr<CBillboard> DustRenderer;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> StarTexture;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> DustTexture;
 
