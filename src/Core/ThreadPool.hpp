@@ -14,6 +14,7 @@ public:
     int32_t GetNumWorkers() const { return NumWorkers; }
     void SetNumWorkers(uint32_t num) { NumWorkers = num; }
 
+    bool IsWorking(uint32_t thread) { return HaveWork[thread]; }
     void Dispatch(uint32_t thread, const T& info);
     
     void Join();

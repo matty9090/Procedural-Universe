@@ -107,7 +107,14 @@ void SandboxTarget::RenderParentSkybox()
 
 void SandboxTarget::DispatchTask(EWorkerTask task, std::function<void()> func)
 {
-    Pool.Dispatch(static_cast<uint32_t>(task), func);
+    auto id = static_cast<uint32_t>(task);
+
+    if (Pool.IsWorking(id))
+    {
+        Pool.Join(static_cast<uint32_t>(task));
+    }
+
+    Pool.Dispatch(id, func);
 }
 
 void SandboxTarget::FinishTask(EWorkerTask task)
