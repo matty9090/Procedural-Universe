@@ -1,9 +1,10 @@
 #include "Billboard.hpp"
 #include "Services/ResourceManager.hpp"
 
-CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, unsigned int reserve, std::vector<BillboardInstance> instances)
+CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, bool fades, unsigned int reserve, std::vector<BillboardInstance> instances)
     : Context(context),
-      Instances(instances)
+      Instances(instances),
+      Fades(fades)
 {
     ID3D11Device* device;
     Context->GetDevice(&device);
@@ -52,14 +53,14 @@ void CBillboard::Render(const ICamera& cam)
 {
     auto inv = static_cast<Matrix>(cam.GetViewMatrix()).Invert();
     auto world = Matrix::CreateScale(RelativeScale) * Matrix::CreateTranslation(Position);
-
+    
     Pipeline.SetState(Context, [&]() {
         unsigned int offset = 0;
         unsigned int stride = sizeof(BillboardInstance);
 
         Context->IASetVertexBuffers(0, 1, InstanceBuffer.GetAddressOf(), &stride, &offset);
-        VertexCB->SetData(Context, { world * cam.GetViewMatrix() * cam.GetProjectionMatrix(), inv });
-
+        VertexCB->SetData(Context, { world * cam.GetViewMatrix() * cam.GetProjectionMatrix(), inv, cam.GetPosition(), Fades ? 1.0f : 0.0f });
+        
         Context->GSSetConstantBuffers(0, 1, VertexCB->GetBuffer());
         Context->PSSetShaderResources(0, 1, Texture.GetAddressOf());
 
@@ -71,7 +72,7 @@ void CBillboard::Render(const ICamera& cam)
 
 void CBillboard::Render(const ICamera& cam, float scale, Vector3 offset)
 {
-    auto view = static_cast<Matrix>(cam.GetViewMatrix());
+    auto view = static_cast<Matrix>(cam.GetViewMatrix()); 
     auto world = Matrix::CreateScale(RelativeScale) * Matrix::CreateTranslation(Position + offset);
 
     view = view.Invert();
@@ -82,7 +83,7 @@ void CBillboard::Render(const ICamera& cam, float scale, Vector3 offset)
         unsigned int stride = sizeof(BillboardInstance);
 
         Context->IASetVertexBuffers(0, 1, InstanceBuffer.GetAddressOf(), &stride, &offset);
-        VertexCB->SetData(Context, { world * cam.GetViewMatrix() * cam.GetProjectionMatrix(), view });
+        VertexCB->SetData(Context, { world * cam.GetViewMatrix() * cam.GetProjectionMatrix(), view, cam.GetPosition(), Fades ? 1.0f : 0.0f });
 
         Context->GSSetConstantBuffers(0, 1, VertexCB->GetBuffer());
         Context->PSSetShaderResources(0, 1, Texture.GetAddressOf());

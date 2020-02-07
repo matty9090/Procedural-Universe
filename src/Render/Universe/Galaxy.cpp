@@ -34,7 +34,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
     Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png");
-    DustRenderer = std::make_unique<CBillboard>(Context, L"assets/Fog.png", 860);
+    DustRenderer = std::make_unique<CBillboard>(Context, L"assets/Fog.png", true, 840);
 
     StarTexture = RESM.GetTexture(L"assets/StarImposter.png");
 }

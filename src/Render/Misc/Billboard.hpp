@@ -15,7 +15,7 @@ struct BillboardInstance
 class CBillboard
 {
 public:
-    CBillboard(ID3D11DeviceContext* context, std::wstring tex, unsigned int reserve = 1, std::vector<BillboardInstance> instances = {});
+    CBillboard(ID3D11DeviceContext* context, std::wstring tex, bool fades = false, unsigned int reserve = 1, std::vector<BillboardInstance> instances = {});
     ~CBillboard();
 
     void Render(const ICamera& cam);
@@ -30,8 +30,11 @@ private:
     {
         Matrix ViewProj;
         Matrix InvView;
+        Vector3 Cam;
+        float Fades;
     };
 
+    bool Fades = false;
     float RelativeScale = 1.0f;
     Vector3 Position = Vector3::Zero;
 
