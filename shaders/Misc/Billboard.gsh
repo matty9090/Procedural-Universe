@@ -58,7 +58,7 @@ void main
 
         if (DoesFade > 0.5f)
         {
-            float t = (length(Cam - inParticle[0].Position) + 2000.0f) / 9000.0f;
+            float t = (length(Cam - inParticle[0].Position) + 3000.0f) / 9000.0f;
             outVert.Colour.a = clamp(lerp(0.0f, inParticle[0].Colour.a, t), 0.0f, inParticle[0].Colour.a);
         }
 
