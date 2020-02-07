@@ -37,6 +37,7 @@ void CSkyBox::Draw(DirectX::SimpleMath::Matrix viewProj)
 {
     Context->RSSetState(CommonStates->CullClockwise());
     Context->PSSetSamplers(0, 1, Sampler.GetAddressOf());
+    Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
     Sphere->Draw(Context, viewProj, Pipeline);
 }
 
