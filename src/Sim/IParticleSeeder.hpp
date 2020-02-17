@@ -22,4 +22,4 @@ class IParticleSeeder
         virtual void SetBlueDist(float low, float hi) {}
 };
 
-std::unique_ptr<IParticleSeeder> CreateParticleSeeder(std::vector<Particle>& particles, EParticleSeeder type);
+std::unique_ptr<IParticleSeeder> CreateParticleSeeder(std::vector<Particle>& particles, EParticleSeeder type, float scale = 1.0f);

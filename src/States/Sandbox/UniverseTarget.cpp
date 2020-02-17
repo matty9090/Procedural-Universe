@@ -96,6 +96,7 @@ void UniverseTarget::Seed(uint64_t seed)
         Galaxies.back()->InitialSeed(i++);
         Galaxies.back()->Scale(4000.0f);
         Galaxies.back()->Move(particle.Position / 0.02f);
+        Galaxies.back()->SetFades(false);
     }
 }
 

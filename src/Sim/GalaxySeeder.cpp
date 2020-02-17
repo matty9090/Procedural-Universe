@@ -7,13 +7,14 @@
 using DirectX::SimpleMath::Vector3;
 using DirectX::SimpleMath::Color;
 
-GalaxySeeder::GalaxySeeder(std::vector<Particle>& particles)
+GalaxySeeder::GalaxySeeder(std::vector<Particle>& particles, float scale)
     : Particles(particles),
       DistZ(0.0f, 16.0f),
       DistR(0.0f, 1.0f),
       DistG(0.0f, 1.0f),
       DistB(0.0f, 1.0f),
-      DistMass(1e28, 1e30)
+      DistMass(1e28, 1e30),
+      Scale(scale)
 {
 
 }
@@ -79,7 +80,7 @@ bool GalaxySeeder::AddParticle(
 {
     if (LocalNum < Particles.size())
     {
-        Particles[LocalNum].Position = Pos;
+        Particles[LocalNum].Position = Pos / Scale;
         Particles[LocalNum].Velocity = Vel;
         Particles[LocalNum].Mass = Mass;
         Particles[LocalNum].Colour = Color(DistR(Gen), DistG(Gen), DistB(Gen));

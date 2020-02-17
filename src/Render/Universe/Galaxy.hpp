@@ -27,10 +27,11 @@ public:
     Galaxy(ID3D11DeviceContext* context);
 
     void InitialSeed(uint64_t seed);
-    void FinishSeed(const std::vector<Particle>& particles, const std::vector<BillboardInstance>& clouds);
+    void FinishSeed(const std::vector<Particle>& particles);
 
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float scale);
+    void SetFades(bool fade) { DustRenderer->SetFades(fade); }
 
     void Render(const ICamera& cam, float t, float scale = 1.0f, DirectX::SimpleMath::Vector3 voffset = DirectX::SimpleMath::Vector3::Zero, bool single = false);
     void RenderImposter(const ICamera& cam);

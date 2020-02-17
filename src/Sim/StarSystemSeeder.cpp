@@ -8,7 +8,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-StarSystemSeeder::StarSystemSeeder(std::vector<Particle>& particles) : Particles(particles)
+StarSystemSeeder::StarSystemSeeder(std::vector<Particle>& particles, float scale) : Particles(particles)
 {
 
 }

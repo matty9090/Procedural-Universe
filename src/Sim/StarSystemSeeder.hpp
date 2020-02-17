@@ -5,7 +5,7 @@
 class StarSystemSeeder : public IParticleSeeder
 {
     public:
-        StarSystemSeeder(std::vector<Particle>& particles);
+        StarSystemSeeder(std::vector<Particle>& particles, float scale);
 
         void Seed(uint64_t seed);
 

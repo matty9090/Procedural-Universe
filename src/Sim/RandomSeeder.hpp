@@ -5,7 +5,7 @@
 class RandomSeeder : public IParticleSeeder
 {
     public:
-        RandomSeeder(std::vector<Particle>& particles);
+        RandomSeeder(std::vector<Particle>& particles, float scale);
 
         void Seed(uint64_t seed);
 

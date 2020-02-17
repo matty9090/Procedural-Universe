@@ -19,6 +19,8 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
     GalaxyRenderer = std::make_unique<Galaxy>(Context);
+    GalaxyRenderer->SetFades(true);
+
     SeedParticles.resize(PARTICLES_PER_GALAXY);
 }
 
@@ -35,7 +37,7 @@ void GalaxyTarget::Render()
 
 void GalaxyTarget::RenderTransitionChild(float t)
 {
-    RenderLerp(t, 1.0f, ParentLocationSpace, true);
+    //RenderLerp(t, 1.0f, ParentLocationSpace, true);
 }
 
 void GalaxyTarget::RenderTransitionParent(float t)
@@ -71,39 +73,23 @@ void GalaxyTarget::OnStartTransitionDownChild(Vector3 location)
     auto seed = GalaxyRenderer->GetSeed();
     auto col = GalaxyRenderer->GetColour();
 
+    GalaxyRenderer->Scale(50.0f);
+
     DispatchTask(EWorkerTask::Seed, [&]() {
         const float Variation = 0.12f;
 
-        SeedDustClouds.clear();
-
-        auto seeder = CreateParticleSeeder(SeedParticles, EParticleSeeder::Galaxy);
+        auto seeder = CreateParticleSeeder(SeedParticles, EParticleSeeder::Galaxy, 0.05f);
         seeder->SetRedDist(col.R() - Variation, col.R() + Variation);
         seeder->SetGreenDist(col.G() - Variation, col.G() + Variation);
         seeder->SetBlueDist(col.B() - Variation, col.B() + Variation);
         seeder->Seed(seed);
-
-        std::default_random_engine gen { static_cast<unsigned int>(seed) };
-        std::uniform_real_distribution<double> dist(0, static_cast<double>(SeedParticles.size()));
-        std::uniform_real_distribution<float> distScale(4.0f, 18.0f);
-        std::uniform_real_distribution<float> distAlpha(0.04f, 0.16f);
-
-        for (int i = 0; i < SeedParticles.size() && i < GalaxyRenderer->NumDustClouds; ++i)
-        {
-            SeedDustClouds.push_back(BillboardInstance {
-                SeedParticles[static_cast<int>(dist(gen))].Position,
-                distScale(gen),
-                Color(1.0f, 1.0f, 1.0f, distAlpha(gen))
-            });
-        }
     });
 }
 
 void GalaxyTarget::OnEndTransitionDownChild()
 {
     FinishTask(EWorkerTask::Seed);
-    
-    GalaxyRenderer->FinishSeed(SeedParticles, SeedDustClouds);
-    GalaxyRenderer->Scale(5.0f * Scale);
+    GalaxyRenderer->FinishSeed(SeedParticles);
 }
 
 void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single)

@@ -8,7 +8,7 @@
 class GalaxySeeder : public IParticleSeeder
 {
     public:
-        GalaxySeeder(std::vector<Particle>& particles);
+        GalaxySeeder(std::vector<Particle>& particles, float scale);
 
         void Seed(uint64_t seed);
 
@@ -19,6 +19,7 @@ class GalaxySeeder : public IParticleSeeder
     private:
         std::vector<Particle>& Particles;
         int LocalNum = 0;
+        float Scale = 1.0f;
 
         bool AddParticle(
             DirectX::SimpleMath::Vector3 Pos,

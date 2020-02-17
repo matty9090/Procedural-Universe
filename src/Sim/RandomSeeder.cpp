@@ -3,7 +3,7 @@
 #include <random>
 #include <DirectXColors.h>
 
-RandomSeeder::RandomSeeder(std::vector<Particle>& particles) : Particles(particles)
+RandomSeeder::RandomSeeder(std::vector<Particle>& particles, float scale) : Particles(particles)
 {
 
 }

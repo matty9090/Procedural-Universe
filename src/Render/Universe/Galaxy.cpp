@@ -34,7 +34,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
     Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png");
-    DustRenderer = std::make_unique<CBillboard>(Context, L"assets/Fog.png", true, 840);
+    DustRenderer = std::make_unique<CBillboard>(Context, L"assets/Fog.png", false, 840);
 
     StarTexture = RESM.GetTexture(L"assets/StarImposter.png");
 }
@@ -44,21 +44,45 @@ void Galaxy::InitialSeed(uint64_t seed)
     Seed = seed;
 
     std::default_random_engine gen { static_cast<unsigned int>(Seed) };
-    std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+    std::uniform_real_distribution<float> distCol(0.0f, 1.0f);
 
-    Colour = Color(dist(gen), dist(gen), dist(gen));
+    Colour = Color(distCol(gen), distCol(gen), distCol(gen));
 
     BillboardInstance inst = { Vector3::Zero, ImposterSize, Colour };
     Imposter->UpdateInstances(std::vector<BillboardInstance> { inst });
     Imposter->SetPosition(Position);
-}
 
-void Galaxy::FinishSeed(const std::vector<Particle>& particles, const std::vector<BillboardInstance>& clouds)
-{
-    Particles = particles;
-    DustClouds = clouds;
+    const float Variation = 0.12f;
+
+    DustClouds.clear();
+    Particles.resize(NumDustClouds);
+
+    auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
+    seeder->SetRedDist(Colour.R() - Variation, Colour.R() + Variation);
+    seeder->SetGreenDist(Colour.G() - Variation, Colour.G() + Variation);
+    seeder->SetBlueDist(Colour.B() - Variation, Colour.B() + Variation);
+    seeder->Seed(seed);
+
+    std::uniform_real_distribution<double> distParticles(0, static_cast<double>(Particles.size()));
+    std::uniform_real_distribution<float> distScale(4.0f, 18.0f);
+    std::uniform_real_distribution<float> distAlpha(0.04f, 0.16f);
+
+    for (int i = 0; i < Particles.size() && i < NumDustClouds; ++i)
+    {
+        DustClouds.push_back(BillboardInstance{
+            Particles[static_cast<int>(distParticles(gen))].Position / 0.002f,
+            distScale(gen),
+            Color(1.0f, 1.0f, 1.0f, distAlpha(gen))
+        });
+    }
 
     DustRenderer->UpdateInstances(DustClouds);
+}
+
+void Galaxy::FinishSeed(const std::vector<Particle>& particles)
+{
+    Particles = particles;
+    RegenerateBuffer();
 }
 
 void Galaxy::Move(Vector3 v)
@@ -140,7 +164,7 @@ void Galaxy::RenderImposter(const ICamera& cam)
 
     Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
 
-    if (imposterT > 0.0f)
+    /*if (imposterT > 0.0f)
     {
         BillboardInstance inst = { Vector3::Zero, ImposterSize, Color(Colour.R(), Colour.G(), Colour.B(), imposterT) };
 
@@ -150,7 +174,7 @@ void Galaxy::RenderImposter(const ICamera& cam)
         Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
         Imposter->UpdateInstances(std::vector<BillboardInstance> { inst });
         Imposter->Render(cam);
-    }
+    }*/
 
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
     DustRenderer->Render(cam);
