@@ -37,7 +37,7 @@ void GalaxyTarget::Render()
 
 void GalaxyTarget::RenderTransitionChild(float t)
 {
-    //RenderLerp(t, 1.0f, ParentLocationSpace, true);
+    
 }
 
 void GalaxyTarget::RenderTransitionParent(float t)
