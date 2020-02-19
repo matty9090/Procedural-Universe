@@ -7,6 +7,8 @@
 
 #include "Services/Log.hpp"
 
+#define DISPLAY_TIMERS false
+
 class CTimer
 {
 public:
@@ -17,9 +19,10 @@ public:
     
     ~CTimer()
     {
+#if DISPLAY_TIMERS
         auto end = std::chrono::high_resolution_clock::now();
         auto span = std::chrono::duration_cast<std::chrono::duration<double>>(end - Start);
-        auto val = round(span.count() * 1000000.0) / 1000.0;
+        auto val = round(span.count() * 1000.0);
 
         std::ostringstream ss;
         ss.precision(2);
@@ -36,6 +39,7 @@ public:
         {
             LOGM(str)
         }
+#endif
     }
 
 private:

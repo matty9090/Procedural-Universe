@@ -174,7 +174,7 @@ void SandboxState::Render()
             ImGui::SetNextWindowBgAlpha(0.5f);
 
             ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-            ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
+            ImGui::Text("Index: %i", ClosestObjIndex);
 
             if (CurrentTarget->Parent)
                 ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());
@@ -263,18 +263,18 @@ void SandboxState::TransitionLogic()
         float objectDist = Vector3::Distance(Camera->GetPosition(), object);
         float scaledDistToObject = (objectDist - CurrentTarget->Child->EndTransitionDist) / CurrentTarget->Child->BeginTransitionDist;
 
-        // Cancel transition if there's another close object
-        if (CurrentTarget->IsTransitioning() && newIndex != ClosestObjIndex)
+        // Cancel transition if there's another close object (TODO: Re-enable this if needed)
+        /*if (CurrentTarget->IsTransitioning() && newIndex != ClosestObjIndex)
         {
             ClosestObjIndex = newIndex;
-            LOGV("There's another close object, switching to new one")
+            LOGM("There's another close object, switching to new one")
 
             CurrentTarget->EndTransitionUpParent();
             CurrentTarget->Child->EndTransitionUpChild();
 
             CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, 1.0f, scaledDistToObject);
             Camera->VelocityScale = CurrentTransitionT;
-        }
+        }*/
 
         if (!CurrentTarget->IsTransitioning())
         {
