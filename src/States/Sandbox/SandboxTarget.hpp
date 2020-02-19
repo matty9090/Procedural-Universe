@@ -36,6 +36,7 @@ public:
     CSkyBox& GetSkyBox() { return SkyBox; }
 
     virtual void Render() = 0;
+    virtual void RenderInChildSpace() {}
     virtual void RenderTransitionChild(float t) { Render(); }
     virtual void RenderTransitionParent(float t) { Render(); }
 

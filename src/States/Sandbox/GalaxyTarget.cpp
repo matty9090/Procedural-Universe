@@ -31,7 +31,8 @@ void GalaxyTarget::Seed(uint64_t seed)
 
 void GalaxyTarget::Render()
 {
-    RenderParentSkybox();
+    //RenderParentSkybox();
+    Parent->RenderInChildSpace();
     RenderLerp(1.0f, 1.0f / Scale);
 }
 
@@ -50,6 +51,7 @@ void GalaxyTarget::MoveObjects(Vector3 v)
 {
     GalaxyRenderer->Move(v);
     Centre += v;
+    //Parent->MoveObjects(v);
 }
 
 void GalaxyTarget::ScaleObjects(float scale)
@@ -66,6 +68,11 @@ void GalaxyTarget::ResetObjectPositions()
 Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
 {
     return GalaxyRenderer->GetClosestObject(pos);
+}
+
+void GalaxyTarget::OnStartTransitionUpChild()
+{
+    Parent->ScaleObjects(1.0f / Scale);
 }
 
 void GalaxyTarget::OnStartTransitionDownChild(Vector3 location)
@@ -90,6 +97,8 @@ void GalaxyTarget::OnEndTransitionDownChild()
 {
     FinishTask(EWorkerTask::Seed);
     GalaxyRenderer->FinishSeed(SeedParticles);
+    Parent->ResetObjectPositions();
+    Parent->ScaleObjects(Scale);
 }
 
 void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single)

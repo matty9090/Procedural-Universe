@@ -24,6 +24,18 @@ void UniverseTarget::Render()
     RenderLerp(1.0f);
 }
 
+void UniverseTarget::RenderInChildSpace()
+{
+    auto dsv = Resources->GetDepthStencilView();
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+
+    for (size_t i = 0; i < Galaxies.size(); ++i)
+    {
+        if (i != CurrentClosestObjectID)
+            Galaxies[i]->RenderImposter(*Camera, 1.0f / Scale);
+    }
+}
+
 void UniverseTarget::RenderTransitionParent(float t)
 {
     RenderLerp(t, true);
@@ -102,11 +114,11 @@ void UniverseTarget::Seed(uint64_t seed)
 
 void UniverseTarget::BakeSkybox(Vector3 object)
 {
-    SkyboxGenerator->Render([&](const ICamera& cam) {
+    /*SkyboxGenerator->Render([&](const ICamera& cam) {
         for (size_t i = 0; i < Galaxies.size(); ++i)
         {
             if(i != CurrentClosestObjectID)
                 Galaxies[i]->RenderImposter(cam);
         }
-    });
+    });*/
 }

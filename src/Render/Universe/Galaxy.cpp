@@ -157,7 +157,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
     Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
 }
 
-void Galaxy::RenderImposter(const ICamera& cam)
+void Galaxy::RenderImposter(const ICamera& cam, float scale)
 {
     float dist = ((Vector3::Distance(cam.GetPosition(), Position) - ImposterFadeDist) / ImposterThreshold) - 1.0f;
     float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
@@ -177,7 +177,7 @@ void Galaxy::RenderImposter(const ICamera& cam)
     }*/
 
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
-    DustRenderer->Render(cam);
+    DustRenderer->Render(cam, scale, Vector3::Zero);
 
     Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
 }
