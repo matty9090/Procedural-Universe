@@ -61,7 +61,7 @@ void UniverseTarget::RenderLerp(float t, bool single)
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    if (single)
+    /*if (single)
     {
         for (size_t i = 0; i < Galaxies.size(); ++i)
         {
@@ -71,7 +71,7 @@ void UniverseTarget::RenderLerp(float t, bool single)
                 Galaxies[i]->RenderImposter(*Camera);
         }
     }
-    else
+    else*/
     {
         for (auto& galaxy : Galaxies)
             galaxy->RenderImposter(*Camera);

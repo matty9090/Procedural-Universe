@@ -3,7 +3,7 @@
 #include <random>
 #include <DirectXColors.h>
 
-RandomSeeder::RandomSeeder(std::vector<Particle>& particles, float scale) : Particles(particles)
+RandomSeeder::RandomSeeder(std::vector<Particle>& particles, float scale) : Particles(particles), Scale(scale)
 {
 
 }
@@ -18,9 +18,9 @@ void RandomSeeder::Seed(uint64_t seed)
 
     for(unsigned int i = 0; i < Particles.size(); ++i)
     {
-        Particles[i].Position.x = static_cast<float>(dist(generator));
-        Particles[i].Position.y = static_cast<float>(dist(generator));
-        Particles[i].Position.z = static_cast<float>(dist(generator));
+        Particles[i].Position.x = static_cast<float>(dist(generator)) / Scale;
+        Particles[i].Position.y = static_cast<float>(dist(generator)) / Scale;
+        Particles[i].Position.z = static_cast<float>(dist(generator)) / Scale;
 
         auto normal = Particles[i].Position;
         normal.Normalize();

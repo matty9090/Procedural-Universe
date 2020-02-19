@@ -34,7 +34,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
     Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png");
-    DustRenderer = std::make_unique<CBillboard>(Context, L"assets/Fog.png", false, 840);
+    DustRenderer = std::make_unique<CBillboard>(Context, L"assets/Fog.png", false, NumDustClouds);
 
     StarTexture = RESM.GetTexture(L"assets/StarImposter.png");
 }
@@ -67,9 +67,9 @@ void Galaxy::InitialSeed(uint64_t seed)
     std::uniform_real_distribution<float> distScale(4.0f, 18.0f);
     std::uniform_real_distribution<float> distAlpha(0.04f, 0.16f);
 
-    for (int i = 0; i < Particles.size() && i < NumDustClouds; ++i)
+    for (size_t i = 0; i < Particles.size() && i < NumDustClouds; ++i)
     {
-        DustClouds.push_back(BillboardInstance{
+        DustClouds.push_back(BillboardInstance {
             Particles[static_cast<int>(distParticles(gen))].Position / 0.002f,
             distScale(gen),
             Color(1.0f, 1.0f, 1.0f, distAlpha(gen))

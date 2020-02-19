@@ -46,9 +46,7 @@ void GalaxySeeder::Seed(uint64_t seed)
     CreateSpiralArm(0.0f, ArmPDist / 2);
     CreateSpiralArm(3.14f, ArmPDist / 2);
 
-    AddParticle(Centre, Vec3d(), 1e32);
-
-    for(int i = 0; i < Particles.size() - LocalNum; ++i)
+    for(int i = LocalNum; i < Particles.size(); ++i)
     {
         Vector3 pos;
         pos.x = static_cast<float>(dist_pos(Gen));
@@ -104,7 +102,7 @@ void GalaxySeeder::CreateSpiralArm(float offset, float dist)
     int loops = static_cast<int>(floor(maxAngle / 0.1f));
     float numPerLoop = floor((static_cast<float>(Particles.size()) * dist) / loops);
 
-    for(float angle = 0.0f, r = 2.0f; angle < 6.0f; angle += 0.1f, r += 7.2f)
+    for (float angle = 0.0f, r = 2.0f; angle < 6.0f; angle += 0.1f, r += 7.2f)
     {
         auto spiral = Vector3(cosf(angle + offset) * r, sinf(angle + offset) * r, 0.0f);
         auto spiraln = Vector3(cosf(angle + offset + 0.1f) * (r + 10.0f), sinf(angle + offset + 0.1f) * (r + 10.0f), 0.0f);
@@ -118,8 +116,8 @@ void GalaxySeeder::CreateSpiralArm(float offset, float dist)
 
         auto sx = spiral - tangent * 140.0f;
         auto ex = spiral + tangent * 140.0f;
-        auto sy = spiral - normal  * 100.0f;
-        auto ey = spiral + normal  * 100.0f;
+        auto sy = spiral - normal  * 400.0f;
+        auto ey = spiral + normal  * 400.0f;
         
         for (int i = 0; i < numPerLoop; ++i)
         {

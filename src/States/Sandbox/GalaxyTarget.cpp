@@ -78,7 +78,7 @@ void GalaxyTarget::OnStartTransitionDownChild(Vector3 location)
     DispatchTask(EWorkerTask::Seed, [&]() {
         const float Variation = 0.12f;
 
-        auto seeder = CreateParticleSeeder(SeedParticles, EParticleSeeder::Galaxy, 0.05f);
+        auto seeder = CreateParticleSeeder(SeedParticles, EParticleSeeder::Galaxy, 0.1f);
         seeder->SetRedDist(col.R() - Variation, col.R() + Variation);
         seeder->SetGreenDist(col.G() - Variation, col.G() + Variation);
         seeder->SetBlueDist(col.B() - Variation, col.B() + Variation);

@@ -47,7 +47,7 @@ public:
     static float ImposterFadeDist;
     static float ImposterOffsetPercent;
 
-    size_t NumDustClouds = 840;
+    unsigned int NumDustClouds = 840;
 
     // Only one galaxy should render stars at any time
     static Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;

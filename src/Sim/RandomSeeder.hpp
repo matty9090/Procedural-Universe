@@ -10,5 +10,6 @@ class RandomSeeder : public IParticleSeeder
         void Seed(uint64_t seed);
 
     private:
+        float Scale = 1.0f;
         std::vector<Particle>& Particles;
 };
