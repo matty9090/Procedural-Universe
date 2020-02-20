@@ -8,6 +8,7 @@
 struct ModelConstantBuffer
 {
     DirectX::SimpleMath::Matrix WorldViewProj;
+    DirectX::SimpleMath::Matrix World;
 };
 
 class CMesh;

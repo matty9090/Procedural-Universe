@@ -48,6 +48,9 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
         std::vector<MeshVertex> vertices;
         std::vector<unsigned int> indices;
         ID3D11ShaderResourceView* texture = nullptr;
+        
+        DirectX::SimpleMath::Vector3 mmin = { 9999, 9999, 9999};
+        DirectX::SimpleMath::Vector3 mmax = { -9999, -9999, -9999 };
 
         for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
         {
@@ -55,6 +58,13 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
             v.Position.x = mesh->mVertices[i].x;
             v.Position.y = mesh->mVertices[i].y;
             v.Position.z = mesh->mVertices[i].z;
+
+            if (v.Position.x < mmin.x) mmin.x = v.Position.x;
+            if (v.Position.y < mmin.y) mmin.y = v.Position.y;
+            if (v.Position.z < mmin.z) mmin.z = v.Position.z;
+            if (v.Position.x > mmax.x) mmax.x = v.Position.x;
+            if (v.Position.y > mmax.y) mmax.y = v.Position.y;
+            if (v.Position.z > mmax.z) mmax.z = v.Position.z;
 
             if (mesh->mTextureCoords[0])
             {
@@ -64,6 +74,9 @@ std::unique_ptr<CMesh> CMesh::Load(ID3D11Device* device, std::string file)
 
             vertices.push_back(v);
         }
+
+        LOGM(mmin)
+        LOGM(mmax)
 
         for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
         {

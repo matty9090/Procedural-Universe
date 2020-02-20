@@ -9,27 +9,27 @@ CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, float height)
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
 
-    Pipeline.LoadVertex(L"shaders/Volumetric/Atmosphere.vsh");
-    Pipeline.LoadPixel(L"shaders/Volumetric/Atmosphere.psh");
+    Pipeline.LoadVertex(L"shaders/Volumetric/SkyFromSpace.vsh");
+    Pipeline.LoadPixel(L"shaders/Volumetric/SkyFromSpace.psh");
     Pipeline.CreateRasteriser(Planet->GetDevice(), ECullMode::Anticlockwise);
     Pipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPosition());
     Pipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-    Sphere = std::make_unique<CModel>(planet->GetDevice(), RESM.GetMesh("assets/Atmosphere.obj"));
-    Sphere->Scale(Planet->Radius * 1.1f);
+    Sphere = std::make_unique<CModel>(planet->GetDevice(), RESM.GetMesh("assets/Sphere.obj"));
+    Sphere->Scale(Planet->Radius * 1.025f);
 }
 
 void CAtmosphereComponent::Update(float dt)
 {
     Sphere->SetPosition(Planet->GetPosition());
-    Sphere->SetScale(Planet->GetScale());
 }
 
 void CAtmosphereComponent::Render(DirectX::SimpleMath::Matrix viewProj)
 {
     Buffer.SetData(Planet->GetContext(), GetScatterBuffer());
 
-    Planet->GetContext()->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+    Planet->GetContext()->OMSetBlendState(CommonStates->AlphaBlend(), DirectX::Colors::Black, 0xFFFFFFFF);
+    Planet->GetContext()->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
     Planet->GetContext()->VSSetConstantBuffers(1, 1, Buffer.GetBuffer());
     Planet->GetContext()->PSSetConstantBuffers(1, 1, Buffer.GetBuffer());
 
@@ -38,11 +38,13 @@ void CAtmosphereComponent::Render(DirectX::SimpleMath::Matrix viewProj)
 
 ScatterBuffer CAtmosphereComponent::GetScatterBuffer()
 {
-    float radius = Planet->Radius;
-    float atmradius = radius + Height;
-    float camHeight = (Planet->Camera.GetPosition() - Planet->GetPosition()).Length();
+    auto camPos = Planet->Camera.GetPosition();
 
-    float scale = 1.0f / (atmradius - Planet->Radius);
+    float radius = Planet->Radius;
+    float atmradius = radius * 1.025f;
+    float camHeight = (camPos - Planet->GetPosition()).Length();
+
+    float scale = 1.0f / (atmradius - radius);
     float scaleDepth = 0.25f;
 
     DirectX::SimpleMath::Vector3 wavelength(0.65f, 0.57f, 0.475f);
@@ -50,26 +52,25 @@ ScatterBuffer CAtmosphereComponent::GetScatterBuffer()
     wavelength.y = 1.0f / powf(wavelength.y, 4.0f);
     wavelength.z = 1.0f / powf(wavelength.z, 4.0f);
 
-    ScatterBuffer buffer = {
-        Planet->Camera.GetPosition() - Planet->GetPosition(),
-        camHeight,
-        DirectX::SimpleMath::Vector3(0.0f, 0.5f, -0.5f),
-        camHeight * camHeight,
-        wavelength,
-        atmradius,
-        atmradius * atmradius,
-        radius,
-        radius * radius,
-        Constants::Kr * Constants::ESun,
-        Constants::Km * Constants::ESun,
-        Constants::Kr * 4.0f * DirectX::XM_PI,
-        Constants::Km * 4.0f * DirectX::XM_PI,
-        scale,
-        scaleDepth,
-        scale / scaleDepth,
-        Constants::Af,
-        Constants::Af * Constants::Af
-    };
+    ScatterBuffer buffer;
+    buffer.fInnerRadius = radius;
+    buffer.fOuterRadius = atmradius;
+    buffer.fInnerRadius2 = radius * radius;
+    buffer.fOuterRadius2 = atmradius * atmradius;
+    buffer.fScale = scale;
+    buffer.fScaleDepth = scaleDepth;
+    buffer.fScaleOverScaleDepth = scale / scaleDepth;
+    buffer.v3CameraPos = camPos;
+    buffer.v3LightPos = DirectX::SimpleMath::Vector3(0.0f, 0.5f, -0.5f);
+    buffer.fCameraHeight = camHeight;
+    buffer.fCameraHeight2 = camHeight * camHeight;
+    buffer.v3InvWavelength  = wavelength;
+    buffer.fKrESun = Constants::Kr * Constants::ESun;
+    buffer.fKmESun = Constants::Km * Constants::ESun;
+    buffer.fKr4PI = Constants::Kr * 4.0f * DirectX::XM_PI;
+    buffer.fKm4PI = Constants::Km * 4.0f * DirectX::XM_PI;
+    buffer.g = Constants::Af;
+    buffer.g2 = Constants::Af * Constants::Af;
 
     return buffer;
 }

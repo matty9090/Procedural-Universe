@@ -40,7 +40,7 @@ void CModel::SetScale(float s)
 
 void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline)
 {
-    MatrixBuffer.SetData(context, { World * ViewProj });
+    MatrixBuffer.SetData(context, { World * ViewProj, World });
 
     Pipeline.SetState(context, [&]() {
         unsigned int offset = 0;

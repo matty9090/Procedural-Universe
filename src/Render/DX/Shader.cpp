@@ -3,16 +3,24 @@
 
 using namespace std;
 
+#define _DEBUG
+
 bool LoadVertexShader(ID3D11Device* device, const wstring& fileName, ID3D11VertexShader** vertexShader, ID3DBlob** shaderCode )
 {
 	ID3DBlob* errors = nullptr;
+
+	UINT dbgFlags = 0;
+
+#ifdef _DEBUG
+	dbgFlags |= D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_DEBUG;
+#endif
 
 	HRESULT hr = 
 		D3DCompileFromFile( fileName.c_str(),
 		                       NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		                       "main",
 		                       "vs_5_0",
-		                       0, 0,
+		                       dbgFlags, 0,
 		                       shaderCode, 
 		                       &errors);
 	if (FAILED(hr))
@@ -47,12 +55,18 @@ bool LoadGeometryShader(ID3D11Device* device, const wstring& fileName, ID3D11Geo
 	ID3DBlob* shaderCode = nullptr;
 	ID3DBlob* errors = nullptr;
 
+	UINT dbgFlags = 0;
+
+#ifdef _DEBUG
+	dbgFlags |= D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_DEBUG;
+#endif
+
 	HRESULT hr = 
 		D3DCompileFromFile( fileName.c_str(),
 		                       NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		                       "main",
 		                       "gs_5_0",
-		                       0, 0,
+		                       dbgFlags, 0,
 		                       &shaderCode,  
 		                       &errors);
 	if (FAILED(hr))
@@ -91,13 +105,19 @@ bool LoadStreamOutGeometryShader(ID3D11Device* device, const wstring& fileName, 
 	ID3DBlob* shaderCode = nullptr;
 	ID3DBlob* errors = nullptr;
 
+	UINT dbgFlags = 0;
+
+#ifdef _DEBUG
+	dbgFlags |= D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_DEBUG;
+#endif
+
 	HRESULT hr = 
 		D3DCompileFromFile( fileName.c_str(), // File containing geometry shader (HLSL)
 		                       NULL, NULL,       // Advanced compilation options - not needed here
 		                       "main",           // Name of entry point in the shader
 		                       "gs_5_0",         // Target geometry shader hardware - ps_1_1 is lowest level
 		                                         // ps_2_0 works on most modern video cards, ps_4_0 required for DX10
-		                       0,                // Additional compilation flags (such as debug flags)
+		                       dbgFlags,         // Additional compilation flags (such as debug flags)
 		                       0,                // More compilation flags (added in DX10)
 		                       &shaderCode,      // Ptr to variable to hold compiled shader code
 		                       &errors           // Ptr to variable to hold error messages
@@ -138,11 +158,18 @@ bool LoadPixelShader(ID3D11Device* device, const wstring& fileName, ID3D11PixelS
 	ID3DBlob* shaderCode = nullptr;
 	ID3DBlob* errors = nullptr;
 
+	UINT dbgFlags = 0;
+
+#ifdef _DEBUG
+	dbgFlags |= D3DCOMPILE_SKIP_OPTIMIZATION | D3DCOMPILE_DEBUG;
+#endif
+
 	HRESULT hr = 
 		D3DCompileFromFile( fileName.c_str(),
-		                       NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		                       "main", "ps_5_0",       
-		                       0, 0, &shaderCode, &errors);       
+		                    NULL, D3D_COMPILE_STANDARD_FILE_INCLUDE,
+		                    "main", "ps_5_0",       
+							dbgFlags, 0,
+							&shaderCode, &errors);
 	if (FAILED(hr))
 	{
 		if (errors)

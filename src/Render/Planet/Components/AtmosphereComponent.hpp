@@ -32,7 +32,7 @@ struct ScatterBuffer
 {
     DirectX::SimpleMath::Vector3 v3CameraPos;
     float fCameraHeight;
-    DirectX::SimpleMath::Vector3 v3LightDir;
+    DirectX::SimpleMath::Vector3 v3LightPos;
     float fCameraHeight2;
     DirectX::SimpleMath::Vector3 v3InvWavelength;
     float fOuterRadius;

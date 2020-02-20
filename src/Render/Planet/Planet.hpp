@@ -24,7 +24,7 @@ public:
 
 private:
     FastNoise Noise;
-    const float Amplitude = 20.0f;
+    const float Amplitude = 2.0f;
 };
 
 class WaterHeightFunc
@@ -56,7 +56,7 @@ public:
     ID3D11DeviceContext* GetContext() const { return Context; }
     
     ICamera& Camera;
-    float Radius = 250.0f;
+    float Radius = 200.0f;
     float SplitDistance = 1500.0f;
     DirectX::SimpleMath::Matrix World;
 

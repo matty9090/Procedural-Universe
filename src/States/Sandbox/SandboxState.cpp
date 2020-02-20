@@ -51,7 +51,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     PostProcess->GaussianBlur = 5.0f;
 
     Planet = std::make_unique<CPlanet>(Context, *Camera);
-    Planet->SetPosition(Vector3(0.0f, 0.0f, 20000.0f));
+    Planet->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
 
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();

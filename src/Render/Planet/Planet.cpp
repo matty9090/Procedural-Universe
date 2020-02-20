@@ -33,7 +33,7 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera& cam)
 
     Components.push_back(std::make_unique<CTerrainComponent<TerrainHeightFunc>>(this));
     Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this));
-    //Components.push_back(std::make_unique<CAtmosphereComponent>(this, 200.0f));
+    Components.push_back(std::make_unique<CAtmosphereComponent>(this, 100.0f));
 }
 
 CPlanet::~CPlanet()
