@@ -22,8 +22,7 @@ VS_OUTPUT main(VS_INPUT v_in) {
 	VS_OUTPUT Output;
 	
 	float3 pos = mul(float4(v_in.Position, 1.0f), World);
-	scatter(pos);
-	//scatter(v_in.vPosition * fOuterRadius);
+	scatterSkyFromSpace(pos);
 	
 	Output.Position = mul(float4(v_in.Position, 1.0f), WorldViewProj);
 	Output.Colour1	= PrimaryColour;

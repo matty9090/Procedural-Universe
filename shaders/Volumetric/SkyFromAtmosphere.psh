@@ -1,0 +1,20 @@
+#include "Scatter.hlsl"
+
+struct VS_OUTPUT {
+	float4 Position : SV_POSITION;
+	float4 Colour1	: COLOR0;
+	float4 Colour2	: COLOR1;
+	float3 T0	    : TEXCOORD0;
+	float  Depth : TEXCOORD1;
+};
+
+float4 main(VS_OUTPUT v) : SV_Target {
+	float fExposure = 2.0f;
+	float fCos = dot(v3LightPos, v.T0) / length(v.T0);
+    float fCos2 = fCos * fCos;
+    float4 col = getRayleighPhase(fCos2) * v.Colour2 + getMiePhase(fCos, fCos2, g, g2) * v.Colour1;
+    col.a = max(max(col.r, col.g), col.b);
+    col = 1.0 - exp(-fExposure * col);
+	
+	return col;
+}

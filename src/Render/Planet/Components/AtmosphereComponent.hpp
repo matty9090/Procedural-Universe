@@ -63,8 +63,10 @@ private:
 
     float Height;
     CPlanet* Planet;
-    RenderPipeline Pipeline;
     ConstantBuffer<ScatterBuffer> Buffer;
+    
+    RenderPipeline PipelineSky;
+    RenderPipeline PipelineSpace;
 
     std::unique_ptr<CModel> Sphere;
     std::unique_ptr<DirectX::CommonStates> CommonStates;

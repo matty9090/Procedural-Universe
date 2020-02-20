@@ -25,7 +25,7 @@ public:
 
 private:
     FastNoise Noise;
-    const float Amplitude = 0.1f;
+    const float Amplitude = 1.0f;
 };
 
 class WaterHeightFunc

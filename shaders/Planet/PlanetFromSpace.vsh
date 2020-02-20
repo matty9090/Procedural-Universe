@@ -26,7 +26,7 @@ struct VS_Output
 void main(in VS_Input v_in, out VS_Output v_out)
 {
 	float3 pos = mul(float4(v_in.Position, 1.0f), World);
-	scatter_surf(pos);
+	scatterGroundFromSpace(pos);
 	
     v_out.Position = mul(float4(v_in.Position, 1.0f), WorldViewProj);
     v_out.Normal = v_in.Normal;

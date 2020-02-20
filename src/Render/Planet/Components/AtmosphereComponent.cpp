@@ -1,6 +1,7 @@
 #include "AtmosphereComponent.hpp"
 #include "Render/Planet/Planet.hpp"
 #include "Services/ResourceManager.hpp"
+#include "Services/Log.hpp"
 
 CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, float height)
     : Planet(planet),
@@ -9,11 +10,17 @@ CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, float height)
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
 
-    Pipeline.LoadVertex(L"shaders/Volumetric/SkyFromSpace.vsh");
-    Pipeline.LoadPixel(L"shaders/Volumetric/SkyFromSpace.psh");
-    Pipeline.CreateRasteriser(Planet->GetDevice(), ECullMode::Anticlockwise);
-    Pipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPosition());
-    Pipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    PipelineSky.LoadVertex(L"shaders/Volumetric/SkyFromAtmosphere.vsh");
+    PipelineSky.LoadPixel(L"shaders/Volumetric/SkyFromAtmosphere.psh");
+    PipelineSky.CreateRasteriser(Planet->GetDevice(), ECullMode::Anticlockwise);
+    PipelineSky.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPosition());
+    PipelineSky.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+    PipelineSpace.LoadVertex(L"shaders/Volumetric/SkyFromSpace.vsh");
+    PipelineSpace.LoadPixel(L"shaders/Volumetric/SkyFromSpace.psh");
+    PipelineSpace.CreateRasteriser(Planet->GetDevice(), ECullMode::Anticlockwise);
+    PipelineSpace.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPosition());
+    PipelineSpace.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
     Sphere = std::make_unique<CModel>(planet->GetDevice(), RESM.GetMesh("assets/Sphere.obj"));
     Sphere->Scale(Planet->Radius * 1.025f);
@@ -33,7 +40,10 @@ void CAtmosphereComponent::Render(DirectX::SimpleMath::Matrix viewProj)
     Planet->GetContext()->VSSetConstantBuffers(1, 1, Buffer.GetBuffer());
     Planet->GetContext()->PSSetConstantBuffers(1, 1, Buffer.GetBuffer());
 
-    Sphere->Draw(Planet->GetContext(), viewProj, Pipeline);
+    auto camHeight = (Planet->Camera.GetPosition() - Planet->GetPosition()).Length();
+    auto atmRadius = Planet->Radius * 1.025f;
+
+    Sphere->Draw(Planet->GetContext(), viewProj, camHeight < atmRadius ? PipelineSky : PipelineSpace);
 }
 
 ScatterBuffer CAtmosphereComponent::GetScatterBuffer()
