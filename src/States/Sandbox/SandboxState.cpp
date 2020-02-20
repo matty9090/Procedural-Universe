@@ -33,7 +33,9 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     Camera = std::make_unique<CSandboxCamera>(width, height);
     Camera->SetPosition(Vector3(0.0f, 0.0f, 5000.0f));
 
-    CTerrainComponent::GeneratePermutations();
+    CTerrainComponent<TerrainHeightFunc>::GeneratePermutations();
+    CTerrainComponent<WaterHeightFunc>::GeneratePermutations();
+
     CreateParticleBuffer(Device, Galaxy::ParticleBuffer.ReleaseAndGetAddressOf(), PARTICLES_PER_GALAXY);
 
     CreateModelPipeline();
@@ -174,7 +176,7 @@ void SandboxState::Render()
             ImGui::SetNextWindowBgAlpha(0.5f);
 
             ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-            ImGui::Text("Index: %i", ClosestObjIndex);
+            ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
 
             if (CurrentTarget->Parent)
                 ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());

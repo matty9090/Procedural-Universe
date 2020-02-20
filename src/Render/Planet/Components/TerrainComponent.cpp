@@ -4,25 +4,26 @@
 
 #include <set>
 
-UINT CTerrainComponent::GridSize = 21;
+template <class HeightFunc>
+UINT CTerrainComponent<HeightFunc>::GridSize = 21;
 
-std::map<UINT, std::vector<UINT>> CTerrainComponent::IndexPerm;
-std::map<int, std::map<int, int>> Quadtree<CTerrainNode>::FaceCorrection;
-std::map<int, std::map<int, int>> Quadtree<CTerrainNode>::InternalCorrection;
+template <class HeightFunc>
+std::map<UINT, std::vector<UINT>> CTerrainComponent<HeightFunc>::IndexPerm;
 
-CTerrainComponent::CTerrainComponent(CPlanet* planet) : Planet(planet)
+template <class HeightFunc>
+CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet, std::wstring pixel) : Planet(planet)
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
 
     TerrainPipeline.LoadVertex(L"shaders/Particles/Planet.vsh");
-    TerrainPipeline.LoadPixel(L"shaders/Particles/Planet.psh");
+    TerrainPipeline.LoadPixel(pixel);
     TerrainPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
     TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
     for (int i = 0; i < 6; ++i)
     {
         DirectX::SimpleMath::Vector3 o = Orientations[(EFace)i] * DirectX::XM_PI / 180.0f;
-        Nodes[i] = new CTerrainNode(Planet, nullptr);
+        Nodes[i] = new FTerrainNode(Planet, nullptr);
         Nodes[i]->Orientation = Quaternion::CreateFromYawPitchRoll(o.y, o.x, o.z);
         Nodes[i]->World = Matrix::Identity;
     }
@@ -41,7 +42,8 @@ CTerrainComponent::CTerrainComponent(CPlanet* planet) : Planet(planet)
     }
 }
 
-CTerrainComponent::~CTerrainComponent()
+template <class HeightFunc>
+CTerrainComponent<HeightFunc>::~CTerrainComponent()
 {
     for (int i = 0; i < 6; ++i)
     {
@@ -49,7 +51,8 @@ CTerrainComponent::~CTerrainComponent()
     }
 }
 
-void CTerrainComponent::Update(float dt)
+template <class HeightFunc>
+void CTerrainComponent<HeightFunc>::Update(float dt)
 {
     for (int i = 0; i < 6; ++i)
     {
@@ -57,9 +60,11 @@ void CTerrainComponent::Update(float dt)
     }
 }
 
-void CTerrainComponent::Render(DirectX::SimpleMath::Matrix viewProj)
+template <class HeightFunc>
+void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj)
 {
     TerrainPipeline.SetState(Planet->GetContext(), [&]() {
+        Planet->GetContext()->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
         Planet->GetContext()->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
         Planet->GetContext()->RSSetState(CommonStates->CullCounterClockwise());
     });
@@ -70,7 +75,8 @@ void CTerrainComponent::Render(DirectX::SimpleMath::Matrix viewProj)
     }
 }
 
-void CTerrainComponent::GeneratePermutations()
+template <class HeightFunc>
+void CTerrainComponent<HeightFunc>::GeneratePermutations()
 {
     typedef std::array<UINT, 5> Tri;
     std::vector<Tri> ind;

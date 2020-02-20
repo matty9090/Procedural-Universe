@@ -10,7 +10,7 @@
 #include "PlanetComponent.hpp"
 
 class CPlanet;
-class CTerrainNode;
+template <class HeightFunc> class CTerrainNode;
 
 enum class EFace
 {
@@ -22,10 +22,13 @@ enum class EFace
     Back
 };
 
+template <class HeightFunc>
 class CTerrainComponent : public IPlanetComponent
 {
+    using FTerrainNode = CTerrainNode<HeightFunc>;
+
 public:
-    CTerrainComponent(CPlanet* planet);
+    CTerrainComponent(CPlanet* planet, std::wstring pixel);
     ~CTerrainComponent();
 
     static void GeneratePermutations();
@@ -48,7 +51,7 @@ private:
     CPlanet* Planet;
 
     RenderPipeline TerrainPipeline;
-    std::array<CTerrainNode*, 6> Nodes;
+    std::array<FTerrainNode*, 6> Nodes;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
     std::map<EFace, DirectX::SimpleMath::Vector3> Orientations = {
@@ -69,3 +72,5 @@ private:
         { EFace::Back,   { EFace::Top  , EFace::Left,  EFace::Bottom, EFace::Right } }
     };
 };
+
+#include "TerrainComponent.cpp"

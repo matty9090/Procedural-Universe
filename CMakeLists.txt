@@ -42,7 +42,10 @@ add_definitions(-DUNICODE)
 include_directories(src)
 
 file(GLOB_RECURSE SRC_FILES src/*.cpp)
-list(REMOVE_ITEM SRC_FILES src/App/NBody.cpp)
+list(REMOVE_ITEM SRC_FILES ${CMAKE_SOURCE_DIR}/src/App/NBody.cpp)
+list(REMOVE_ITEM SRC_FILES ${CMAKE_SOURCE_DIR}/src/Render/Planet/Components/TerrainNode.cpp)
+list(REMOVE_ITEM SRC_FILES ${CMAKE_SOURCE_DIR}/src/Render/Planet/Components/TerrainComponent.cpp)
+message(${SRC_FILES})
 
 add_library(nbody_lib STATIC ${SRC_FILES})
 target_compile_options(nbody_lib PRIVATE /WX)

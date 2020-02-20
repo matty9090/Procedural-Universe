@@ -23,9 +23,10 @@ struct TerrainVertex
     Vector2 UV;
 };
 
-class CTerrainNode : public Quadtree<CTerrainNode>
+template <class HeightFunc>
+class CTerrainNode : public Quadtree<CTerrainNode<HeightFunc>>
 {
-	public:	
+	public:
 		CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad = (EQuad)0);
 
         void Generate();
@@ -54,8 +55,11 @@ class CTerrainNode : public Quadtree<CTerrainNode>
         std::vector<TerrainVertex> Vertices;
         std::vector<UINT> Indices;
 
+		HeightFunc GetHeight;
         ConstantBuffer<TerrainBuffer> Buffer;
 
         Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
         Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
 };
+
+#include "TerrainNode.cpp"

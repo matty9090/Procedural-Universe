@@ -14,7 +14,21 @@
 #include "Misc/FastNoise.hpp"
 #include "Components/PlanetComponent.hpp"
 
-class CTerrainComponent;
+class TerrainHeightFunc
+{
+public:
+    TerrainHeightFunc();
+    float operator()(DirectX::SimpleMath::Vector3 normal);
+
+private:
+    FastNoise Noise;
+};
+
+class WaterHeightFunc
+{
+public:
+    float operator()(DirectX::SimpleMath::Vector3 normal);
+};
 
 class CPlanet
 {
@@ -45,7 +59,6 @@ private:
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
 
-    FastNoise Noise;
     float PlanetScale = 1.0f;
     DirectX::SimpleMath::Vector3 Position;
 

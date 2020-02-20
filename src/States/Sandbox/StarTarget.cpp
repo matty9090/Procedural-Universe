@@ -159,13 +159,11 @@ void StarTarget::BakeSkybox(Vector3 object)
 
 void StarTarget::Seed(uint64_t seed)
 {
-    Particles.resize(10);
+    Particles.resize(12);
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 
-    auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Galaxy);
+    auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random, 2.0f);
     seeder->Seed(seed);
-
-    ScaleObjects(2.4f);
 }
 
 void StarTarget::UpdateParticleBuffer()

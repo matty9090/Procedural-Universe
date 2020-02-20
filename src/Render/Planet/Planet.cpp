@@ -7,6 +7,28 @@
 #include "Components/TerrainComponent.hpp"
 #include "Components/AtmosphereComponent.hpp"
 
+TerrainHeightFunc::TerrainHeightFunc()
+{
+    Noise.SetFrequency(1.0f);
+    Noise.SetFractalOctaves(6);
+}
+
+float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal)
+{
+    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * 20.0f;
+}
+
+std::map<int, std::map<int, int>> Quadtree<CTerrainNode<TerrainHeightFunc>>::FaceCorrection;
+std::map<int, std::map<int, int>> Quadtree<CTerrainNode<TerrainHeightFunc>>::InternalCorrection;
+
+float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal)
+{
+    return 0.0f;
+}
+
+std::map<int, std::map<int, int>> Quadtree<CTerrainNode<WaterHeightFunc>>::FaceCorrection;
+std::map<int, std::map<int, int>> Quadtree<CTerrainNode<WaterHeightFunc>>::InternalCorrection;
+
 CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
     : Camera(cam),
       Context(context)
@@ -15,10 +37,8 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
 
     World = DirectX::SimpleMath::Matrix::Identity;
 
-    Noise.SetFrequency(1.0f);
-    Noise.SetFractalOctaves(6);
-
-    Components.push_back(std::make_unique<CTerrainComponent>(this));
+    Components.push_back(std::make_unique<CTerrainComponent<TerrainHeightFunc>>(this, L"shaders/Particles/Planet.psh"));
+    Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this, L"shaders/Particles/PlanetWater.psh"));
     //Components.push_back(std::make_unique<CAtmosphereComponent>(this, 200.0f));
 }
 
@@ -55,11 +75,6 @@ void CPlanet::SetPosition(DirectX::SimpleMath::Vector3 p)
 {
     Position = p;
     UpdateMatrix();
-}
-
-float CPlanet::GetHeight(DirectX::SimpleMath::Vector3 normal)
-{
-    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * 20.0f;
 }
 
 void CPlanet::UpdateMatrix()

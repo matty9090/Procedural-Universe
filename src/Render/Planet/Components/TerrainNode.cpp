@@ -4,8 +4,9 @@
 #include "Render/Planet/Planet.hpp"
 #include "Render/Planet/Components/TerrainComponent.hpp"
 
-CTerrainNode::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad)
-	: Quadtree(quad, parent),
+template <class HeightFunc>
+CTerrainNode<HeightFunc>::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad)
+    : Quadtree(quad, parent),
       Planet(planet),
       Buffer(planet->GetDevice())
 {
@@ -22,63 +23,64 @@ CTerrainNode::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad)
     }
 }
 
-void CTerrainNode::Generate()
+template <class HeightFunc>
+void CTerrainNode<HeightFunc>::Generate()
 {
-	UINT gridsize = CTerrainComponent::GridSize, gh = CTerrainComponent::GridSize / 2;
+    UINT gridsize = CTerrainComponent<HeightFunc>::GridSize, gh = CTerrainComponent<HeightFunc>::GridSize / 2;
 
     Indices.clear();
     Vertices.clear();
     Vertices.reserve(gridsize * gridsize);
 
-	float step = Bounds.size / (gridsize - 1);
-	int k = 0, sx = 0, sy = 0;
+    float step = Bounds.size / (gridsize - 1);
+    int k = 0, sx = 0, sy = 0;
 
-	switch (Quad)
-	{
-		case NW: sx = 0,  sy = 0; break;
-		case NE: sx = gh, sy = 0; break;
-		case SE: sx = gh, sy = gh; break;
-		case SW: sx = 0,  sy = gh; break;
-	}
+    switch (Quad)
+    {
+        case NW: sx = 0, sy = 0; break;
+        case NE: sx = gh, sy = 0; break;
+        case SE: sx = gh, sy = gh; break;
+        case SW: sx = 0, sy = gh; break;
+    }
 
-	for (UINT y = 0; y < gridsize; ++y)
-	{
-		float yy = Bounds.y + y * step;
+    for (UINT y = 0; y < gridsize; ++y)
+    {
+        float yy = Bounds.y + y * step;
 
-		for (UINT x = 0; x < gridsize; ++x, ++k)
-		{
+        for (UINT x = 0; x < gridsize; ++x, ++k)
+        {
             TerrainVertex vertex;
 
-			if (Parent && (x % 2 == 0) && (y % 2 == 0))
-			{
-				int xh = sx + x / 2;
-				int yh = sy + y / 2;
+            if (Parent && (x % 2 == 0) && (y % 2 == 0))
+            {
+                int xh = sx + x / 2;
+                int yh = sy + y / 2;
 
                 vertex = Parent->GetVertex(xh + yh * gridsize);
-			}
-			else
-			{
+            }
+            else
+            {
                 float xx = Bounds.x + x * step;
 
-				Vector3 pos = Vector3(xx, yy, 1.0f);
-				pos = Vector3::Transform(PointToSphere(pos), Orientation);
+                Vector3 pos = Vector3(xx, yy, 1.0f);
+                pos = Vector3::Transform(PointToSphere(pos), Orientation);
 
-				Vector3 normal = pos;
-				normal.Normalize();
+                Vector3 normal = pos;
+                normal.Normalize();
 
-				float height = Planet->GetHeight(normal);
+                float height = GetHeight(normal);
                 Vector3 finalPos = pos * Planet->Radius + normal * height;
 
                 vertex.Position = finalPos;
                 vertex.Normal = normal;
-			}
+            }
 
             Vertices.push_back(vertex);
-		}
-	}
+        }
+    }
 
-	Indices = CTerrainComponent::IndexPerm[0];
-    
+    Indices = CTerrainComponent<HeightFunc>::IndexPerm[0];
+
     D3D11_BUFFER_DESC desc;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     desc.Usage = D3D11_USAGE_DEFAULT;
@@ -99,35 +101,37 @@ void CTerrainNode::Generate()
     Planet->GetDevice()->CreateBuffer(&desc, &data, IndexBuffer.ReleaseAndGetAddressOf());
 }
 
-void CTerrainNode::NotifyNeighbours()
+template <class HeightFunc>
+void CTerrainNode<HeightFunc>::NotifyNeighbours()
 {
-	std::vector<CTerrainNode*> neighbours;
+    std::vector<CTerrainNode*> neighbours;
 
     for (int i = 0; i < 4; ++i)
     {
         auto sn = GetSmallerNeighbours(GetGreaterThanOrEqualNeighbour(i), i);
-		neighbours.insert(neighbours.end(), sn.begin(), sn.end());
+        neighbours.insert(neighbours.end(), sn.begin(), sn.end());
     }
 
-	for (auto n : neighbours)
-		n->FixEdges();
+    for (auto n : neighbours)
+        n->FixEdges();
 }
 
-void CTerrainNode::FixEdges()
+template <class HeightFunc>
+void CTerrainNode<HeightFunc>::FixEdges()
 {
-	std::vector<CTerrainNode*> neighbours(4);
-	std::vector<bool> depths(4);
+    std::vector<CTerrainNode*> neighbours(4);
+    std::vector<bool> depths(4);
 
-	for (int i = 0; i < 4; ++i) neighbours[i] = GetGreaterThanOrEqualNeighbour(i);
-	for (int i = 0; i < 4; ++i) depths[i]     = neighbours[i] && (Depth - neighbours[i]->GetDepth() >= 1);
+    for (int i = 0; i < 4; ++i) neighbours[i] = GetGreaterThanOrEqualNeighbour(i);
+    for (int i = 0; i < 4; ++i) depths[i] = neighbours[i] && (Depth - neighbours[i]->GetDepth() >= 1);
 
-	int d0 = depths[North] ? CTerrainComponent::Top    : 0;
-	int d1 = depths[East]  ? CTerrainComponent::Right  : 0;
-	int d2 = depths[South] ? CTerrainComponent::Bottom : 0;
-	int d3 = depths[West]  ? CTerrainComponent::Left   : 0;
+    int d0 = depths[North] ? CTerrainComponent<HeightFunc>::Top : 0;
+    int d1 = depths[East] ? CTerrainComponent<HeightFunc>::Right : 0;
+    int d2 = depths[South] ? CTerrainComponent<HeightFunc>::Bottom : 0;
+    int d3 = depths[West] ? CTerrainComponent<HeightFunc>::Left : 0;
 
-	int perm = d0 | d1 | d2 | d3;
-	Indices = CTerrainComponent::IndexPerm[perm];
+    int perm = d0 | d1 | d2 | d3;
+    Indices = CTerrainComponent<HeightFunc>::IndexPerm[perm];
 
     D3D11_BUFFER_DESC desc;
     desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
@@ -142,21 +146,24 @@ void CTerrainNode::FixEdges()
     Planet->GetDevice()->CreateBuffer(&desc, &data, IndexBuffer.ReleaseAndGetAddressOf());
 }
 
-Vector3 CTerrainNode::PointToSphere(Vector3 p)
+template <class HeightFunc>
+Vector3 CTerrainNode<HeightFunc>::PointToSphere(Vector3 p)
 {
     float x2 = p.x * p.x, y2 = p.y * p.y, z2 = p.z * p.z;
 
-	return Vector3(p.x * sqrtf(1.0f - y2 * 0.5f - z2 * 0.5f + (y2 * z2) * 0.33333333f),
-		           p.y * sqrtf(1.0f - z2 * 0.5f - x2 * 0.5f + (z2 * x2) * 0.33333333f),
-		           p.z * sqrtf(1.0f - x2 * 0.5f - y2 * 0.5f + (x2 * y2) * 0.33333333f));
+    return Vector3(p.x * sqrtf(1.0f - y2 * 0.5f - z2 * 0.5f + (y2 * z2) * 0.33333333f),
+        p.y * sqrtf(1.0f - z2 * 0.5f - x2 * 0.5f + (z2 * x2) * 0.33333333f),
+        p.z * sqrtf(1.0f - x2 * 0.5f - y2 * 0.5f + (x2 * y2) * 0.33333333f));
 }
 
-void CTerrainNode::Update(float dt)
+template <class HeightFunc>
+void CTerrainNode<HeightFunc>::Update(float dt)
 {
-	Quadtree::Update(dt);
+    Quadtree::Update(dt);
 }
 
-void CTerrainNode::Render(Matrix viewProj)
+template <class HeightFunc>
+void CTerrainNode<HeightFunc>::Render(Matrix viewProj)
 {
     if (IsLeaf())
     {
@@ -178,54 +185,58 @@ void CTerrainNode::Render(Matrix viewProj)
     }
 }
 
-Vector3 CTerrainNode::GetCenterWorld()
+template <class HeightFunc>
+Vector3 CTerrainNode<HeightFunc>::GetCenterWorld()
 {
-    Vector3 midpoint = Vertices[(CTerrainComponent::GridSize * CTerrainComponent::GridSize) / 2].Position;
+    Vector3 midpoint = Vertices[(CTerrainComponent<HeightFunc>::GridSize * CTerrainComponent<HeightFunc>::GridSize) / 2].Position;
     return Vector3::Transform(midpoint, Planet->World * World);
 }
 
-void CTerrainNode::SplitFunction()
+template <class HeightFunc>
+void CTerrainNode<HeightFunc>::SplitFunction()
 {
-	float x = Bounds.x, y = Bounds.y;
-	float d = Bounds.size / 2;
+    float x = Bounds.x, y = Bounds.y;
+    float d = Bounds.size / 2;
 
-	for (int i = 0; i < 4; ++i)
-	{
+    for (int i = 0; i < 4; ++i)
+    {
         ChildNodes[i] = new CTerrainNode(Planet, this, static_cast<EQuad>(i));
-	}
+    }
 
-	ChildNodes[NW]->SetBounds(Square { x    , y    , d });
-	ChildNodes[NE]->SetBounds(Square { x + d, y    , d });
-	ChildNodes[SE]->SetBounds(Square { x + d, y + d, d });
-	ChildNodes[SW]->SetBounds(Square { x    , y + d, d });
+    ChildNodes[NW]->SetBounds(Square{ x    , y    , d });
+    ChildNodes[NE]->SetBounds(Square{ x + d, y    , d });
+    ChildNodes[SE]->SetBounds(Square{ x + d, y + d, d });
+    ChildNodes[SW]->SetBounds(Square{ x    , y + d, d });
 
-	for (int i = 0; i < 4; ++i)
-		ChildNodes[i]->Generate();
+    for (int i = 0; i < 4; ++i)
+        ChildNodes[i]->Generate();
 
-	for (int i = 0; i < 4; ++i)
-		ChildNodes[i]->FixEdges();
+    for (int i = 0; i < 4; ++i)
+        ChildNodes[i]->FixEdges();
 
-	NotifyNeighbours();
+    NotifyNeighbours();
 }
 
-void CTerrainNode::MergeFunction()
+template <class HeightFunc>
+void CTerrainNode<HeightFunc>::MergeFunction()
 {
-	for (int i = 0; i < 4; ++i)
-	{
-		ChildNodes[i] = nullptr;
-	}
+    for (int i = 0; i < 4; ++i)
+    {
+        ChildNodes[i] = nullptr;
+    }
 
-	NotifyNeighbours();
+    NotifyNeighbours();
 }
 
-bool CTerrainNode::DistanceFunction()
+template <class HeightFunc>
+bool CTerrainNode<HeightFunc>::DistanceFunction()
 {
-	Vector3 cam = Planet->Camera->GetPosition();
-	float distance = Vector3::Distance(cam, GetCenterWorld());
+    Vector3 cam = Planet->Camera->GetPosition();
+    float distance = Vector3::Distance(cam, GetCenterWorld());
 
-	//float height = Vector3::Distance(cam, Planet->GetTransform().GetLocation()) - Radius * 0.96f;
-	//float horizon = sqrtf(height * (2 * Radius + height));
-	//bool visible = distance - Diameter < horizon;
+    //float height = Vector3::Distance(cam, Planet->GetTransform().GetLocation()) - Radius * 0.96f;
+    //float horizon = sqrtf(height * (2 * Radius + height));
+    //bool visible = distance - Diameter < horizon;
 
-	return Depth < 8 && distance < Bounds.size * Planet->SplitDistance;
+    return Depth < 8 && distance < Bounds.size * Planet->SplitDistance;
 }

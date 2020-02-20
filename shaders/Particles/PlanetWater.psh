@@ -1,0 +1,26 @@
+cbuffer c0
+{
+    float3 LightDirection;
+    float Lerp;
+};
+
+struct PS_Input
+{
+    float4 Position : SV_POSITION;
+    float3 Normal : NORMAL;
+    float2 UV : TEXCOORD;
+};
+
+struct PS_Output
+{
+    float4 Colour : SV_Target;
+};
+
+void main(in PS_Input v_in, out PS_Output colour)
+{
+    float3 lightCol = float3(1.0f, 1.0f, 1.0f);
+    float3 diffuse = float3(0.0f, 0.32f, 1.0f);
+
+    float3 light = diffuse * lightCol * max(dot(v_in.Normal, LightDirection), 0.0f);
+    colour.Colour = float4(diffuse, Lerp);
+}
