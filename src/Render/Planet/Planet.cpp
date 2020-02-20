@@ -18,16 +18,10 @@ float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal)
     return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * 20.0f;
 }
 
-std::map<int, std::map<int, int>> Quadtree<CTerrainNode<TerrainHeightFunc>>::FaceCorrection;
-std::map<int, std::map<int, int>> Quadtree<CTerrainNode<TerrainHeightFunc>>::InternalCorrection;
-
 float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal)
 {
     return 0.0f;
 }
-
-std::map<int, std::map<int, int>> Quadtree<CTerrainNode<WaterHeightFunc>>::FaceCorrection;
-std::map<int, std::map<int, int>> Quadtree<CTerrainNode<WaterHeightFunc>>::InternalCorrection;
 
 CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
     : Camera(cam),

@@ -13,6 +13,9 @@ struct Square
 	float size;
 };
 
+extern std::map<int, std::map<int, int>> FaceCorrection;
+extern std::map<int, std::map<int, int>> InternalCorrection;
+
 template <class T>
 struct Quadtree
 {
@@ -49,9 +52,6 @@ struct Quadtree
 
 		int FaceID, Quad;
         std::vector<T*> RootNeighbourList;
-
-		static std::map<int, std::map<int, int>> FaceCorrection;
-		static std::map<int, std::map<int, int>> InternalCorrection;
 
 	protected:
 		std::array<T*, 4> ChildNodes;
