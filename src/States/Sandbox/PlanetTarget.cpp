@@ -16,7 +16,7 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
-    Planet = std::make_unique<CPlanet>(Context, Camera);
+    Planet = std::make_unique<CPlanet>(Context, *Camera);
 
     CreatePlanetPipeline();
 }

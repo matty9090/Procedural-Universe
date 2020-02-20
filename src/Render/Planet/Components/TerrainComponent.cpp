@@ -11,12 +11,14 @@ template <class HeightFunc>
 std::map<UINT, std::vector<UINT>> CTerrainComponent<HeightFunc>::IndexPerm;
 
 template <class HeightFunc>
-CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet, std::wstring pixel) : Planet(planet)
+CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet) : Planet(planet)
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
 
+    HeightFunc HeightObj;
+
     TerrainPipeline.LoadVertex(L"shaders/Particles/Planet.vsh");
-    TerrainPipeline.LoadPixel(pixel);
+    TerrainPipeline.LoadPixel(HeightObj.PixelShader);
     TerrainPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
     TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
@@ -67,6 +69,7 @@ void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj)
         Planet->GetContext()->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
         Planet->GetContext()->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
         Planet->GetContext()->RSSetState(CommonStates->CullCounterClockwise());
+        //Planet->GetContext()->RSSetState(CommonStates->Wireframe());
     });
 
     for (int i = 0; i < 6; ++i)

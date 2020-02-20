@@ -28,7 +28,7 @@ class CTerrainComponent : public IPlanetComponent
     using FTerrainNode = CTerrainNode<HeightFunc>;
 
 public:
-    CTerrainComponent(CPlanet* planet, std::wstring pixel);
+    CTerrainComponent(CPlanet* planet);
     ~CTerrainComponent();
 
     static void GeneratePermutations();

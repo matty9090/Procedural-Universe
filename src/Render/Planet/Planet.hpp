@@ -20,20 +20,25 @@ public:
     TerrainHeightFunc();
     float operator()(DirectX::SimpleMath::Vector3 normal);
 
+    std::wstring PixelShader = L"shaders/Particles/Planet.psh";
+
 private:
     FastNoise Noise;
+    const float Amplitude = 20.0f;
 };
 
 class WaterHeightFunc
 {
 public:
     float operator()(DirectX::SimpleMath::Vector3 normal);
+
+    std::wstring PixelShader = L"shaders/Particles/PlanetWater.psh";
 };
 
 class CPlanet
 {
 public:
-    CPlanet(ID3D11DeviceContext* context, ICamera* cam);
+    CPlanet(ID3D11DeviceContext* context, ICamera& cam);
     ~CPlanet();
 
     void Update(float dt);
@@ -50,7 +55,7 @@ public:
     ID3D11Device* GetDevice() const { return Device; }
     ID3D11DeviceContext* GetContext() const { return Context; }
     
-    ICamera* Camera;
+    ICamera& Camera;
     float Radius = 250.0f;
     float SplitDistance = 1500.0f;
     DirectX::SimpleMath::Matrix World;

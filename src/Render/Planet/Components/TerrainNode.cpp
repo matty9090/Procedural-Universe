@@ -231,7 +231,7 @@ void CTerrainNode<HeightFunc>::MergeFunction()
 template <class HeightFunc>
 bool CTerrainNode<HeightFunc>::DistanceFunction()
 {
-    Vector3 cam = Planet->Camera->GetPosition();
+    Vector3 cam = Planet->Camera.GetPosition();
     float distance = Vector3::Distance(cam, GetCenterWorld());
 
     //float height = Vector3::Distance(cam, Planet->GetTransform().GetLocation()) - Radius * 0.96f;

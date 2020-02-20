@@ -40,7 +40,7 @@ ScatterBuffer CAtmosphereComponent::GetScatterBuffer()
 {
     float radius = Planet->Radius;
     float atmradius = radius + Height;
-    float camHeight = (Planet->Camera->GetPosition() - Planet->GetPosition()).Length();
+    float camHeight = (Planet->Camera.GetPosition() - Planet->GetPosition()).Length();
 
     float scale = 1.0f / (atmradius - Planet->Radius);
     float scaleDepth = 0.25f;
@@ -51,7 +51,7 @@ ScatterBuffer CAtmosphereComponent::GetScatterBuffer()
     wavelength.z = 1.0f / powf(wavelength.z, 4.0f);
 
     ScatterBuffer buffer = {
-        Planet->Camera->GetPosition() - Planet->GetPosition(),
+        Planet->Camera.GetPosition() - Planet->GetPosition(),
         camHeight,
         DirectX::SimpleMath::Vector3(0.0f, 0.5f, -0.5f),
         camHeight * camHeight,

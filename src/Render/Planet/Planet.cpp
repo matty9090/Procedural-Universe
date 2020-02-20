@@ -15,7 +15,7 @@ TerrainHeightFunc::TerrainHeightFunc()
 
 float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal)
 {
-    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * 20.0f;
+    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * Amplitude;
 }
 
 float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal)
@@ -23,7 +23,7 @@ float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal)
     return 0.0f;
 }
 
-CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
+CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera& cam)
     : Camera(cam),
       Context(context)
 {
@@ -31,8 +31,8 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera* cam)
 
     World = DirectX::SimpleMath::Matrix::Identity;
 
-    Components.push_back(std::make_unique<CTerrainComponent<TerrainHeightFunc>>(this, L"shaders/Particles/Planet.psh"));
-    Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this, L"shaders/Particles/PlanetWater.psh"));
+    Components.push_back(std::make_unique<CTerrainComponent<TerrainHeightFunc>>(this));
+    Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this));
     //Components.push_back(std::make_unique<CAtmosphereComponent>(this, 200.0f));
 }
 
@@ -50,7 +50,7 @@ void CPlanet::Update(float dt)
 void CPlanet::Render()
 {
     for (auto& component : Components)
-        component->Render(Camera->GetViewMatrix() * Camera->GetProjectionMatrix());
+        component->Render(Camera.GetViewMatrix() * Camera.GetProjectionMatrix());
 }
 
 void CPlanet::Move(DirectX::SimpleMath::Vector3 v)
