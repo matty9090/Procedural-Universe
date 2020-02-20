@@ -15,12 +15,32 @@ CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet) : Planet(plane
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
 
+    HasAtmosphere = Planet->HasComponent<CAtmosphereComponent>();
+
     HeightFunc HeightObj;
 
-    TerrainPipeline.LoadVertex(L"shaders/Particles/Planet.vsh");
-    TerrainPipeline.LoadPixel(HeightObj.PixelShader);
-    TerrainPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
-    TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    if (HasAtmosphere)
+    {
+        new(&TerrainAtmPipeline) RenderPipeline;
+        TerrainAtmPipeline.LoadVertex(L"Shaders/Planet/PlanetFromAtmosphere.vsh");
+        TerrainAtmPipeline.LoadPixel(HeightObj.PixelShader + L"FromAtmosphere.psh");
+        TerrainAtmPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
+        TerrainAtmPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+        
+        new(&TerrainSpacePipeline) RenderPipeline;
+        TerrainSpacePipeline.LoadVertex(L"Shaders/Planet/PlanetFromSpace.vsh");
+        TerrainSpacePipeline.LoadPixel(HeightObj.PixelShader + L"FromSpace.psh");
+        TerrainSpacePipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
+        TerrainSpacePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    }
+    else
+    {
+        new(&TerrainPipeline) RenderPipeline;
+        TerrainPipeline.LoadVertex(L"Shaders/Planet/Planet.vsh");
+        TerrainPipeline.LoadPixel(HeightObj.PixelShader + L".psh");
+        TerrainPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
+        TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    }
 
     for (int i = 0; i < 6; ++i)
     {
@@ -65,7 +85,9 @@ void CTerrainComponent<HeightFunc>::Update(float dt)
 template <class HeightFunc>
 void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj)
 {
-    TerrainPipeline.SetState(Planet->GetContext(), [&]() {
+    RenderPipeline& pipeline = HasAtmosphere ? TerrainSpacePipeline : TerrainPipeline;
+    
+    pipeline.SetState(Planet->GetContext(), [&]() {
         Planet->GetContext()->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
         Planet->GetContext()->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
         Planet->GetContext()->RSSetState(CommonStates->CullCounterClockwise());

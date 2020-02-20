@@ -21,11 +21,11 @@ struct VS_INPUT {
 VS_OUTPUT main(VS_INPUT v_in) {
 	VS_OUTPUT Output;
 	
-	float3 pos = mul(float4(v_in.vPosition, 1.0f), World);
+	float3 pos = mul(float4(v_in.Position, 1.0f), World);
 	scatter(pos);
 	//scatter(v_in.vPosition * fOuterRadius);
 	
-	Output.Position = mul(float4(v_in.vPosition, 1.0f), WorldViewProj);
+	Output.Position = mul(float4(v_in.Position, 1.0f), WorldViewProj);
 	Output.Colour1	= PrimaryColour;
 	Output.Colour2	= SecondaryColour;
 	Output.T0	    = T0;

@@ -1,0 +1,24 @@
+cbuffer c0
+{
+    float3 LightDirection;
+    float Lerp;
+};
+
+struct PS_Input
+{
+    float4 Position : SV_POSITION;
+    float3 Normal : NORMAL;
+    float2 UV : TEXCOORD;
+	float4 Colour1	: COLOR0;
+	float4 Colour2	: COLOR1;
+};
+
+float4 main(in PS_Input v_in) : SV_Target
+{
+	float fExposure = 2.0f;
+	float4 diffuse = float4(0, 1, 0, 1);
+	float4 night = float4(0, 0, 0, 1);
+    float4 col = v_in.Colour1 + diffuse * v_in.Colour2 + (night * (1.0 - v_in.Colour2)) * 0.2;
+	
+	return 1.0 - exp(col * -fExposure);
+}

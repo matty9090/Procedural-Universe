@@ -9,11 +9,6 @@ struct VS_OUTPUT {
 };
 
 float4 main(VS_OUTPUT v) : SV_Target {
-	/*float3 colour = getScatterColour(v.Colour1, v.Colour2, v.T0);
-	colour = 1.0 - exp(colour * -0.8f);
-
-	return float4(colour, colour.b);*/
-
 	float fExposure = 2.0f;
 
 	float fCos = dot(v3LightPos, v.T0) / length(v.T0);

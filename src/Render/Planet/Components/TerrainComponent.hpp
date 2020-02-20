@@ -50,7 +50,19 @@ public:
 private:
     CPlanet* Planet;
 
-    RenderPipeline TerrainPipeline;
+    bool HasAtmosphere = false;
+
+    union
+    {
+        RenderPipeline TerrainPipeline;
+
+        struct
+        {
+            RenderPipeline TerrainAtmPipeline;
+            RenderPipeline TerrainSpacePipeline;
+        };
+    };
+
     std::array<FTerrainNode*, 6> Nodes;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 

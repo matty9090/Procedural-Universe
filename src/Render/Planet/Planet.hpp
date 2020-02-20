@@ -4,6 +4,7 @@
 #include <list>
 #include <vector>
 #include <memory>
+#include <typeinfo>
 #include <d3d11.h>
 #include <SimpleMath.h>
 #include <CommonStates.h>
@@ -20,11 +21,11 @@ public:
     TerrainHeightFunc();
     float operator()(DirectX::SimpleMath::Vector3 normal);
 
-    std::wstring PixelShader = L"shaders/Particles/Planet.psh";
+    std::wstring PixelShader = L"shaders/Planet/Planet";
 
 private:
     FastNoise Noise;
-    const float Amplitude = 2.0f;
+    const float Amplitude = 0.1f;
 };
 
 class WaterHeightFunc
@@ -32,7 +33,7 @@ class WaterHeightFunc
 public:
     float operator()(DirectX::SimpleMath::Vector3 normal);
 
-    std::wstring PixelShader = L"shaders/Particles/PlanetWater.psh";
+    std::wstring PixelShader = L"shaders/Planet/PlanetWater";
 };
 
 class CPlanet
@@ -46,6 +47,9 @@ public:
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float s);
     void SetPosition(DirectX::SimpleMath::Vector3 p);
+    
+    template <class Component>
+    bool HasComponent();
     
     float GetScale() const { return PlanetScale; }
     float GetHeight(DirectX::SimpleMath::Vector3 normal);
@@ -71,3 +75,17 @@ private:
     
     void UpdateMatrix();
 };
+
+template <class Component>
+bool CPlanet::HasComponent()
+{
+    for (const auto& component : Components)
+    {
+        if (typeid(*component) == typeid(Component))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}

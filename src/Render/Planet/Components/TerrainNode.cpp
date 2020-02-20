@@ -168,7 +168,8 @@ void CTerrainNode<HeightFunc>::Render(Matrix viewProj)
     if (IsLeaf())
     {
         auto context = Planet->GetContext();
-        Buffer.SetData(context, { Planet->World * World * viewProj });
+        auto w = Planet->World * World;
+        Buffer.SetData(context, { w * viewProj, w });
 
         UINT offset = 0;
         UINT stride = sizeof(TerrainVertex);

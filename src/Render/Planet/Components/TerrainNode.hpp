@@ -14,6 +14,7 @@ class CPlanet;
 struct TerrainBuffer
 {
     Matrix WorldViewProj;
+    Matrix World;
 };
 
 struct TerrainVertex

@@ -31,9 +31,9 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera& cam)
 
     World = DirectX::SimpleMath::Matrix::Identity;
 
+    Components.push_back(std::make_unique<CAtmosphereComponent>(this, 100.0f));
     Components.push_back(std::make_unique<CTerrainComponent<TerrainHeightFunc>>(this));
     Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this));
-    Components.push_back(std::make_unique<CAtmosphereComponent>(this, 100.0f));
 }
 
 CPlanet::~CPlanet()
