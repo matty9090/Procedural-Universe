@@ -9,18 +9,17 @@ struct PS_Input
     float4 Position : SV_POSITION;
     float3 Normal : NORMAL;
     float2 UV : TEXCOORD;
+	float4 Colour1	: COLOR0;
+	float4 Colour2	: COLOR1;
+	float  Intensity : COLOR2;
 };
 
-struct PS_Output
+float4 main(in PS_Input v_in) : SV_Target
 {
-    float4 Colour : SV_Target;
-};
-
-void main(in PS_Input v_in, out PS_Output colour)
-{
-    float3 lightCol = float3(1.0f, 1.0f, 1.0f);
-    float3 diffuse = float3(0.0f, 0.7f, 0.1f);
-
-    float3 light = diffuse * lightCol * max(dot(v_in.Normal, LightDirection), 0.0f);
-    colour.Colour = float4(diffuse, Lerp);
+	float fExposure = 2.0f;
+    float4 diffuse = float4(0, 1, 0, 1);
+    float4 col = 1.0 - exp(-fExposure * (v_in.Colour1 + diffuse * v_in.Colour2));
+    col.a = col.b;
+	
+	return col;
 }

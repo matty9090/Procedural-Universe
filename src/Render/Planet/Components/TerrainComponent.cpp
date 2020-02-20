@@ -85,7 +85,16 @@ void CTerrainComponent<HeightFunc>::Update(float dt)
 template <class HeightFunc>
 void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj)
 {
-    RenderPipeline& pipeline = HasAtmosphere ? TerrainSpacePipeline : TerrainPipeline;
+    bool inAtm = false;
+
+    if (HasAtmosphere)
+    {
+        auto camHeight = (Planet->Camera.GetPosition() - Planet->GetPosition()).Length();
+        auto atmRadius = Planet->Radius * 1.025f;
+        inAtm = camHeight < atmRadius;
+    }
+
+    RenderPipeline& pipeline = HasAtmosphere ? (inAtm ? TerrainAtmPipeline : TerrainSpacePipeline) : TerrainPipeline;
     
     pipeline.SetState(Planet->GetContext(), [&]() {
         Planet->GetContext()->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);

@@ -39,7 +39,7 @@ void CAtmosphereComponent::Render(DirectX::SimpleMath::Matrix viewProj)
     Planet->GetContext()->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
     Planet->GetContext()->VSSetConstantBuffers(1, 1, Buffer.GetBuffer());
     Planet->GetContext()->PSSetConstantBuffers(1, 1, Buffer.GetBuffer());
-
+    
     auto camHeight = (Planet->Camera.GetPosition() - Planet->GetPosition()).Length();
     auto atmRadius = Planet->Radius * 1.025f;
 

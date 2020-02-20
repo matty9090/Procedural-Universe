@@ -210,6 +210,57 @@ void scatterSkyFromAtmosphere(float3 pos) {
 	T0 = v3CameraPos - v3Pos;
 }
 
+void scatterGroundFromAtmosphere(float3 pos) {
+	// Get the ray from the camera to the vertex and its length (which
+	// is the far point of the ray passing through the atmosphere)
+	float3 v3Pos = pos;
+	float3 v3Ray = v3Pos - v3CameraPos;
+	float fFar = length(v3Ray);
+	v3Ray /= fFar;
+	float len = length(v3Pos);
+
+	// Calculate the ray's start and end positions in the atmosphere,
+	// then calculate its scattering offset
+
+	float3 v3Start = v3CameraPos;
+	float fDepth = exp((fInnerRadius - fCameraHeight) / fScaleDepth);
+    float fCameraAngle = dot(-v3Ray, v3Pos) / len;
+    float fLightAngle = dot(v3LightPos, v3Pos) / len;
+	
+	float fCameraScale = scale(fCameraAngle);
+    float fLightScale = scale(fLightAngle);
+    float fCameraOffset = fDepth*fCameraScale;
+    float fTemp = (fLightScale + fCameraScale);
+	
+	const int fSamples = 2;
+
+	// Initialize the scattering loop variables
+	float fSampleLength = fFar / fSamples;
+    float fScaledLength = fSampleLength * fScale;
+	
+    float3 v3SampleRay = v3Ray * fSampleLength;
+    float3 v3SamplePoint = v3Start + v3SampleRay * 0.5;
+
+	// Now loop through the sample points
+
+	float3 v3FrontColor = float3(0.0, 0.0, 0.0);
+	float3 v3Attenuate;
+
+	for (int i = 0; i < fSamples; i++) {
+		float fHeight = length(v3SamplePoint);
+        float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fHeight));
+        float fScatter = fDepth*fTemp - fCameraOffset;
+        
+		v3Attenuate = exp(-fScatter * (v3InvWavelength * fKr4PI + fKm4PI));
+        v3FrontColor += v3Attenuate * (fDepth * fScaledLength);
+        v3SamplePoint += v3SampleRay;
+
+	}
+	
+	PrimaryColour = clamp(v3FrontColor, 0.0, 3.0) * (v3InvWavelength * fKrESun + fKmESun);
+    SecondaryColour = clamp(v3Attenuate, 0.0, 3.0);
+}
+
 float3 getScatterColour(float3 c1, float3 c2, float3 t0) {
 	float fCos = dot(v3LightPos, t0) / length(t0);
 	float fCos2 = fCos * fCos;
