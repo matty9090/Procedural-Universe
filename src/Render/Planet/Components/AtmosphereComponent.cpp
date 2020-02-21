@@ -71,7 +71,7 @@ ScatterBuffer CAtmosphereComponent::GetScatterBuffer()
     buffer.fScaleDepth = scaleDepth;
     buffer.fScaleOverScaleDepth = scale / scaleDepth;
     buffer.v3CameraPos = camPos;
-    buffer.v3LightPos = DirectX::SimpleMath::Vector3(0.0f, 0.5f, -0.5f);
+    buffer.v3LightPos = Planet->LightSource;
     buffer.fCameraHeight = camHeight;
     buffer.fCameraHeight2 = camHeight * camHeight;
     buffer.v3InvWavelength  = wavelength;

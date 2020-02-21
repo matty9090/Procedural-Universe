@@ -17,6 +17,7 @@ struct VS_Input
 struct VS_Output
 {
     float4 Position : SV_POSITION;
+	float3 WorldPos : POSITION;
     float3 Normal : NORMAL;
     float2 UV : TEXCOORD;
 	float4 Colour1	: COLOR0;
@@ -30,7 +31,8 @@ void main(in VS_Input v_in, out VS_Output v_out)
 	scatterGroundFromAtmosphere(pos);
 	
     v_out.Position = mul(float4(v_in.Position, 1.0f), WorldViewProj);
-    v_out.Normal = v_in.Normal;
+	v_out.WorldPos = pos;
+    v_out.Normal = normalize(v_in.Normal);
     v_out.UV = v_in.UV;
     v_out.Colour1 = float4(PrimaryColour, 0.0f);
     v_out.Colour2 = float4(SecondaryColour, 0.0f);

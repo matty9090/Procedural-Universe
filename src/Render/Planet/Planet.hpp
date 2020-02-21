@@ -11,6 +11,7 @@
 
 #include "Render/DX/RenderCommon.hpp"
 #include "Render/Cameras/Camera.hpp"
+#include "Render/Model/Model.hpp"
 
 #include "Misc/FastNoise.hpp"
 #include "Components/PlanetComponent.hpp"
@@ -19,19 +20,20 @@ class TerrainHeightFunc
 {
 public:
     TerrainHeightFunc();
-    float operator()(DirectX::SimpleMath::Vector3 normal);
+
+    float operator()(DirectX::SimpleMath::Vector3 normal, int depth = 0);
 
     std::wstring PixelShader = L"shaders/Planet/Planet";
 
 private:
     FastNoise Noise;
-    const float Amplitude = 1.0f;
+    const float Amplitude = 4.0f;
 };
 
 class WaterHeightFunc
 {
 public:
-    float operator()(DirectX::SimpleMath::Vector3 normal);
+    float operator()(DirectX::SimpleMath::Vector3 normal, int depth = 0);
 
     std::wstring PixelShader = L"shaders/Planet/PlanetWater";
 };
@@ -42,10 +44,12 @@ public:
     CPlanet(ID3D11DeviceContext* context, ICamera& cam);
     ~CPlanet();
 
+    void Seed(uint64_t seed);
     void Update(float dt);
-    void Render();
+    void Render(float scale = 1.0f);
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float s);
+    void SetScale(float s);
     void SetPosition(DirectX::SimpleMath::Vector3 p);
     
     template <class Component>
@@ -62,6 +66,8 @@ public:
     ICamera& Camera;
     float Radius = 200.0f;
     float SplitDistance = 720.0f;
+
+    DirectX::SimpleMath::Vector3 LightSource;
     DirectX::SimpleMath::Matrix World;
 
     static bool Wireframe;

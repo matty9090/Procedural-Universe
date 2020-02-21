@@ -19,6 +19,8 @@ public:
     Vector3 GetClosestObject(Vector3 pos) override;
     size_t GetClosestObjectIndex() const override { return CurrentClosestObjectID; }
 
+    Vector3 GetLightDirection() const;
+
 private:
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
     void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f, bool single = false);

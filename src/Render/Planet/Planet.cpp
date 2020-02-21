@@ -12,15 +12,15 @@ bool CPlanet::Wireframe = false;
 TerrainHeightFunc::TerrainHeightFunc()
 {
     Noise.SetFrequency(1.0f);
-    Noise.SetFractalOctaves(6);
+    Noise.SetFractalOctaves(10);
 }
 
-float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal)
+float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int depth)
 {
     return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * Amplitude;
 }
 
-float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal)
+float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int depth)
 {
     return 0.0f;
 }
@@ -32,8 +32,8 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera& cam)
     Context->GetDevice(&Device);
 
     World = DirectX::SimpleMath::Matrix::Identity;
-
-    Components.push_back(std::make_unique<CAtmosphereComponent>(this, 100.0f));
+    
+    //Components.push_back(std::make_unique<CAtmosphereComponent>(this, 100.0f));
     Components.push_back(std::make_unique<CTerrainComponent<TerrainHeightFunc>>(this));
     Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this));
 }
@@ -43,14 +43,26 @@ CPlanet::~CPlanet()
     
 }
 
+void CPlanet::Seed(uint64_t seed)
+{
+
+}
+
 void CPlanet::Update(float dt)
 {
     for (auto& component : Components)
         component->Update(dt);
 }
 
-void CPlanet::Render()
+void CPlanet::Render(float scale)
 {
+    /*Matrix view = Camera.GetViewMatrix();
+    Matrix viewProj = view * Camera.GetProjectionMatrix();
+
+    view = view.Invert();
+    view *= Matrix::CreateScale(scale);
+    view = view.Invert();*/
+
     for (auto& component : Components)
         component->Render(Camera.GetViewMatrix() * Camera.GetProjectionMatrix());
 }
@@ -64,6 +76,12 @@ void CPlanet::Move(DirectX::SimpleMath::Vector3 v)
 void CPlanet::Scale(float s)
 {
     PlanetScale *= s;
+    UpdateMatrix();
+}
+
+void CPlanet::SetScale(float s)
+{
+    PlanetScale = s;
     UpdateMatrix();
 }
 

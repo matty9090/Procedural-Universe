@@ -9,6 +9,7 @@ CTerrainNode<HeightFunc>::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQ
     : Quadtree(quad, parent),
       Planet(planet),
       Buffer(planet->GetDevice()),
+      PSBuffer(planet->GetDevice()),
       Diameter(Bounds.size * Planet->Radius)
 {
     for (size_t child = 0; child < 4; ++child) {
@@ -68,18 +69,37 @@ void CTerrainNode<HeightFunc>::Generate()
                 Vector3 normal = pos;
                 normal.Normalize();
 
-                float height = GetHeight(normal);
+                float height = GetHeight(normal, Depth);
                 Vector3 finalPos = pos * Planet->Radius + normal * height;
 
                 vertex.Position = finalPos;
-                vertex.Normal = normal;
+                vertex.Normal = Vector3::Zero;
+                vertex.UV = Vector2(xx, yy);
             }
+
+            if (x == 0)             Edges[West].push_back(k);
+            if (x >= gridsize - 1)  Edges[East].push_back(k);
+            if (y == 0)             Edges[North].push_back(k);
+            if (y >= gridsize - 1)  Edges[South].push_back(k);
 
             Vertices.push_back(vertex);
         }
     }
 
     Indices = CTerrainComponent<HeightFunc>::IndexPerm[0];
+
+    for (size_t i = 0; i < Indices.size(); i += 3)
+    {
+        Vector3 p1 = Vertices[Indices[i + 0]].Position;
+        Vector3 p2 = Vertices[Indices[i + 1]].Position;
+        Vector3 p3 = Vertices[Indices[i + 2]].Position;
+
+        Vector3 n = (p3 - p1).Cross(p2 - p1);
+
+        Vertices[Indices[i + 0]].Normal += n;
+        Vertices[Indices[i + 1]].Normal += n;
+        Vertices[Indices[i + 2]].Normal += n;
+    }
 
     D3D11_BUFFER_DESC desc;
     desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -133,6 +153,11 @@ void CTerrainNode<HeightFunc>::FixEdges()
     int perm = d0 | d1 | d2 | d3;
     Indices = CTerrainComponent<HeightFunc>::IndexPerm[perm];
 
+    FixEdge(North, neighbours[North], neighbours[North]->GetEdge(South), d0);
+    FixEdge(East,  neighbours[East],  neighbours[East]->GetEdge(West),   d1);
+    FixEdge(South, neighbours[South], neighbours[South]->GetEdge(North), d2);
+    FixEdge(West,  neighbours[West],  neighbours[West]->GetEdge(East),   d3);
+
     D3D11_BUFFER_DESC desc;
     desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
     desc.Usage = D3D11_USAGE_DEFAULT;
@@ -144,6 +169,18 @@ void CTerrainNode<HeightFunc>::FixEdges()
     data.pSysMem = Indices.data();
 
     Planet->GetDevice()->CreateBuffer(&desc, &data, IndexBuffer.ReleaseAndGetAddressOf());
+}
+
+template<class HeightFunc>
+void CTerrainNode<HeightFunc>::FixEdge(EDir dir, CTerrainNode* neighbour, std::vector<UINT> edge, int depth)
+{
+    if (Depth - depth == 0)
+    {
+        for (UINT i = 0; i < CTerrainComponent<HeightFunc>::GridSize; ++i)
+        {
+            //Vertices[Edges[dir][i]].Normal = neighbour->GetVertex(edge[i]).Normal;
+        }
+    }
 }
 
 template <class HeightFunc>
@@ -182,7 +219,9 @@ void CTerrainNode<HeightFunc>::Render(Matrix viewProj)
     {
         auto context = Planet->GetContext();
         auto w = Planet->World * World;
+
         Buffer.SetData(context, { w * viewProj, w });
+        PSBuffer.SetData(context, { Planet->LightSource });
 
         UINT offset = 0;
         UINT stride = sizeof(TerrainVertex);
@@ -190,6 +229,7 @@ void CTerrainNode<HeightFunc>::Render(Matrix viewProj)
         context->IASetVertexBuffers(0, 1, VertexBuffer.GetAddressOf(), &stride, &offset);
         context->IASetIndexBuffer(IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
         context->VSSetConstantBuffers(0, 1, Buffer.GetBuffer());
+        context->PSSetConstantBuffers(0, 1, PSBuffer.GetBuffer());
         context->DrawIndexed(static_cast<UINT>(Indices.size()), 0, 0);
     }
     else

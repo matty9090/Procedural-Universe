@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <vector>
 #include <d3d11.h>
 #include <SimpleMath.h>
@@ -15,6 +16,12 @@ struct TerrainBuffer
 {
     Matrix WorldViewProj;
     Matrix World;
+};
+
+struct TerrainPSBuffer
+{
+	Vector3 LightDir;
+	float Custom;
 };
 
 struct TerrainVertex
@@ -34,6 +41,7 @@ class CTerrainNode : public Quadtree<CTerrainNode<HeightFunc>>
 		void Update(float dt);
 		void Render(Matrix viewProj);
 
+		std::vector<UINT> GetEdge(EDir dir) { return Edges[dir]; }
 		TerrainVertex GetVertex(int index) const { return Vertices[index]; }
 
         Matrix World;
@@ -44,6 +52,7 @@ class CTerrainNode : public Quadtree<CTerrainNode<HeightFunc>>
 	private:
 		void NotifyNeighbours();
 		void FixEdges();
+		void FixEdge(EDir dir, CTerrainNode* neighbour, std::vector<UINT> edge, int depth);
 
 		void SplitFunction() override;
 		void MergeFunction() override;
@@ -55,10 +64,13 @@ class CTerrainNode : public Quadtree<CTerrainNode<HeightFunc>>
 
         std::vector<TerrainVertex> Vertices;
         std::vector<UINT> Indices;
+		std::map<EDir, std::vector<UINT>> Edges;
 
 		bool Visible = true;
 		HeightFunc GetHeight;
+
         ConstantBuffer<TerrainBuffer> Buffer;
+        ConstantBuffer<TerrainPSBuffer> PSBuffer;
 
         Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
         Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;

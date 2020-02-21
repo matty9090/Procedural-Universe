@@ -68,6 +68,13 @@ Vector3 StarTarget::GetClosestObject(Vector3 pos)
     return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
 }
 
+Vector3 StarTarget::GetLightDirection() const
+{
+    auto pos = Particles[CurrentClosestObjectID].Position;
+    pos.Normalize();
+    return pos;
+}
+
 void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
 {
     Matrix view = Camera->GetViewMatrix();
