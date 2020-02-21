@@ -98,8 +98,7 @@ void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj)
     pipeline.SetState(Planet->GetContext(), [&]() {
         Planet->GetContext()->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
         Planet->GetContext()->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Planet->GetContext()->RSSetState(CommonStates->CullCounterClockwise());
-        //Planet->GetContext()->RSSetState(CommonStates->Wireframe());
+        Planet->GetContext()->RSSetState(Planet->Wireframe ? CommonStates->Wireframe() : CommonStates->CullCounterClockwise());
     });
 
     for (int i = 0; i < 6; ++i)

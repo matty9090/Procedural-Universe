@@ -7,6 +7,8 @@
 #include "Components/TerrainComponent.hpp"
 #include "Components/AtmosphereComponent.hpp"
 
+bool CPlanet::Wireframe = false;
+
 TerrainHeightFunc::TerrainHeightFunc()
 {
     Noise.SetFrequency(1.0f);

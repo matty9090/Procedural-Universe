@@ -106,6 +106,9 @@ void SandboxState::Update(float dt)
     if (Tracker.IsKeyReleased(DirectX::Keyboard::F2))
         PostProcess->UseBloom = !PostProcess->UseBloom;
 
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::F3))
+        CPlanet::Wireframe = !CPlanet::Wireframe;
+
     FloatingOrigin();
     TransitionLogic();
 

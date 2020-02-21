@@ -64,6 +64,8 @@ public:
     float SplitDistance = 720.0f;
     DirectX::SimpleMath::Matrix World;
 
+    static bool Wireframe;
+
 private:
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
