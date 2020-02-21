@@ -61,7 +61,7 @@ public:
     
     ICamera& Camera;
     float Radius = 200.0f;
-    float SplitDistance = 1500.0f;
+    float SplitDistance = 720.0f;
     DirectX::SimpleMath::Matrix World;
 
 private:

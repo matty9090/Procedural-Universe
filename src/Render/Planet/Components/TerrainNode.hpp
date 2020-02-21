@@ -56,6 +56,7 @@ class CTerrainNode : public Quadtree<CTerrainNode<HeightFunc>>
         std::vector<TerrainVertex> Vertices;
         std::vector<UINT> Indices;
 
+		bool Visible = true;
 		HeightFunc GetHeight;
         ConstantBuffer<TerrainBuffer> Buffer;
 

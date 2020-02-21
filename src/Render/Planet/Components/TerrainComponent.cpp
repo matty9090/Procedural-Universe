@@ -5,7 +5,7 @@
 #include <set>
 
 template <class HeightFunc>
-UINT CTerrainComponent<HeightFunc>::GridSize = 21;
+UINT CTerrainComponent<HeightFunc>::GridSize = 25;
 
 template <class HeightFunc>
 std::map<UINT, std::vector<UINT>> CTerrainComponent<HeightFunc>::IndexPerm;
@@ -14,7 +14,6 @@ template <class HeightFunc>
 CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet) : Planet(planet)
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
-
     HasAtmosphere = Planet->HasComponent<CAtmosphereComponent>();
 
     HeightFunc HeightObj;

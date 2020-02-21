@@ -8,7 +8,8 @@ template <class HeightFunc>
 CTerrainNode<HeightFunc>::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad)
     : Quadtree(quad, parent),
       Planet(planet),
-      Buffer(planet->GetDevice())
+      Buffer(planet->GetDevice()),
+      Diameter(Bounds.size * Planet->Radius)
 {
     for (size_t child = 0; child < 4; ++child) {
         ChildNodes[child] = nullptr;
@@ -18,7 +19,6 @@ CTerrainNode<HeightFunc>::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQ
     {
         Depth = Parent->GetDepth() + 1;
         World = Parent->World;
-        Diameter = Bounds.size * Planet->Radius * 2;
         Orientation = Parent->Orientation;
     }
 }
@@ -159,12 +159,25 @@ Vector3 CTerrainNode<HeightFunc>::PointToSphere(Vector3 p)
 template <class HeightFunc>
 void CTerrainNode<HeightFunc>::Update(float dt)
 {
-    Quadtree::Update(dt);
+    auto cam = Planet->Camera.GetPosition();
+    float distance = Vector3::Distance(cam, GetCenterWorld());
+    float height = Vector3::Distance(cam, Planet->GetPosition()) - Planet->Radius;
+    float horizon = sqrtf(height * (2 * Planet->Radius + height));
+
+    Visible = distance - Diameter / 2.0f < horizon;
+
+    if (Visible)
+    {
+        Quadtree::Update(dt);
+    }
 }
 
 template <class HeightFunc>
 void CTerrainNode<HeightFunc>::Render(Matrix viewProj)
 {
+    if (!Visible)
+        return;
+
     if (IsLeaf())
     {
         auto context = Planet->GetContext();
@@ -204,10 +217,10 @@ void CTerrainNode<HeightFunc>::SplitFunction()
         ChildNodes[i] = new CTerrainNode(Planet, this, static_cast<EQuad>(i));
     }
 
-    ChildNodes[NW]->SetBounds(Square{ x    , y    , d });
-    ChildNodes[NE]->SetBounds(Square{ x + d, y    , d });
-    ChildNodes[SE]->SetBounds(Square{ x + d, y + d, d });
-    ChildNodes[SW]->SetBounds(Square{ x    , y + d, d });
+    ChildNodes[NW]->SetBounds(Square { x    , y    , d });
+    ChildNodes[NE]->SetBounds(Square { x + d, y    , d });
+    ChildNodes[SE]->SetBounds(Square { x + d, y + d, d });
+    ChildNodes[SW]->SetBounds(Square { x    , y + d, d });
 
     for (int i = 0; i < 4; ++i)
         ChildNodes[i]->Generate();
@@ -234,10 +247,6 @@ bool CTerrainNode<HeightFunc>::DistanceFunction()
 {
     Vector3 cam = Planet->Camera.GetPosition();
     float distance = Vector3::Distance(cam, GetCenterWorld());
-
-    //float height = Vector3::Distance(cam, Planet->GetTransform().GetLocation()) - Radius * 0.96f;
-    //float horizon = sqrtf(height * (2 * Radius + height));
-    //bool visible = distance - Diameter < horizon;
 
     return Depth < 8 && distance < Bounds.size * Planet->SplitDistance;
 }
