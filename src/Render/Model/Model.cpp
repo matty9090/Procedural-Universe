@@ -38,11 +38,28 @@ void CModel::SetScale(float s)
     UpdateMatrices();
 }
 
-void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline)
+void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix viewProj, const RenderPipeline& pipeline)
 {
-    MatrixBuffer.SetData(context, { World * ViewProj, World });
+    MatrixBuffer.SetData(context, { World * viewProj, World });
 
-    Pipeline.SetState(context, [&]() {
+    pipeline.SetState(context, [&]() {
+        unsigned int offset = 0;
+        unsigned int stride = sizeof(MeshVertex);
+
+        context->IASetVertexBuffers(0, 1, Mesh->VertexBuffer.GetAddressOf(), &stride, &offset);
+        context->IASetIndexBuffer(Mesh->IndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+        context->VSSetConstantBuffers(0, 1, MatrixBuffer.GetBuffer());
+        context->PSSetShaderResources(0, 1, &Texture);
+
+        context->DrawIndexed(Mesh->NumIndices, 0, 0);
+    });
+}
+
+void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix viewProj, DirectX::SimpleMath::Matrix parentWorld, const RenderPipeline& pipeline)
+{
+    MatrixBuffer.SetData(context, { World * parentWorld * viewProj, World * parentWorld });
+
+    pipeline.SetState(context, [&]() {
         unsigned int offset = 0;
         unsigned int stride = sizeof(MeshVertex);
 

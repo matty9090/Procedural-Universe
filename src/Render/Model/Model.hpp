@@ -33,7 +33,8 @@ public:
     void SetScale(float s);
     
     void SetTexture(ID3D11ShaderResourceView* tex) { Texture = tex; }
-    void Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix ViewProj, const RenderPipeline& Pipeline);
+    void Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix viewProj, const RenderPipeline& pipeline);
+    void Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix viewProj, DirectX::SimpleMath::Matrix parentWorld, const RenderPipeline& pipeline);
 
 protected:
     void UpdateMatrices();
