@@ -218,7 +218,7 @@ void CTerrainNode<HeightFunc>::Render(Matrix viewProj)
     if (IsLeaf())
     {
         auto context = Planet->GetContext();
-        auto w = Planet->World * World;
+        auto w = World * Planet->World;
 
         Buffer.SetData(context, { w * viewProj, w });
         PSBuffer.SetData(context, { Planet->LightSource });

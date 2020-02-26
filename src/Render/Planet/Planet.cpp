@@ -3,6 +3,7 @@
 #include <set>
 #include <array>
 #include <algorithm>
+#include <imgui.h>
 
 #include "Components/TerrainComponent.hpp"
 #include "Components/AtmosphereComponent.hpp"
@@ -33,7 +34,7 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera& cam)
 
     World = DirectX::SimpleMath::Matrix::Identity;
     
-    //Components.push_back(std::make_unique<CAtmosphereComponent>(this, 100.0f));
+    Components.push_back(std::make_unique<CAtmosphereComponent>(this));
     Components.push_back(std::make_unique<CTerrainComponent<TerrainHeightFunc>>(this));
     Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this));
 }
@@ -65,6 +66,50 @@ void CPlanet::Render(float scale)
 
     for (auto& component : Components)
         component->Render(Camera.GetViewMatrix() * Camera.GetProjectionMatrix());
+}
+
+void CPlanet::RenderUI()
+{
+    ImGui::SetNextWindowSize(ImVec2(260, Camera.GetSize().y));
+    ImGui::SetNextWindowPos(ImVec2(Camera.GetSize().x, 0), 0, ImVec2(1.0f, 0.0f));
+    ImGui::Begin("Planet", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+    
+    if (ImGui::CollapsingHeader("Planet"))
+    {
+        static bool chkAtm = HasComponent<CAtmosphereComponent>();
+        static bool chkWater = HasComponent<CTerrainComponent<WaterHeightFunc>>();
+
+        /*if (ImGui::Checkbox("Atmosphere", &chkAtm))
+        {
+            if (chkAtm)
+                Components.push_back(std::make_unique<CAtmosphereComponent>(this));
+            else
+                RemoveComponent<CAtmosphereComponent>();
+        }*/
+
+        if (ImGui::Checkbox("Water", &chkWater))
+        {
+            if (chkWater)
+                Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this));
+            else
+                RemoveComponent<CTerrainComponent<WaterHeightFunc>>();
+        }
+
+        if (ImGui::Button("Move forwards"))
+        {
+            Move(Vector3(10.0f, 0.0f, 0.0f));
+        }
+
+        if (ImGui::Button("Move backwards"))
+        {
+            Move(Vector3(-10.0f, 0.0f, 0.0f));
+        }
+    }
+
+    for (auto& component : Components)
+        component->RenderUI();
+
+    ImGui::End();
 }
 
 void CPlanet::Move(DirectX::SimpleMath::Vector3 v)

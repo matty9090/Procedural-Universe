@@ -27,15 +27,16 @@ struct VS_Output
 
 void main(in VS_Input v_in, out VS_Output v_out)
 {
-	float3 pos = mul(float4(v_in.Position, 1.0f), World);
-	scatterGroundFromAtmosphere(pos);
+	float3 objPos = float3(World[3][0], World[3][1], World[3][2]);
+	float3 pos = mul(float4(v_in.Position, 1.0f), World).xyz;
+	scatterGroundFromAtmosphere(pos, objPos);
 	
-    v_out.Position = mul(float4(v_in.Position, 1.0f), WorldViewProj);
-	v_out.WorldPos = pos;
-    v_out.Normal = normalize(v_in.Normal);
-    v_out.UV = v_in.UV;
-    v_out.Colour1 = float4(PrimaryColour, 0.0f);
-    v_out.Colour2 = float4(SecondaryColour, 0.0f);
+    v_out.Position 	= mul(float4(v_in.Position, 1.0f), WorldViewProj);
+	v_out.WorldPos 	= pos;
+    v_out.Normal 	= normalize(v_in.Normal);
+    v_out.UV 		= v_in.UV;
+    v_out.Colour1 	= float4(PrimaryColour, 0.0f);
+    v_out.Colour2 	= float4(SecondaryColour, 0.0f);
 	v_out.Intensity = (dot(v3LightPos, v_in.Normal) + 1.0) * 0.5;
     v_out.Position.z = LogDepthBuffer(v_out.Position.w);
 }

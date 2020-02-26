@@ -41,7 +41,7 @@ void CModel::SetScale(float s)
 void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix viewProj, const RenderPipeline& pipeline)
 {
     MatrixBuffer.SetData(context, { World * viewProj, World });
-
+    
     pipeline.SetState(context, [&]() {
         unsigned int offset = 0;
         unsigned int stride = sizeof(MeshVertex);
@@ -57,7 +57,9 @@ void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix view
 
 void CModel::Draw(ID3D11DeviceContext* context, DirectX::SimpleMath::Matrix viewProj, DirectX::SimpleMath::Matrix parentWorld, const RenderPipeline& pipeline)
 {
-    MatrixBuffer.SetData(context, { World * parentWorld * viewProj, World * parentWorld });
+    auto world = World * parentWorld;
+
+    MatrixBuffer.SetData(context, { world * viewProj, world });
 
     pipeline.SetState(context, [&]() {
         unsigned int offset = 0;

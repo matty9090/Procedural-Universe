@@ -155,6 +155,20 @@ void SandboxState::Render()
     Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
     Context->PSSetSamplers(0, 1, &sampler);
 
+    ImGui_ImplDX11_NewFrame();
+    ImGui_ImplWin32_NewFrame();
+    ImGui::NewFrame();
+
+    if (CurrentTarget->IsTransitioning())
+    {
+        CurrentTarget->RenderUI();
+        CurrentTarget->Child->RenderUI();
+    }
+    else
+    {
+        CurrentTarget->RenderUI();
+    }
+
     if (bShowClosestObject && CurrentTarget->Child != nullptr)
     {
         auto closest = CurrentTarget->GetClosestObject(Camera->GetPosition());
@@ -170,10 +184,6 @@ void SandboxState::Render()
         // Don't show closest if behind the camera
         //if (Camera->GetForward().Dot(closest) > 0.0f)
         {
-            ImGui_ImplDX11_NewFrame();
-            ImGui_ImplWin32_NewFrame();
-            ImGui::NewFrame();
-
             ImGui::SetNextWindowPos(ImVec2(static_cast<float>(Maths::Clamp(x - 200, 10, w - 170)), static_cast<float>(Maths::Clamp(y - 160, 16, h - 110))));
             ImGui::SetNextWindowSize(ImVec2(160, 100));
             ImGui::SetNextWindowBgAlpha(0.5f);
@@ -190,16 +200,20 @@ void SandboxState::Render()
                 ImGui::Text("Transition: %i%%", static_cast<int>(CurrentTransitionT * 100.0f));
 
             ImGui::End();
-
-            ImGui::Render();
-            ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
         }
     }
 
+    ImGui::Render();
+    ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
     auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale));
+    
+    std::ostringstream cam;
+    cam << "Cam: (" << Camera->GetPosition().x << ", " << Camera->GetPosition().y << ", " << Camera->GetPosition().z << ")";
 
     SpriteBatch->Begin();
     Font->DrawString(SpriteBatch.get(), (std::string("Speed: ") + speed).c_str(), Vector3(2.0f, 2.0, 0.0f));
+    Font->DrawString(SpriteBatch.get(), cam.str().c_str(), Vector3(2.0f, 28.0, 0.0f));
     SpriteBatch->End();
 }
 

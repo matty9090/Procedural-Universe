@@ -3,7 +3,7 @@
 
 using namespace std;
 
-#define _DEBUG
+//#define _DEBUG
 
 bool LoadVertexShader(ID3D11Device* device, const wstring& fileName, ID3D11VertexShader** vertexShader, ID3DBlob** shaderCode )
 {

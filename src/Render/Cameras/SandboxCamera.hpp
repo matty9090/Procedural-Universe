@@ -75,6 +75,13 @@ class CSandboxCamera : public ICamera
         DirectX::XMMATRIX GetProjectionMatrix() const { return Proj; }
 
         /**
+         * @brief Get the width and height of the viewport
+         *
+         * @return DirectX::SimpleMath::Vector2
+         */
+        DirectX::SimpleMath::Vector2 GetSize() const;
+
+        /**
          * @brief Get the position of the camera
          * 
          * @return Vector3 

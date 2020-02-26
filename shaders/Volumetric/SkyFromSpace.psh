@@ -5,7 +5,7 @@ struct VS_OUTPUT {
 	float3 Colour1	: COLOR0;
 	float3 Colour2	: COLOR1;
 	float3 T0	    : TEXCOORD0;
-	float  Depth : TEXCOORD1;
+	float  Depth    : TEXCOORD1;
 };
 
 float4 main(VS_OUTPUT v) : SV_Target {

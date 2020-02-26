@@ -13,21 +13,6 @@
 
 class CPlanet;
 
-namespace Constants
-{
-    // Rayleigh scattering constant
-    const float Kr = 0.0025f;
-
-    // Mie scattering constant
-    const float Km = 0.0010f;
-
-    // Atmospheric scattering constant
-    const float Af = -0.990f;
-
-    // Mie phase asymmetry factor
-    const float ESun = 15.0f;
-}
-
 struct ScatterBuffer
 {
     DirectX::SimpleMath::Vector3 v3CameraPos;
@@ -53,15 +38,26 @@ struct ScatterBuffer
 class CAtmosphereComponent : public IPlanetComponent
 {
 public:
-    CAtmosphereComponent(CPlanet* planet, float height);
+    CAtmosphereComponent(CPlanet* planet, float height = 1.025f);
 
     void Update(float dt) final;
     void Render(DirectX::SimpleMath::Matrix viewProj) final;
+    void RenderUI() final;
+
+    float GetRadius() const;
 
 private:
     ScatterBuffer GetScatterBuffer();
 
-    float Height;
+    float Height = 1.025f;
+    float ScaleDepth = 0.25f;
+    DirectX::SimpleMath::Vector3 Colour = { 0.65f, 0.57f, 0.475f };
+
+    float Kr = 0.0025f; // Rayleigh scattering constant
+    float Km = 0.0010f; // Mie scattering constant
+    float Af = -0.990f; // Atmospheric scattering constant
+    float ESun = 15.0f; // Mie phase asymmetry factor
+
     CPlanet* Planet;
     ConstantBuffer<ScatterBuffer> Buffer;
     

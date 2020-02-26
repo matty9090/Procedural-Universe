@@ -1,4 +1,5 @@
 #include "TerrainComponent.hpp"
+#include "AtmosphereComponent.hpp"
 #include "TerrainNode.hpp"
 #include "Render/Planet/Planet.hpp"
 
@@ -89,7 +90,7 @@ void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj)
     if (HasAtmosphere)
     {
         auto camHeight = (Planet->Camera.GetPosition() - Planet->GetPosition()).Length();
-        auto atmRadius = Planet->Radius * 1.025f;
+        auto atmRadius = Planet->GetComponent<CAtmosphereComponent>()->GetRadius();
         inAtm = camHeight < atmRadius;
     }
 

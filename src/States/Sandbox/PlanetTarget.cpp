@@ -7,7 +7,7 @@
 PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Planetary", "N/A", resources, camera, rtv)
 {
-    Scale = 0.0004f;
+    Scale = 0.001f;
     BeginTransitionDist = 10.0f;
     EndTransitionDist = 0.3f;
 
@@ -28,6 +28,11 @@ void PlanetTarget::Render()
     Planet->Render();
 }
 
+void PlanetTarget::RenderUI()
+{
+    Planet->RenderUI();
+}
+
 void PlanetTarget::RenderTransitionChild(float t)
 {
     auto dsv = Resources->GetDepthStencilView();
@@ -37,7 +42,7 @@ void PlanetTarget::RenderTransitionChild(float t)
     //Context->PSSetConstantBuffers(0, 1, PlanetBuffer->GetBuffer());
 
     Planet->Move(ParentLocationSpace);
-    Planet->Render();
+    Planet->Render(Scale);
     Planet->Move(-ParentLocationSpace);
 }
 
@@ -95,7 +100,7 @@ void PlanetTarget::StateIdle(float dt)
     Planet->Update(dt);
 
     float dist = Vector3::Distance(Camera->GetPosition(), Planet->GetPosition()) - Planet->Radius;
-    float t = (dist - 100.0f) / (Planet->Radius * 3.0f);
+    float t = (dist - Planet->Radius * 0.5f) / (Planet->Radius * 3.0f);
 
-    VelocityMultiplier = Maths::Clamp(Maths::Lerp(0.01f, 1.0f, t), 0.01f, 1.0f);
+    VelocityMultiplier = Maths::Clamp(Maths::Lerp(0.02f, 1.0f, t), 0.02f, 1.0f);
 }

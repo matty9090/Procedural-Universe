@@ -30,6 +30,13 @@ static float3 SecondaryColour;
 static float3 T0;
 static float Depth;
 
+float getNearIntersection(float3 v3Pos, float3 v3Ray, float fDistance2, float fRadius2) {
+	float B = 2.0 * dot(v3Pos, v3Ray);
+	float C = fDistance2 - fRadius2;
+	float fDet = max(0.0, B * B - 4.0 * C);
+	return 0.5 * (-B - sqrt(fDet));
+}
+
 // Calculates the Mie phase function
 float getMiePhase(float fCos, float fCos2, float g, float g2) {
 	return 1.5 * ((1.0 - g2) / (2.0 + g2)) * (1.0 + fCos2) / pow(1.0 + g2 - 2.0 * g * fCos, 1.5);
@@ -45,26 +52,26 @@ float scale(float fCos) {
 	return fScaleDepth * exp(-0.00287 + x * (0.459 + x * (3.83 + x * (-6.80 + x * 5.25))));
 }
 
-void scatterSkyFromSpace(float3 pos) {
+void scatterSkyFromSpace(float3 v3Pos, float3 planetPos) {
+	float3 camPos = v3CameraPos - planetPos;
+	v3Pos -= planetPos;
+
 	// Get the ray from the camera to the vertex and its length (which
 	// is the far point of the ray passing through the atmosphere)
-	float3 v3Pos = pos;
-	float3 v3Ray = v3Pos - v3CameraPos;
+
+	float3 v3Ray = v3Pos - camPos;
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
 	
 	// Calculate the closest intersection of the ray with
 	// the outer atmosphere (point A in Figure 16-3)
-
-	float b = 2.0 * dot(v3CameraPos, v3Ray);
-	float c = fCameraHeight2 - fOuterRadius2;
-	float det = max(0.0, b * b - 4.0 * c);
-	float fNear = 0.5 * (-b - sqrt(det));
+	
+	float fNear = getNearIntersection(camPos, v3Ray, fCameraHeight2, fOuterRadius2);
 
 	// Calculate the ray's start and end positions in the atmosphere,
 	// then calculate its scattering offset
 
-	float3 v3Start = v3CameraPos + v3Ray * fNear;
+	float3 v3Start = camPos + v3Ray * fNear;
 	fFar -= fNear;
 	float fStartAngle = dot(v3Ray, v3Start) / fOuterRadius;
 	float fStartDepth = exp(-1.0 / fScaleDepth);
@@ -97,24 +104,26 @@ void scatterSkyFromSpace(float3 pos) {
 		v3SamplePoint += v3SampleRay;
 	}
 	
-	PrimaryColour = v3FrontColor * (v3InvWavelength * fKrESun);
-	SecondaryColour = v3FrontColor * fKmESun;
-	T0 = v3CameraPos - v3Pos;
+	PrimaryColour = saturate(v3FrontColor * (v3InvWavelength * fKrESun));
+	SecondaryColour = saturate(v3FrontColor * fKmESun);
+	T0 = camPos - v3Pos;
 }
 
-void scatterGroundFromSpace(float3 pos) {
+void scatterGroundFromSpace(float3 v3Pos, float3 planetPos) {
+	float3 camPos = v3CameraPos - planetPos;
+	v3Pos -= planetPos;
+
 	// Get the ray from the camera to the vertex and its length (which
 	// is the far point of the ray passing through the atmosphere)
 	
-	float3 v3Pos = pos;
-	float3 v3Ray = v3Pos - v3CameraPos;
+	float3 v3Ray = v3Pos - camPos;
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
 	
 	// Calculate the closest intersection of the ray with
 	// the outer atmosphere (point A in Figure 16-3)
 	
-	float b = 2.0 * dot(v3CameraPos, v3Ray);
+	float b = 2.0 * dot(camPos, v3Ray);
 	float c = fCameraHeight2 - fOuterRadius2;
 	float det = max(0.0, b * b - 4.0 * c);
 	float fNear = 0.5 * (-b - sqrt(det));
@@ -122,7 +131,7 @@ void scatterGroundFromSpace(float3 pos) {
 	// Calculate the ray's start and end positions in the atmosphere,
 	// then calculate its scattering offset
 
-	float3 v3Start = v3CameraPos + v3Ray * fNear;
+	float3 v3Start = camPos + v3Ray * fNear;
 	fFar -= fNear;
 	
 	float fDepth = exp((fInnerRadius - fOuterRadius) / fScaleDepth);
@@ -157,22 +166,25 @@ void scatterGroundFromSpace(float3 pos) {
 		v3SamplePoint += v3SampleRay;
 	}
 	
-	PrimaryColour = v3FrontColor * (v3InvWavelength * fKrESun + fKmESun);
-	SecondaryColour = v3Attenuate;
+	PrimaryColour = saturate(v3FrontColor * (v3InvWavelength * fKrESun + fKmESun));
+	SecondaryColour = saturate(v3Attenuate);
 }
 
-void scatterSkyFromAtmosphere(float3 pos) {
+void scatterSkyFromAtmosphere(float3 v3Pos, float3 planetPos) {
+	float3 camPos = v3CameraPos - planetPos;
+	v3Pos -= planetPos;
+
 	// Get the ray from the camera to the vertex and its length (which
 	// is the far point of the ray passing through the atmosphere)
-	float3 v3Pos = pos;
-	float3 v3Ray = v3Pos - v3CameraPos;
+
+	float3 v3Ray = v3Pos - camPos;
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
 
 	// Calculate the ray's start and end positions in the atmosphere,
 	// then calculate its scattering offset
 
-	float3 v3Start = v3CameraPos;
+	float3 v3Start = camPos;
 	float fHeight = length(v3Start);
 	float fDepth = exp(fScaleOverScaleDepth * (fInnerRadius - fCameraHeight));
 	float fStartAngle = dot(v3Ray, v3Start) / fHeight;
@@ -205,16 +217,19 @@ void scatterSkyFromAtmosphere(float3 pos) {
 	}
 	
 	float sun = 1.0 + 6.50 * exp(-fHeight * fHeight / fOuterRadius * fOuterRadius);
-	PrimaryColour = v3FrontColor * fKmESun;
-	SecondaryColour = v3FrontColor * (v3InvWavelength * fKrESun * sun);
-	T0 = v3CameraPos - v3Pos;
+	PrimaryColour = saturate(v3FrontColor * fKmESun);
+	SecondaryColour = saturate(v3FrontColor * (v3InvWavelength * fKrESun * sun));
+	T0 = camPos - v3Pos;
 }
 
-void scatterGroundFromAtmosphere(float3 pos) {
+void scatterGroundFromAtmosphere(float3 v3Pos, float3 planetPos) {
+	float3 camPos = v3CameraPos - planetPos;
+	v3Pos -= planetPos;
+
 	// Get the ray from the camera to the vertex and its length (which
 	// is the far point of the ray passing through the atmosphere)
-	float3 v3Pos = pos;
-	float3 v3Ray = v3Pos - v3CameraPos;
+
+	float3 v3Ray = v3Pos - camPos;
 	float fFar = length(v3Ray);
 	v3Ray /= fFar;
 	float len = length(v3Pos);
@@ -222,14 +237,14 @@ void scatterGroundFromAtmosphere(float3 pos) {
 	// Calculate the ray's start and end positions in the atmosphere,
 	// then calculate its scattering offset
 
-	float3 v3Start = v3CameraPos;
+	float3 v3Start = camPos;
 	float fDepth = exp((fInnerRadius - fCameraHeight) / fScaleDepth);
     float fCameraAngle = dot(-v3Ray, v3Pos) / len;
     float fLightAngle = dot(v3LightPos, v3Pos) / len;
 	
 	float fCameraScale = scale(fCameraAngle);
     float fLightScale = scale(fLightAngle);
-    float fCameraOffset = fDepth*fCameraScale;
+    float fCameraOffset = fDepth * fCameraScale;
     float fTemp = (fLightScale + fCameraScale);
 	
 	const int fSamples = 2;
@@ -257,8 +272,8 @@ void scatterGroundFromAtmosphere(float3 pos) {
 
 	}
 	
-	PrimaryColour = clamp(v3FrontColor, 0.0, 3.0) * (v3InvWavelength * fKrESun + fKmESun);
-    SecondaryColour = clamp(v3Attenuate, 0.0, 3.0);
+	PrimaryColour = saturate(clamp(v3FrontColor, 0.0, 3.0) * (v3InvWavelength * fKrESun + fKmESun));
+    SecondaryColour = saturate(clamp(v3Attenuate, 0.0, 3.0));
 }
 
 float3 getScatterColour(float3 c1, float3 c2, float3 t0) {

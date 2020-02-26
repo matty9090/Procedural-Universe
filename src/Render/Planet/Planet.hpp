@@ -27,7 +27,7 @@ public:
 
 private:
     FastNoise Noise;
-    const float Amplitude = 4.0f;
+    const float Amplitude = 1.0f;
 };
 
 class WaterHeightFunc
@@ -47,6 +47,7 @@ public:
     void Seed(uint64_t seed);
     void Update(float dt);
     void Render(float scale = 1.0f);
+    void RenderUI();
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float s);
     void SetScale(float s);
@@ -54,6 +55,12 @@ public:
     
     template <class Component>
     bool HasComponent();
+
+    template <class Component>
+    Component* GetComponent();
+
+    template <class Component>
+    void RemoveComponent();
     
     float GetScale() const { return PlanetScale; }
     float GetHeight(DirectX::SimpleMath::Vector3 normal);
@@ -64,8 +71,8 @@ public:
     ID3D11DeviceContext* GetContext() const { return Context; }
     
     ICamera& Camera;
-    float Radius = 200.0f;
-    float SplitDistance = 720.0f;
+    float Radius = 50.0f;
+    float SplitDistance = 200.0f;
 
     DirectX::SimpleMath::Vector3 LightSource;
     DirectX::SimpleMath::Matrix World;
@@ -96,4 +103,26 @@ bool CPlanet::HasComponent()
     }
 
     return false;
+}
+
+template <class Component>
+Component* CPlanet::GetComponent()
+{
+    for (const auto& component : Components)
+    {
+        if (typeid(*component) == typeid(Component))
+        {
+            return static_cast<Component*>(component.get());
+        }
+    }
+
+    return nullptr;
+}
+
+template <class Component>
+void CPlanet::RemoveComponent()
+{
+    Components.remove_if([](const std::unique_ptr<IPlanetComponent>& component) {
+        return typeid(*component) == typeid(Component);
+    });
 }

@@ -20,9 +20,10 @@ struct VS_INPUT {
 
 VS_OUTPUT main(VS_INPUT v_in) {
 	VS_OUTPUT Output;
-
+	
+	float3 objPos = float3(World[3][0], World[3][1], World[3][2]);
 	float3 pos = mul(float4(v_in.vPosition, 1.0f), World);
-	scatterSkyFromSpace(pos);
+	scatterSkyFromSpace(pos, objPos);
 
 	Output.Position = mul(float4(v_in.vPosition, 1.0f), WorldViewProj);
 	Output.Colour1 = PrimaryColour;

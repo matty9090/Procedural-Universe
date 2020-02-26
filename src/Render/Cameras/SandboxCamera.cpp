@@ -28,46 +28,49 @@ void CSandboxCamera::Update(float dt)
 
 void CSandboxCamera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, DirectX::Keyboard::State kb, float dt)
 {
-    if (ms.positionMode == Mouse::MODE_RELATIVE)
+    if ((ms.positionMode == Mouse::MODE_ABSOLUTE && ms.x < Width - 260) || ms.positionMode == Mouse::MODE_RELATIVE)
     {
-        Vector3 delta = Vector3(static_cast<float>(ms.x), static_cast<float>(ms.y), 0.0f) * 0.007f;
-        
-        Pitch -= delta.y;
-        Yaw -= delta.x;
+        if (ms.positionMode == Mouse::MODE_RELATIVE)
+        {
+            Vector3 delta = Vector3(static_cast<float>(ms.x), static_cast<float>(ms.y), 0.0f) * 0.007f;
 
-        float limit = XM_PI / 2.0f - 0.01f;
-        Pitch = (std::max)(-limit, Pitch);
-        Pitch = (std::min)(+limit, Pitch);
+            Pitch -= delta.y;
+            Yaw -= delta.x;
 
-        if (Yaw > XM_PI)
-            Yaw -= XM_PI * 2.0f;
-        else if (Yaw < -XM_PI)
-            Yaw += XM_PI * 2.0f;
+            float limit = XM_PI / 2.0f - 0.01f;
+            Pitch = (std::max)(-limit, Pitch);
+            Pitch = (std::min)(+limit, Pitch);
+
+            if (Yaw > XM_PI)
+                Yaw -= XM_PI * 2.0f;
+            else if (Yaw < -XM_PI)
+                Yaw += XM_PI * 2.0f;
+        }
+        else
+        {
+            double t = -1.0f * ((static_cast<double>(-ms.scrollWheelValue) / 8000.0) - 1.0f);
+            t *= t * t * t;
+
+            Speed = (std::max)(InitialSpeed * static_cast<float>(t), 0.0f);
+        }
+
+        mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
+
+        Vector3 move = Vector3::Zero;
+
+        if (kb.W) move.z += 1.0f;
+        if (kb.S) move.z -= 1.0f;
+        if (kb.A) move.x += 1.0f;
+        if (kb.D) move.x -= 1.0f;
+        if (kb.Q) Roll -= 2.0f * dt;
+        if (kb.E) Roll += 2.0f * dt;
+
+        Quaternion q = Quaternion::CreateFromYawPitchRoll(Yaw, -Pitch, 0.0f);
+        move = Vector3::Transform(move, q);
+        move *= dt * Speed * VelocityScale;
+
+        Position += move;
     }
-    else
-    {
-        double t = -1.0f * ((static_cast<double>(-ms.scrollWheelValue) / 8000.0) - 1.0f);
-        t *= t * t * t;
-
-        Speed = (std::max)(InitialSpeed * static_cast<float>(t), 0.0f);
-    }
-
-    mouse->SetMode(ms.leftButton ? Mouse::MODE_RELATIVE : Mouse::MODE_ABSOLUTE);
-
-    Vector3 move = Vector3::Zero;
-
-    if (kb.W) move.z += 1.0f;
-    if (kb.S) move.z -= 1.0f;
-    if (kb.A) move.x += 1.0f;
-    if (kb.D) move.x -= 1.0f;
-    if (kb.Q) Roll   -= 2.0f * dt;
-    if (kb.E) Roll   += 2.0f * dt;
-
-    Quaternion q = Quaternion::CreateFromYawPitchRoll(Yaw, -Pitch, 0.0f);
-    move = Vector3::Transform(move, q);
-    move *= dt * Speed * VelocityScale;
-    
-    Position += move;
 }
 
 void CSandboxCamera::SetPosition(Vector3 p)
@@ -91,6 +94,11 @@ std::string CSandboxCamera::ToString()
 DirectX::XMMATRIX CSandboxCamera::GetViewMatrix() const
 {
     return View;
+}
+
+DirectX::SimpleMath::Vector2 CSandboxCamera::GetSize() const
+{
+    return DirectX::SimpleMath::Vector2(static_cast<float>(Width), static_cast<float>(Height));
 }
 
 bool CSandboxCamera::PixelFromWorldPoint(Vector3 worldPt, int& x, int& y)
