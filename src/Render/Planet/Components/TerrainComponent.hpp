@@ -10,7 +10,9 @@
 #include "PlanetComponent.hpp"
 
 class CPlanet;
-template <class HeightFunc> class CTerrainNode;
+
+template <class HeightFunc>
+class CTerrainNode;
 
 enum class EFace
 {
@@ -36,6 +38,7 @@ public:
     void Init() final;
     void Update(float dt) final;
     void Render(DirectX::SimpleMath::Matrix viewProj) final;
+    void RenderUI() final;
 
     enum EPermutations
     {
@@ -48,9 +51,12 @@ public:
     static UINT GridSize;
     static std::map<UINT, std::vector<UINT>> IndexPerm;
 
+    HeightFunc HeightObject;
+
 private:
     CPlanet* Planet;
 
+    bool Dirty = false;
     bool HasAtmosphere = false;
 
     union
@@ -64,6 +70,7 @@ private:
         };
     };
 
+    std::string Name;
     std::array<FTerrainNode*, 6> Nodes;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 

@@ -12,8 +12,36 @@ bool CPlanet::Wireframe = false;
 
 TerrainHeightFunc::TerrainHeightFunc()
 {
-    Noise.SetFrequency(1.0f);
-    Noise.SetFractalOctaves(10);
+    Noise.SetFrequency(Frequency);
+    Noise.SetFractalGain(Gain);
+    Noise.SetFractalOctaves(Octaves);
+}
+
+bool TerrainHeightFunc::RenderUI()
+{
+    bool dirty = false;
+
+    dirty |= ImGui::SliderFloat("Amplitude", &Amplitude, 0.04f, 1.2f);
+
+    if (ImGui::SliderFloat("Frequency", &Frequency, 0.1f, 4.0f))
+    {
+        Noise.SetFrequency(Frequency);
+        dirty |= true;
+    }
+
+    if (ImGui::SliderFloat("Gain", &Gain, 0.3f, 0.8f))
+    {
+        Noise.SetFractalGain(Gain);
+        dirty |= true;
+    }
+
+    if (ImGui::SliderInt("Octaves", &Octaves, 0, 20))
+    {
+        Noise.SetFractalOctaves(Octaves);
+        dirty |= true;
+    }
+
+    return dirty;
 }
 
 float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int depth)
@@ -21,9 +49,14 @@ float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int dep
     return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * Amplitude;
 }
 
+bool WaterHeightFunc::RenderUI()
+{
+    return ImGui::SliderFloat("Water level", &Height, -0.5f, 0.9f);
+}
+
 float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int depth)
 {
-    return 0.0f;
+    return Height;
 }
 
 CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera& cam)
@@ -57,13 +90,6 @@ void CPlanet::Update(float dt)
 
 void CPlanet::Render(float scale)
 {
-    /*Matrix view = Camera.GetViewMatrix();
-    Matrix viewProj = view * Camera.GetProjectionMatrix();
-
-    view = view.Invert();
-    view *= Matrix::CreateScale(scale);
-    view = view.Invert();*/
-
     for (auto& component : Components)
         component->Render(Camera.GetViewMatrix() * Camera.GetProjectionMatrix());
 }

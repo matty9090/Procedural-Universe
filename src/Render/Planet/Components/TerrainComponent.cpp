@@ -1,9 +1,11 @@
 #include "TerrainComponent.hpp"
+#include "TerrainComponent.hpp"
 #include "AtmosphereComponent.hpp"
 #include "TerrainNode.hpp"
 #include "Render/Planet/Planet.hpp"
 
 #include <set>
+#include <type_traits>
 
 template <class HeightFunc>
 UINT CTerrainComponent<HeightFunc>::GridSize = 25;
@@ -14,28 +16,14 @@ std::map<UINT, std::vector<UINT>> CTerrainComponent<HeightFunc>::IndexPerm;
 template <class HeightFunc>
 CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet) : Planet(planet)
 {
+    std::string className = typeid(HeightFunc).name();
+    className = className.substr(6);
+
+    Name = "Terrain (";
+    Name += className;
+    Name += ")";
+
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
-
-    for (int i = 0; i < 6; ++i)
-    {
-        DirectX::SimpleMath::Vector3 o = Orientations[(EFace)i] * DirectX::XM_PI / 180.0f;
-        Nodes[i] = new FTerrainNode(Planet, nullptr);
-        Nodes[i]->Orientation = Quaternion::CreateFromYawPitchRoll(o.y, o.x, o.z);
-        Nodes[i]->World = Matrix::Identity;
-    }
-
-    for (int f = 0; f < 6; ++f)
-    {
-        for (int i = 0; i < 4; ++i)
-        {
-            Nodes[f]->RootNeighbourList.push_back(Nodes[(int)Neighbours[(EFace)f][i]]);
-        }
-    }
-
-    for (int i = 0; i < 6; ++i)
-    {
-        Nodes[i]->Generate();
-    }
 }
 
 template <class HeightFunc>
@@ -76,11 +64,41 @@ void CTerrainComponent<HeightFunc>::Init()
         TerrainPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
         TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     }
+
+    for (int i = 0; i < 6; ++i)
+    {
+        DirectX::SimpleMath::Vector3 o = Orientations[(EFace)i] * DirectX::XM_PI / 180.0f;
+        Nodes[i] = new FTerrainNode(Planet, this, nullptr);
+        Nodes[i]->Orientation = Quaternion::CreateFromYawPitchRoll(o.y, o.x, o.z);
+        Nodes[i]->World = Matrix::Identity;
+    }
+
+    for (int f = 0; f < 6; ++f)
+    {
+        for (int i = 0; i < 4; ++i)
+        {
+            Nodes[f]->RootNeighbourList.push_back(Nodes[(int)Neighbours[(EFace)f][i]]);
+        }
+    }
+
+    for (int i = 0; i < 6; ++i)
+    {
+        Nodes[i]->Generate();
+    }
 }
 
 template <class HeightFunc>
 void CTerrainComponent<HeightFunc>::Update(float dt)
 {
+    if (Dirty)
+    {
+        for (int i = 0; i < 6; ++i)
+            delete Nodes[i];
+
+        Init();
+        Dirty = false;
+    }
+
     for (int i = 0; i < 6; ++i)
     {
         Nodes[i]->Update(dt);
@@ -110,6 +128,15 @@ void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj)
     for (int i = 0; i < 6; ++i)
     {
         Nodes[i]->Render(viewProj);
+    }
+}
+
+template<class HeightFunc>
+void CTerrainComponent<HeightFunc>::RenderUI()
+{
+    if (ImGui::CollapsingHeader(Name.c_str()))
+    {
+        Dirty = HeightObject.RenderUI();
     }
 }
 

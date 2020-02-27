@@ -5,9 +5,10 @@
 #include "Render/Planet/Components/TerrainComponent.hpp"
 
 template <class HeightFunc>
-CTerrainNode<HeightFunc>::CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad)
+CTerrainNode<HeightFunc>::CTerrainNode(CPlanet* planet, CTerrainComponent<HeightFunc>* terrain, CTerrainNode* parent, EQuad quad)
     : Quadtree(quad, parent),
       Planet(planet),
+      Terrain(terrain),
       Buffer(planet->GetDevice()),
       PSBuffer(planet->GetDevice()),
       Diameter(Bounds.size * Planet->Radius)
@@ -69,7 +70,7 @@ void CTerrainNode<HeightFunc>::Generate()
                 Vector3 normal = pos;
                 normal.Normalize();
 
-                float height = GetHeight(normal, Depth);
+                float height = Terrain->HeightObject(normal, Depth);
                 Vector3 finalPos = pos * Planet->Radius + normal * height;
 
                 vertex.Position = finalPos;
@@ -254,7 +255,7 @@ void CTerrainNode<HeightFunc>::SplitFunction()
 
     for (int i = 0; i < 4; ++i)
     {
-        ChildNodes[i] = new CTerrainNode(Planet, this, static_cast<EQuad>(i));
+        ChildNodes[i] = new CTerrainNode(Planet, Terrain, this, static_cast<EQuad>(i));
     }
 
     ChildNodes[NW]->SetBounds(Square { x    , y    , d });

@@ -35,7 +35,7 @@ template <class HeightFunc>
 class CTerrainNode : public Quadtree<CTerrainNode<HeightFunc>>
 {
 	public:
-		CTerrainNode(CPlanet* planet, CTerrainNode* parent, EQuad quad = (EQuad)0);
+		CTerrainNode(CPlanet* planet, CTerrainComponent<HeightFunc>* terrain, CTerrainNode* parent, EQuad quad = (EQuad)0);
 
         void Generate();
 		void Update(float dt);
@@ -46,7 +46,9 @@ class CTerrainNode : public Quadtree<CTerrainNode<HeightFunc>>
 
         Matrix World;
 		CPlanet* Planet;
+		CTerrainComponent<HeightFunc>* Terrain;
 		Quaternion Orientation;
+
 		float Diameter = 0.0f;
 
 	private:
@@ -67,7 +69,6 @@ class CTerrainNode : public Quadtree<CTerrainNode<HeightFunc>>
 		std::map<EDir, std::vector<UINT>> Edges;
 
 		bool Visible = true;
-		HeightFunc GetHeight;
 
         ConstantBuffer<TerrainBuffer> Buffer;
         ConstantBuffer<TerrainPSBuffer> PSBuffer;

@@ -21,22 +21,30 @@ class TerrainHeightFunc
 public:
     TerrainHeightFunc();
 
+    bool RenderUI();
     float operator()(DirectX::SimpleMath::Vector3 normal, int depth = 0);
 
     std::wstring PixelShader = L"shaders/Planet/Planet";
 
 private:
     FastNoise Noise;
+
+    int Octaves = 10;
     float Amplitude = 1.0f;
+    float Gain = 0.5f;
+    float Frequency = 1.0f;
 };
 
 class WaterHeightFunc
 {
 public:
+    bool RenderUI();
     float operator()(DirectX::SimpleMath::Vector3 normal, int depth = 0);
 
-    float Height = 0.0f;
     std::wstring PixelShader = L"shaders/Planet/PlanetWater";
+
+private:
+    float Height = 0.0f;
 };
 
 class CPlanet
