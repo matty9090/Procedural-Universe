@@ -33,6 +33,7 @@ public:
 
     static void GeneratePermutations();
 
+    void Init() final;
     void Update(float dt) final;
     void Render(DirectX::SimpleMath::Matrix viewProj) final;
 

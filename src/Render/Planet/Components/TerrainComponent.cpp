@@ -15,32 +15,6 @@ template <class HeightFunc>
 CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet) : Planet(planet)
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
-    HasAtmosphere = Planet->HasComponent<CAtmosphereComponent>();
-
-    HeightFunc HeightObj;
-
-    if (HasAtmosphere)
-    {
-        new(&TerrainAtmPipeline) RenderPipeline;
-        TerrainAtmPipeline.LoadVertex(L"Shaders/Planet/PlanetFromAtmosphere.vsh");
-        TerrainAtmPipeline.LoadPixel(HeightObj.PixelShader + L"FromAtmosphere.psh");
-        TerrainAtmPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
-        TerrainAtmPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-        
-        new(&TerrainSpacePipeline) RenderPipeline;
-        TerrainSpacePipeline.LoadVertex(L"Shaders/Planet/PlanetFromSpace.vsh");
-        TerrainSpacePipeline.LoadPixel(HeightObj.PixelShader + L"FromSpace.psh");
-        TerrainSpacePipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
-        TerrainSpacePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    }
-    else
-    {
-        new(&TerrainPipeline) RenderPipeline;
-        TerrainPipeline.LoadVertex(L"Shaders/Planet/Planet.vsh");
-        TerrainPipeline.LoadPixel(HeightObj.PixelShader + L".psh");
-        TerrainPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
-        TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    }
 
     for (int i = 0; i < 6; ++i)
     {
@@ -70,6 +44,37 @@ CTerrainComponent<HeightFunc>::~CTerrainComponent()
     for (int i = 0; i < 6; ++i)
     {
         delete Nodes[i];
+    }
+}
+
+template<class HeightFunc>
+void CTerrainComponent<HeightFunc>::Init()
+{
+    HasAtmosphere = Planet->HasComponent<CAtmosphereComponent>();
+
+    HeightFunc HeightObj;
+
+    if (HasAtmosphere)
+    {
+        new(&TerrainAtmPipeline) RenderPipeline;
+        TerrainAtmPipeline.LoadVertex(L"Shaders/Planet/PlanetFromAtmosphere.vsh");
+        TerrainAtmPipeline.LoadPixel(HeightObj.PixelShader + L"FromAtmosphere.psh");
+        TerrainAtmPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
+        TerrainAtmPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+        new(&TerrainSpacePipeline) RenderPipeline;
+        TerrainSpacePipeline.LoadVertex(L"Shaders/Planet/PlanetFromSpace.vsh");
+        TerrainSpacePipeline.LoadPixel(HeightObj.PixelShader + L"FromSpace.psh");
+        TerrainSpacePipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
+        TerrainSpacePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    }
+    else
+    {
+        new(&TerrainPipeline) RenderPipeline;
+        TerrainPipeline.LoadVertex(L"Shaders/Planet/Planet.vsh");
+        TerrainPipeline.LoadPixel(HeightObj.PixelShader + L".psh");
+        TerrainPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
+        TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     }
 }
 

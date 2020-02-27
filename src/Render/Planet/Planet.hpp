@@ -27,7 +27,7 @@ public:
 
 private:
     FastNoise Noise;
-    const float Amplitude = 1.0f;
+    float Amplitude = 1.0f;
 };
 
 class WaterHeightFunc
@@ -35,6 +35,7 @@ class WaterHeightFunc
 public:
     float operator()(DirectX::SimpleMath::Vector3 normal, int depth = 0);
 
+    float Height = 0.0f;
     std::wstring PixelShader = L"shaders/Planet/PlanetWater";
 };
 
@@ -58,6 +59,9 @@ public:
 
     template <class Component>
     Component* GetComponent();
+
+    template <class Component, class... Args>
+    void AddComponent(Args... args);
 
     template <class Component>
     void RemoveComponent();
@@ -83,12 +87,14 @@ private:
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
 
+    bool Editable = false;
     float PlanetScale = 1.0f;
     DirectX::SimpleMath::Vector3 Position;
 
     std::list<std::unique_ptr<IPlanetComponent>> Components;
     
     void UpdateMatrix();
+    void RefreshComponents();
 };
 
 template <class Component>
@@ -119,10 +125,22 @@ Component* CPlanet::GetComponent()
     return nullptr;
 }
 
+template <class Component, class... Args>
+void CPlanet::AddComponent(Args... args)
+{
+    auto component = std::make_unique<Component>(std::forward<Args>(args)...);
+    component->Init();
+    Components.push_back(std::move(component));
+
+    RefreshComponents();
+}
+
 template <class Component>
 void CPlanet::RemoveComponent()
 {
     Components.remove_if([](const std::unique_ptr<IPlanetComponent>& component) {
         return typeid(*component) == typeid(Component);
     });
+
+    RefreshComponents();
 }

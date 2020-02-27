@@ -34,9 +34,9 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera& cam)
 
     World = DirectX::SimpleMath::Matrix::Identity;
     
-    Components.push_back(std::make_unique<CAtmosphereComponent>(this));
-    Components.push_back(std::make_unique<CTerrainComponent<TerrainHeightFunc>>(this));
-    Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this));
+    AddComponent<CAtmosphereComponent>(this);
+    AddComponent<CTerrainComponent<TerrainHeightFunc>>(this);
+    AddComponent<CTerrainComponent<WaterHeightFunc>>(this);
 }
 
 CPlanet::~CPlanet()
@@ -76,39 +76,42 @@ void CPlanet::RenderUI()
     
     if (ImGui::CollapsingHeader("Planet"))
     {
-        static bool chkAtm = HasComponent<CAtmosphereComponent>();
-        static bool chkWater = HasComponent<CTerrainComponent<WaterHeightFunc>>();
+        ImGui::Checkbox("Editable", &Editable);
 
-        /*if (ImGui::Checkbox("Atmosphere", &chkAtm))
+        if (Editable)
         {
-            if (chkAtm)
-                Components.push_back(std::make_unique<CAtmosphereComponent>(this));
-            else
-                RemoveComponent<CAtmosphereComponent>();
-        }*/
+            static bool chkTerr = HasComponent<CTerrainComponent<TerrainHeightFunc>>();
 
-        if (ImGui::Checkbox("Water", &chkWater))
-        {
-            if (chkWater)
-                Components.push_back(std::make_unique<CTerrainComponent<WaterHeightFunc>>(this));
-            else
-                RemoveComponent<CTerrainComponent<WaterHeightFunc>>();
-        }
+            if (ImGui::Checkbox("Terrain", &chkTerr))
+            {
+                chkTerr ? AddComponent<CTerrainComponent<TerrainHeightFunc>>(this) : RemoveComponent<CTerrainComponent<TerrainHeightFunc>>();
+            }
 
-        if (ImGui::Button("Move forwards"))
-        {
-            Move(Vector3(10.0f, 0.0f, 0.0f));
-        }
+            static bool chkAtm = HasComponent<CAtmosphereComponent>();
 
-        if (ImGui::Button("Move backwards"))
-        {
-            Move(Vector3(-10.0f, 0.0f, 0.0f));
+            if (ImGui::Checkbox("Atmosphere", &chkAtm))
+            {
+                chkAtm ? AddComponent<CAtmosphereComponent>(this) : RemoveComponent<CAtmosphereComponent>();
+            }
+            
+            static bool chkWater = HasComponent<CTerrainComponent<WaterHeightFunc>>();
+
+            if (ImGui::Checkbox("Water", &chkWater))
+            {
+                chkWater ? AddComponent<CTerrainComponent<WaterHeightFunc>>(this) : RemoveComponent<CTerrainComponent<WaterHeightFunc>>();
+            }
         }
     }
 
-    for (auto& component : Components)
-        component->RenderUI();
+    ImGui::BeginChild("Components");
 
+    if (Editable)
+    {
+        for (auto& component : Components)
+            component->RenderUI();
+    }
+
+    ImGui::EndChild();
     ImGui::End();
 }
 
@@ -140,4 +143,10 @@ void CPlanet::UpdateMatrix()
 {
     World = DirectX::SimpleMath::Matrix::CreateScale(PlanetScale) *
             DirectX::SimpleMath::Matrix::CreateTranslation(Position); 
+}
+
+void CPlanet::RefreshComponents()
+{
+    for (auto& c : Components)
+        c->Init();
 }

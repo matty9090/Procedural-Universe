@@ -24,13 +24,17 @@ CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, float height)
     PipelineSpace.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPosition());
     PipelineSpace.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
-    Sphere = std::make_unique<CModel>(planet->GetDevice(), RESM.GetMesh("assets/Sphere.obj"));
+    Sphere = std::make_unique<CModel>(Planet->GetDevice(), RESM.GetMesh("assets/Sphere.obj"));
+}
+
+void CAtmosphereComponent::Init()
+{
     Sphere->SetScale(Planet->Radius * 1.025f);
 }
 
 void CAtmosphereComponent::Update(float dt)
 {
-    //Sphere->SetPosition(Planet->GetPosition());
+
 }
 
 void CAtmosphereComponent::Render(DirectX::SimpleMath::Matrix viewProj)

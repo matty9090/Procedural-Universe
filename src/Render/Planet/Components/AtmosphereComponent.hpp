@@ -40,6 +40,7 @@ class CAtmosphereComponent : public IPlanetComponent
 public:
     CAtmosphereComponent(CPlanet* planet, float height = 1.025f);
 
+    void Init() final;
     void Update(float dt) final;
     void Render(DirectX::SimpleMath::Matrix viewProj) final;
     void RenderUI() final;
