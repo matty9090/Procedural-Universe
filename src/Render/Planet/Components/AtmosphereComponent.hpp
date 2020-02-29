@@ -57,12 +57,12 @@ private:
 
     float Kr = 0.0025f; // Rayleigh scattering constant
     float Km = 0.0010f; // Mie scattering constant
-    float Af = -0.990f; // Atmospheric scattering constant
-    float ESun = 15.0f; // Mie phase asymmetry factor
+    float Af = -0.990f; // Mie phase asymmetry factor
+    float ESun = 15.0f; // Brightness of the star
 
     float KrMin = 0.0005f, KrMax = 0.0045f;
     float KmMin = 0.0001f, KmMax = 0.001f;
-    float ESunMin = 0.1f, ESunMax = 80.0f;
+    float ESunMin = 8.0f, ESunMax = 80.0f;
 
     CPlanet* Planet;
     ConstantBuffer<ScatterBuffer> Buffer;

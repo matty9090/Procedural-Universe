@@ -20,7 +20,8 @@ class TerrainHeightFunc
 {
 public:
     TerrainHeightFunc();
-
+    
+    void Seed(uint64_t seed);
     bool RenderUI();
     float operator()(DirectX::SimpleMath::Vector3 normal, int depth = 0);
 
@@ -33,11 +34,16 @@ private:
     float Amplitude = 1.0f;
     float Gain = 0.5f;
     float Frequency = 1.0f;
+
+    float AmplitudeMin = 0.5f, AmplitudeMax = 3.0f;
+    float GainMin = 0.3f, GainMax = 0.8f;
+    float FreqMin = 0.1f, FreqMax = 5.0f;
 };
 
 class WaterHeightFunc
 {
 public:
+    void Seed(uint64_t seed);
     bool RenderUI();
     float operator()(DirectX::SimpleMath::Vector3 normal, int depth = 0);
 
@@ -45,6 +51,7 @@ public:
 
 private:
     float Height = 0.0f;
+    float HeightMin = -0.5f, HeightMax = 0.6f;
 };
 
 class CPlanet

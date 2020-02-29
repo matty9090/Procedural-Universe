@@ -18,6 +18,19 @@ TerrainHeightFunc::TerrainHeightFunc()
     Noise.SetFractalOctaves(Octaves);
 }
 
+void TerrainHeightFunc::Seed(uint64_t seed)
+{
+    std::default_random_engine gen { static_cast<unsigned int>(seed) };
+
+    std::uniform_real_distribution<float> AmpDist(AmplitudeMin, AmplitudeMax);
+    std::uniform_real_distribution<float> GainDist(GainMin, GainMax);
+    std::uniform_real_distribution<float> FreqDist(FreqMin, FreqMax);
+
+    Amplitude = AmpDist(gen);
+    Gain = GainDist(gen);
+    Frequency = FreqDist(gen);
+}
+
 bool TerrainHeightFunc::RenderUI()
 {
     bool dirty = false;
@@ -48,6 +61,14 @@ bool TerrainHeightFunc::RenderUI()
 float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int depth)
 {
     return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * Amplitude;
+}
+
+void WaterHeightFunc::Seed(uint64_t seed)
+{
+    std::default_random_engine gen { static_cast<unsigned int>(seed) };
+    std::uniform_real_distribution<float> HeightDist(HeightMin, HeightMax);
+
+    Height = HeightDist(gen);
 }
 
 bool WaterHeightFunc::RenderUI()

@@ -24,6 +24,7 @@ CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet, uint64_t seed)
     Name += ")";
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
+    HeightObject.Seed(seed);
 }
 
 template <class HeightFunc>
