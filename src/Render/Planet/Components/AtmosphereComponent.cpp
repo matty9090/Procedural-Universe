@@ -5,9 +5,8 @@
 
 #include <imgui.h>
 
-CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, float height)
+CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, uint64_t seed)
     : Planet(planet),
-      Height(height),
       Buffer(planet->GetDevice())
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());

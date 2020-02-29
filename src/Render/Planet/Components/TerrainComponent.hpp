@@ -30,7 +30,7 @@ class CTerrainComponent : public IPlanetComponent
     using FTerrainNode = CTerrainNode<HeightFunc>;
 
 public:
-    CTerrainComponent(CPlanet* planet);
+    CTerrainComponent(CPlanet* planet, uint64_t seed = 0);
     ~CTerrainComponent();
 
     static void GeneratePermutations();
@@ -39,6 +39,8 @@ public:
     void Update(float dt) final;
     void Render(DirectX::SimpleMath::Matrix viewProj) final;
     void RenderUI() final;
+
+    std::string GetName() const override { return Name; }
 
     enum EPermutations
     {

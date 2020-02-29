@@ -38,7 +38,7 @@ struct ScatterBuffer
 class CAtmosphereComponent : public IPlanetComponent
 {
 public:
-    CAtmosphereComponent(CPlanet* planet, float height = 1.025f);
+    CAtmosphereComponent(CPlanet* planet, uint64_t seed = 0);
 
     void Init() final;
     void Update(float dt) final;
@@ -46,6 +46,7 @@ public:
     void RenderUI() final;
 
     float GetRadius() const;
+    std::string GetName() const override { return "Atmosphere"; }
 
 private:
     ScatterBuffer GetScatterBuffer();

@@ -73,6 +73,8 @@ public:
 
     template <class Component>
     void RemoveComponent();
+
+    void RemoveAllComponents();
     
     float GetScale() const { return PlanetScale; }
     float GetHeight(DirectX::SimpleMath::Vector3 normal);
@@ -81,7 +83,13 @@ public:
 
     ID3D11Device* GetDevice() const { return Device; }
     ID3D11DeviceContext* GetContext() const { return Context; }
+
+    std::string to_string() const;
     
+    enum EType { Rocky, Habitable, GasGiant, _Max };
+
+    std::string Name = "Planet";
+    EType Type;
     ICamera& Camera;
     float Radius = 50.0f;
     float SplitDistance = 200.0f;

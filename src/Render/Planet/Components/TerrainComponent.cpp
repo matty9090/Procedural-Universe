@@ -14,7 +14,7 @@ template <class HeightFunc>
 std::map<UINT, std::vector<UINT>> CTerrainComponent<HeightFunc>::IndexPerm;
 
 template <class HeightFunc>
-CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet) : Planet(planet)
+CTerrainComponent<HeightFunc>::CTerrainComponent(CPlanet* planet, uint64_t seed) : Planet(planet)
 {
     std::string className = typeid(HeightFunc).name();
     className = className.substr(6);

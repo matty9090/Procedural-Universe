@@ -2,6 +2,7 @@
 
 #include <set>
 #include <array>
+#include <random>
 #include <algorithm>
 #include <imgui.h>
 
@@ -51,7 +52,7 @@ float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int dep
 
 bool WaterHeightFunc::RenderUI()
 {
-    return ImGui::SliderFloat("Water level", &Height, -0.5f, 0.9f);
+    return ImGui::SliderFloat("Water level", &Height, -0.5f, 0.6f);
 }
 
 float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int depth)
@@ -66,10 +67,6 @@ CPlanet::CPlanet(ID3D11DeviceContext* context, ICamera& cam)
     Context->GetDevice(&Device);
 
     World = DirectX::SimpleMath::Matrix::Identity;
-    
-    AddComponent<CAtmosphereComponent>(this);
-    AddComponent<CTerrainComponent<TerrainHeightFunc>>(this);
-    AddComponent<CTerrainComponent<WaterHeightFunc>>(this);
 }
 
 CPlanet::~CPlanet()
@@ -79,7 +76,39 @@ CPlanet::~CPlanet()
 
 void CPlanet::Seed(uint64_t seed)
 {
+    RemoveAllComponents();
 
+    auto gen = std::default_random_engine { static_cast<unsigned int>(seed) };
+    std::uniform_int_distribution<> distType(0, EType::_Max);
+
+    auto type = distType(gen);
+
+    // Habitable
+    if (type == EType::Habitable)
+    {
+        std::normal_distribution<float> distRadius(30.0f, 2.0f);
+        Radius = distRadius(gen) + 30.0f;
+
+        AddComponent<CAtmosphereComponent>(this, seed);
+        AddComponent<CTerrainComponent<WaterHeightFunc>>(this, seed);
+        AddComponent<CTerrainComponent<TerrainHeightFunc>>(this, seed);
+    }
+    // Rocky
+    else if (type == EType::Rocky)
+    {
+        AddComponent<CTerrainComponent<TerrainHeightFunc>>(this, seed);
+    }
+    // Gas Giant
+    else
+    {
+        std::normal_distribution<float> distRadius(220.0f, 2.0f);
+        Radius = distRadius(gen) + 100.0f;
+
+        AddComponent<CAtmosphereComponent>(this, seed);
+        AddComponent<CTerrainComponent<WaterHeightFunc>>(this, seed);
+    }
+
+    LOGM(to_string())
 }
 
 void CPlanet::Update(float dt)
@@ -163,6 +192,26 @@ void CPlanet::SetPosition(DirectX::SimpleMath::Vector3 p)
 {
     Position = p;
     UpdateMatrix();
+}
+
+void CPlanet::RemoveAllComponents()
+{
+    Components.clear();
+}
+
+std::string CPlanet::to_string() const
+{
+    std::string type = (Type == Rocky) ? "Rocky" : (Type == Habitable ? "Habitable" : "Gas Giant");
+
+    std::ostringstream ss;
+    ss << "Planet " << Name << " (" << type << ")\n";
+    
+    for (const auto& c : Components)
+    {
+        ss << "\tComponent [" << c->GetName() << "]\n";
+    }
+
+    return ss.str();
 }
 
 void CPlanet::UpdateMatrix()

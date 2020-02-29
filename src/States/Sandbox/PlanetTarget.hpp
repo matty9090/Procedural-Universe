@@ -14,6 +14,7 @@ public:
     void RenderTransitionChild(float t) override;
     void RenderTransitionParent(float t) override;
 
+    void Seed(uint64_t seed);
     void MoveObjects(Vector3 v) override;
     void ScaleObjects(float scale) override;
     void ResetObjectPositions() override;
