@@ -3,6 +3,7 @@
 #include "Services/ResourceManager.hpp"
 #include "Services/Log.hpp"
 
+#include <random>
 #include <imgui.h>
 
 CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, uint64_t seed)
@@ -24,6 +25,18 @@ CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, uint64_t seed)
     PipelineSpace.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
     Sphere = std::make_unique<CModel>(Planet->GetDevice(), RESM.GetMesh("assets/Sphere.obj"));
+
+    std::default_random_engine gen { static_cast<unsigned int>(seed) };
+
+    std::uniform_real_distribution<float> KrDist(KrMin, KrMax);
+    std::uniform_real_distribution<float> KmDist(KmMin, KmMax);
+    std::uniform_real_distribution<float> ESunDist(ESunMin, ESunMax);
+    std::uniform_real_distribution<float> WaveDist(0.0f, 0.8f);
+
+    Kr = KrDist(gen);
+    Km = KmDist(gen);
+    ESun = ESunDist(gen);
+    Colour = DirectX::SimpleMath::Vector3(WaveDist(gen), WaveDist(gen), WaveDist(gen));
 }
 
 void CAtmosphereComponent::Init()
@@ -62,10 +75,10 @@ void CAtmosphereComponent::RenderUI()
             Sphere->SetScale(Planet->Radius * Height);
 
         ImGui::ColorPicker3("Colour", &Colour.x);
-        ImGui::SliderFloat("Kr", &Kr, 0.0005f, 0.0045f, "%.5f");
-        ImGui::SliderFloat("Km", &Km, 0.0001f, 0.0040f, "%.5f");
+        ImGui::SliderFloat("Kr", &Kr, KrMin, KrMax, "%.5f");
+        ImGui::SliderFloat("Km", &Km, KmMin, KmMax, "%.5f");
         ImGui::SliderFloat("Af", &Af, -0.5f, -1.2f);
-        ImGui::SliderFloat("ESun", &ESun, 0.1f, 100.0f);
+        ImGui::SliderFloat("ESun", &ESun, ESunMin, ESunMax);
     }
 }
 

@@ -89,7 +89,7 @@ public:
     enum EType { Rocky, Habitable, GasGiant, _Max };
 
     std::string Name = "Planet";
-    EType Type;
+    uint8_t Type;
     ICamera& Camera;
     float Radius = 50.0f;
     float SplitDistance = 200.0f;

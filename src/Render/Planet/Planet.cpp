@@ -81,10 +81,10 @@ void CPlanet::Seed(uint64_t seed)
     auto gen = std::default_random_engine { static_cast<unsigned int>(seed) };
     std::uniform_int_distribution<> distType(0, EType::_Max);
 
-    auto type = distType(gen);
+    Type = distType(gen);
 
     // Habitable
-    if (type == EType::Habitable)
+    if (Type == EType::Habitable)
     {
         std::normal_distribution<float> distRadius(30.0f, 2.0f);
         Radius = distRadius(gen) + 30.0f;
@@ -94,7 +94,7 @@ void CPlanet::Seed(uint64_t seed)
         AddComponent<CTerrainComponent<TerrainHeightFunc>>(this, seed);
     }
     // Rocky
-    else if (type == EType::Rocky)
+    else if (Type == EType::Rocky)
     {
         AddComponent<CTerrainComponent<TerrainHeightFunc>>(this, seed);
     }
@@ -131,25 +131,30 @@ void CPlanet::RenderUI()
     
     if (ImGui::CollapsingHeader("Planet"))
     {
+        if (ImGui::Button("Randomise"))
+        {
+            Seed(time(0));
+        }
+
         ImGui::Checkbox("Editable", &Editable);
 
         if (Editable)
         {
-            static bool chkTerr = HasComponent<CTerrainComponent<TerrainHeightFunc>>();
+            bool chkTerr = HasComponent<CTerrainComponent<TerrainHeightFunc>>();
 
             if (ImGui::Checkbox("Terrain", &chkTerr))
             {
                 chkTerr ? AddComponent<CTerrainComponent<TerrainHeightFunc>>(this) : RemoveComponent<CTerrainComponent<TerrainHeightFunc>>();
             }
 
-            static bool chkAtm = HasComponent<CAtmosphereComponent>();
+            bool chkAtm = HasComponent<CAtmosphereComponent>();
 
             if (ImGui::Checkbox("Atmosphere", &chkAtm))
             {
                 chkAtm ? AddComponent<CAtmosphereComponent>(this) : RemoveComponent<CAtmosphereComponent>();
             }
             
-            static bool chkWater = HasComponent<CTerrainComponent<WaterHeightFunc>>();
+            bool chkWater = HasComponent<CTerrainComponent<WaterHeightFunc>>();
 
             if (ImGui::Checkbox("Water", &chkWater))
             {
