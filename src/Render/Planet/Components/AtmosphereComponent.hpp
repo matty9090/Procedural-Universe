@@ -62,7 +62,7 @@ private:
 
     float KrMin = 0.0005f, KrMax = 0.0045f;
     float KmMin = 0.0001f, KmMax = 0.001f;
-    float ESunMin = 0.1f, ESunMax = 100.0f;
+    float ESunMin = 0.1f, ESunMax = 80.0f;
 
     CPlanet* Planet;
     ConstantBuffer<ScatterBuffer> Buffer;

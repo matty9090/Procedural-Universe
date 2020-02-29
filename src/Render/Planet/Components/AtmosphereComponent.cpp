@@ -2,6 +2,7 @@
 #include "Render/Planet/Planet.hpp"
 #include "Services/ResourceManager.hpp"
 #include "Services/Log.hpp"
+#include "Misc/ProcUtils.hpp"
 
 #include <random>
 #include <imgui.h>
@@ -31,12 +32,19 @@ CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, uint64_t seed)
     std::uniform_real_distribution<float> KrDist(KrMin, KrMax);
     std::uniform_real_distribution<float> KmDist(KmMin, KmMax);
     std::uniform_real_distribution<float> ESunDist(ESunMin, ESunMax);
-    std::uniform_real_distribution<float> WaveDist(0.0f, 0.8f);
+    std::uniform_real_distribution<float> HueDist(0.0f, 360.0f);
 
     Kr = KrDist(gen);
     Km = KmDist(gen);
     ESun = ESunDist(gen);
-    Colour = DirectX::SimpleMath::Vector3(WaveDist(gen), WaveDist(gen), WaveDist(gen));
+
+    int H = 0, S = 0, L = 0;
+    auto col = DirectX::SimpleMath::Color(0.65f, 0.57f, 0.475f);
+
+    ProcUtils::RGBToHSL(col, H, S, L);
+    ProcUtils::HSLToRGB(HueDist(gen), static_cast<float>(S), static_cast<float>(L), col);
+
+    Colour = { col.R(), col.G(), col.B() };
 }
 
 void CAtmosphereComponent::Init()
