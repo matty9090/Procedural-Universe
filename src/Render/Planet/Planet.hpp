@@ -13,6 +13,7 @@
 #include "Render/Cameras/Camera.hpp"
 #include "Render/Model/Model.hpp"
 
+#include "Misc/Gradient.hpp"
 #include "Misc/FastNoise.hpp"
 #include "Components/PlanetComponent.hpp"
 
@@ -23,7 +24,7 @@ public:
     
     void Seed(uint64_t seed);
     bool RenderUI();
-    float operator()(DirectX::SimpleMath::Vector3 normal, int depth = 0);
+    float operator()(DirectX::SimpleMath::Vector3 normal, DirectX::SimpleMath::Color& colour, int depth = 0);
 
     std::wstring PixelShader = L"shaders/Planet/Planet";
 
@@ -38,6 +39,8 @@ private:
     float AmplitudeMin = 0.5f, AmplitudeMax = 3.0f;
     float GainMin = 0.3f, GainMax = 0.8f;
     float FreqMin = 0.1f, FreqMax = 5.0f;
+
+    Gradient::Gradient<Gradient::GradientColor> Colour;
 };
 
 class WaterHeightFunc
@@ -45,13 +48,16 @@ class WaterHeightFunc
 public:
     void Seed(uint64_t seed);
     bool RenderUI();
-    float operator()(DirectX::SimpleMath::Vector3 normal, int depth = 0);
+    float operator()(DirectX::SimpleMath::Vector3 normal, DirectX::SimpleMath::Color& colour, int depth = 0);
 
     std::wstring PixelShader = L"shaders/Planet/PlanetWater";
 
 private:
     float Height = 0.0f;
     float HeightMin = -0.5f, HeightMax = 0.6f;
+    float AlphaMin = 0.1f, AlphaMax = 0.8f;
+
+    DirectX::SimpleMath::Color Colour;
 };
 
 class CPlanet
@@ -96,7 +102,7 @@ public:
     enum EType { Rocky, Habitable, GasGiant, _Max };
 
     std::string Name = "Planet";
-    uint8_t Type;
+    uint8_t Type = 0;
     ICamera& Camera;
     float Radius = 50.0f;
     float SplitDistance = 200.0f;

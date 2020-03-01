@@ -69,3 +69,12 @@ void ProcUtils::HSLToRGB(float H, float S, float L, DirectX::SimpleMath::Color& 
 
 	rgb = DirectX::SimpleMath::Color(fR + m, fG + m, fB + m);
 }
+
+DirectX::SimpleMath::Color ProcUtils::RandomColour(std::default_random_engine& gen)
+{
+	DirectX::SimpleMath::Color col;
+	std::uniform_real_distribution<float> dist(0.0f, 360.0f);
+	ProcUtils::HSLToRGB(dist(gen), 100.0f, 50.0f, col);
+
+	return col;
+}

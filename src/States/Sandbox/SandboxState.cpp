@@ -52,7 +52,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     //Planet = std::make_unique<CPlanet>(Context, *Camera);
     //Planet->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
-
+    
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
 

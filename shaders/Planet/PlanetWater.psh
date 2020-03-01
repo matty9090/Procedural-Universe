@@ -8,14 +8,11 @@ struct PS_Input
     float4 Position : SV_POSITION;
 	float3 WorldPos : POSITION;
     float3 Normal : NORMAL;
-    float2 UV : TEXCOORD;
+	float4 Colour : COLOR;
 };
 
 float4 main(in PS_Input v_in) : SV_Target
 {
-    float3 lightCol = float3(1.0f, 1.0f, 1.0f);
-    float3 diffuse = float3(0.0f, 0.32f, 1.0f);
-    float3 light = diffuse * lightCol * max(dot(v_in.Normal, LightDir), 0.0f);
-	
+    float3 light = v_in.Colour * max(dot(v_in.Normal, LightDir), 0.0f);
     return float4(light, 1.0);
 }

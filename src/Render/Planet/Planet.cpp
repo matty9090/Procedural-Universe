@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <imgui.h>
 
+#include "Misc/ProcUtils.hpp"
 #include "Components/TerrainComponent.hpp"
 #include "Components/AtmosphereComponent.hpp"
 
@@ -29,6 +30,12 @@ void TerrainHeightFunc::Seed(uint64_t seed)
     Amplitude = AmpDist(gen);
     Gain = GainDist(gen);
     Frequency = FreqDist(gen);
+
+    auto col1 = ProcUtils::RandomColour(gen);
+    auto col2 = ProcUtils::RandomColour(gen);
+
+    Colour.AddColorStop(0.0f, Gradient::GradientColor(col1.R(), col1.G(), col1.B(), 1.0f));
+    Colour.AddColorStop(1.0f, Gradient::GradientColor(col2.R(), col2.G(), col2.B(), 1.0f));
 }
 
 bool TerrainHeightFunc::RenderUI()
@@ -58,17 +65,28 @@ bool TerrainHeightFunc::RenderUI()
     return dirty;
 }
 
-float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int depth)
+float TerrainHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, DirectX::SimpleMath::Color& colour, int depth)
 {
-    return Noise.GetSimplexFractal(normal.x, normal.y, normal.z) * Amplitude;
+    auto noise = Noise.GetSimplexFractal(normal.x, normal.y, normal.z);
+    auto col = Colour.GetColorAt(noise / 2.0f + 0.5f);
+
+    colour.R(col.r);
+    colour.G(col.g);
+    colour.B(col.b);
+    colour.A(1.0f);
+
+    return noise * Amplitude;
 }
 
 void WaterHeightFunc::Seed(uint64_t seed)
 {
     std::default_random_engine gen { static_cast<unsigned int>(seed) };
     std::uniform_real_distribution<float> HeightDist(HeightMin, HeightMax);
+    std::uniform_real_distribution<float> AlphaDist(AlphaMin, AlphaMax);
 
     Height = HeightDist(gen);
+    Colour = ProcUtils::RandomColour(gen);
+    Colour.A(AlphaDist(gen));
 }
 
 bool WaterHeightFunc::RenderUI()
@@ -76,8 +94,9 @@ bool WaterHeightFunc::RenderUI()
     return ImGui::SliderFloat("Water level", &Height, -0.5f, 0.6f);
 }
 
-float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, int depth)
+float WaterHeightFunc::operator()(DirectX::SimpleMath::Vector3 normal, DirectX::SimpleMath::Color& colour, int depth)
 {
+    colour = Colour;
     return Height;
 }
 

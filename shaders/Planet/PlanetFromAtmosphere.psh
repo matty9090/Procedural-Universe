@@ -5,23 +5,18 @@ cbuffer c0 : register(b0)
 
 struct PS_Input
 {
-    float4 Position : SV_POSITION;
-    float3 WorldPos : POSITION;
-    float3 Normal : NORMAL;
-    float2 UV : TEXCOORD;
-	float4 Colour1	: COLOR0;
-	float4 Colour2	: COLOR1;
-	float  Intensity : COLOR2;
+    float4 Position  : SV_POSITION;
+	float3 WorldPos  : POSITION;
+    float3 Normal 	 : NORMAL;
+	float4 Colour0	 : COLOR0;
+	float4 Colour1	 : COLOR1;
+	float4 Colour2	 : COLOR2;
+	float  Intensity : COLOR3;
 };
 
 float4 main(in PS_Input v_in) : SV_Target
 {
 	float fExposure = 2.0f;
-	float4 lightCol = float4(1, 1, 1, 1);
-    float4 diffuse = float4(0, 1, 0, 1);
-	float4 light = lightCol * max(dot(v_in.Normal, LightDir), 0.0f);
-    float4 col = 1.0 - exp(-fExposure * (v_in.Colour1 + diffuse * light * v_in.Colour2));
-    col.a = col.b;
-	
-	return col;
+    float3 col = v_in.Colour1 + v_in.Colour0 * v_in.Colour2;	
+	return float4(1.0 - exp(col * -fExposure), col.b);
 }

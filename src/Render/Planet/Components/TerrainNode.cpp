@@ -70,12 +70,11 @@ void CTerrainNode<HeightFunc>::Generate()
                 Vector3 normal = pos;
                 normal.Normalize();
 
-                float height = Terrain->HeightObject(normal, Depth);
+                float height = Terrain->HeightObject(normal, vertex.Colour, Depth);
                 Vector3 finalPos = pos * Planet->Radius + normal * height;
 
                 vertex.Position = finalPos;
                 vertex.Normal = Vector3::Zero;
-                vertex.UV = Vector2(xx, yy);
             }
 
             if (x == 0)             Edges[West].push_back(k);

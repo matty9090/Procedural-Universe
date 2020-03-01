@@ -28,7 +28,7 @@ struct TerrainVertex
 {
     Vector3 Position;
     Vector3 Normal;
-    Vector2 UV;
+	Color   Colour;
 };
 
 template <class HeightFunc>
