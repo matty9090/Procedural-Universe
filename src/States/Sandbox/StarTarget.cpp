@@ -209,7 +209,7 @@ void StarTarget::CreateParticlePipeline()
     ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/PlanetParticle.gsh");
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
-    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
+    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColourScale());
 
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
 

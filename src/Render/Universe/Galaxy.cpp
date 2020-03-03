@@ -3,6 +3,7 @@
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
 #include "Sim/IParticleSeeder.hpp"
+#include "Render/DX/RenderCommon.hpp"
 
 #include <random>
 
@@ -18,17 +19,12 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
 {
     context->GetDevice(&Device);
 
-    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/Particles/StarParticle.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/GalaxyParticle.gsh");
     ParticlePipeline.CreateRasteriser(Device, ECullMode::Anticlockwise);
-    ParticlePipeline.CreateInputLayout(Device, layout);    
+    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColourScale());
 
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);

@@ -111,7 +111,7 @@ void SimulationState::CreateDeviceDependentResources()
     ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/DrawParticle.gsh");
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
-    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColour());
+    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColourScale());
 
     GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
 
@@ -172,7 +172,7 @@ void SimulationState::RegisterEvents()
     });
 
     EventStream::Register(EEvent::SeederChanged, [this](const EventData& data) {
-        Seeder = CreateParticleSeeder(Particles, static_cast<const SeederTypeEventData&>(data).Value);
+        Seeder = CreateParticleSeeder(Particles, static_cast<EParticleSeeder>(static_cast<const SeederTypeEventData&>(data).Value));
         InitParticles();
     });
 

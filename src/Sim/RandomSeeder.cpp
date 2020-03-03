@@ -3,12 +3,14 @@
 #include <random>
 #include <DirectXColors.h>
 
-RandomSeeder::RandomSeeder(std::vector<Particle>& particles, float scale) : Particles(particles), Scale(scale)
+template <class T>
+RandomSeeder<T>::RandomSeeder(std::vector<T>& particles, float scale) : Particles(particles), Scale(scale)
 {
 
 }
 
-void RandomSeeder::Seed(uint64_t seed)
+template <class T>
+void RandomSeeder<T>::Seed(uint64_t seed)
 {
     std::default_random_engine generator;
     std::uniform_real_distribution<double> dist(-500.0f, 500.0);

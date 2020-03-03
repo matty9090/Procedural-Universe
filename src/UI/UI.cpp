@@ -77,7 +77,7 @@ void CUI::Render()
     
     if(ImGui::Combo("Seeder", &SelectedSeeder, "Random\0Galaxy\0StarSystem\0"))
     {
-        EventStream::Report(EEvent::SeederChanged, SeederTypeEventData(static_cast<EParticleSeeder>(SelectedSeeder)));
+        EventStream::Report(EEvent::SeederChanged, SeederTypeEventData(SelectedSeeder));
     }
 
     if(ImGui::Button(DrawDebug ? "Debug Off" : "Debug On"))

@@ -7,7 +7,8 @@
 using DirectX::SimpleMath::Vector3;
 using DirectX::SimpleMath::Color;
 
-GalaxySeeder::GalaxySeeder(std::vector<Particle>& particles, float scale)
+template <class T>
+GalaxySeeder<T>::GalaxySeeder(std::vector<T>& particles, float scale)
     : Particles(particles),
       DistZ(0.0f, 16.0f),
       DistR(0.0f, 1.0f),
@@ -19,22 +20,26 @@ GalaxySeeder::GalaxySeeder(std::vector<Particle>& particles, float scale)
 
 }
 
-void GalaxySeeder::SetRedDist(float low, float hi)
+template <class T>
+void GalaxySeeder<T>::SetRedDist(float low, float hi)
 {
     DistR = std::uniform_real_distribution<float>(Maths::Clamp(low, 0.0f, 1.0f), Maths::Clamp(hi, 0.0f, 1.0f));
 }
 
-void GalaxySeeder::SetGreenDist(float low, float hi)
+template <class T>
+void GalaxySeeder<T>::SetGreenDist(float low, float hi)
 {
     DistG = std::uniform_real_distribution<float>(Maths::Clamp(low, 0.0f, 1.0f), Maths::Clamp(hi, 0.0f, 1.0f));
 }
 
-void GalaxySeeder::SetBlueDist(float low, float hi)
+template <class T>
+void GalaxySeeder<T>::SetBlueDist(float low, float hi)
 {
     DistB = std::uniform_real_distribution<float>(Maths::Clamp(low, 0.0f, 1.0f), Maths::Clamp(hi, 0.0f, 1.0f));
 }
 
-void GalaxySeeder::Seed(uint64_t seed)
+template <class T>
+void GalaxySeeder<T>::Seed(uint64_t seed)
 {
     Gen = std::default_random_engine { static_cast<unsigned int>(seed) };
 
@@ -70,7 +75,8 @@ void GalaxySeeder::Seed(uint64_t seed)
     }
 }
 
-bool GalaxySeeder::AddParticle(
+template <class T>
+bool GalaxySeeder<T>::AddParticle(
     DirectX::SimpleMath::Vector3 Pos,
     Vec3<double> Vel,
     double Mass
@@ -93,7 +99,8 @@ bool GalaxySeeder::AddParticle(
     return false;
 }
 
-void GalaxySeeder::CreateSpiralArm(float offset, float dist)
+template <class T>
+void GalaxySeeder<T>::CreateSpiralArm(float offset, float dist)
 {
     std::normal_distribution<float> distx(0.5f, 0.2f);
     std::uniform_real_distribution<float> disty(0.2f, 0.5f);

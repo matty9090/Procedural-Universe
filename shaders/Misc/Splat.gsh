@@ -14,8 +14,9 @@ cbuffer cb1
 
 struct GS_VertIn
 {
-	float3 Position : POSITION;
-    float4 Colour : COLOR;
+    float3 Position : POSITION;
+    float4 Colour   : COLOR;
+    float  Scale    : TEXCOORD;
 };
 
 struct GS_VertOut

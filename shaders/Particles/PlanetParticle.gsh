@@ -5,7 +5,6 @@ cbuffer cb0
     row_major float4x4 ViewProjMatrix;
     row_major float4x4 InvViewMatrix;
     float3 Translation;
-    float Scale;
 };
 
 cbuffer cb1
@@ -16,7 +15,8 @@ cbuffer cb1
 struct GS_VertIn
 {
 	float3 Position : POSITION;
-    float4 Colour : COLOR;
+    float4 Colour   : COLOR;
+    float  Scale    : TEXCOORD;
 };
 
 struct GS_VertOut
@@ -53,8 +53,7 @@ void main
 
 	for (int i = 0; i < 4; ++i)
 	{
-		const float scale = 0.1f;
-        float3 corner = Corners[i] * scale * Lerp;
+        float3 corner = Corners[i] * inParticle[0].Scale * Lerp;
         float3 worldPosition = inParticle[0].Position + mul(corner, (float3x3)InvViewMatrix) + Translation;
         
 		outVert.ViewportPosition = mul( float4(worldPosition, 1.0f), ViewProjMatrix );

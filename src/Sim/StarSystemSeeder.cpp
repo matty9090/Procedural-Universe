@@ -8,12 +8,14 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 
-StarSystemSeeder::StarSystemSeeder(std::vector<Particle>& particles, float scale) : Particles(particles)
+template <class T>
+StarSystemSeeder<T>::StarSystemSeeder(std::vector<T>& particles, float scale) : Particles(particles)
 {
 
 }
 
-void StarSystemSeeder::Seed(uint64_t seed)
+template <class T>
+void StarSystemSeeder<T>::Seed(uint64_t seed)
 {
     Particle& star = Particles[0];
     star.Colour = DirectX::SimpleMath::Color(0.6f, 1.0f, 1.0f);

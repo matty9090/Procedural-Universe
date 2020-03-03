@@ -16,3 +16,10 @@ struct Particle
     
     double Mass;
 };
+
+struct LWParticle
+{
+    DirectX::SimpleMath::Vector3 Position;
+    DirectX::SimpleMath::Color Colour;
+    float Scale;
+};

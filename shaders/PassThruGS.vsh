@@ -1,10 +1,11 @@
 struct VS_InputOutput
 {
 	float3 Position : POSITION;
-    float4 Colour : COLOR;
+    float4 Colour   : COLOR;
+	float  Scale    : TEXCOORD;
 };
 
-void main( in VS_InputOutput i, out VS_InputOutput o ) 
+VS_InputOutput main(VS_InputOutput i)
 {
-	o = i;
+	return i;
 }

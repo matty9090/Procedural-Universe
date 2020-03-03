@@ -5,10 +5,11 @@
 #include <SimpleMath.h>
 #include <random>
 
+template <class T>
 class GalaxySeeder : public IParticleSeeder
 {
     public:
-        GalaxySeeder(std::vector<Particle>& particles, float scale);
+        GalaxySeeder(std::vector<T>& particles, float scale);
 
         void Seed(uint64_t seed);
 
@@ -17,7 +18,7 @@ class GalaxySeeder : public IParticleSeeder
         virtual void SetBlueDist(float low, float hi);
 
     private:
-        std::vector<Particle>& Particles;
+        std::vector<T>& Particles;
         int LocalNum = 0;
         float Scale = 1.0f;
 
@@ -38,3 +39,5 @@ class GalaxySeeder : public IParticleSeeder
         std::default_random_engine Gen;
         DirectX::SimpleMath::Vector3 Centre;
 };
+
+#include "GalaxySeeder.cpp"

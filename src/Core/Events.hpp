@@ -45,9 +45,9 @@ struct SimTypeEventData : public EventData
 
 struct SeederTypeEventData : public EventData
 {
-    EParticleSeeder Value;
+    uint8_t Value;
 
-    SeederTypeEventData(EParticleSeeder value) : Value(value) {}
+    SeederTypeEventData(uint8_t value) : Value(value) {}
 };
 
 struct BenchmarkEventData : public EventData
