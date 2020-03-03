@@ -5,6 +5,7 @@ cbuffer cb0
     row_major float4x4 ViewProjMatrix;
     row_major float4x4 InvViewMatrix;
     float3 Translation;
+    float Scale;
 };
 
 cbuffer cb1

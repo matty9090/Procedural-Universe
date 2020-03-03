@@ -58,7 +58,8 @@ void PlanetTarget::RenderTransitionParent(float t)
 
 void PlanetTarget::Seed(uint64_t seed)
 {
-    Planet->Seed(seed);
+    CPlanetSeeder seeder(seed);
+    seeder.SeedPlanet(Planet.get());
 }
 
 void PlanetTarget::MoveObjects(Vector3 v)

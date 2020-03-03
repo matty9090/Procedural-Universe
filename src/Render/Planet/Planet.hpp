@@ -60,13 +60,27 @@ private:
     DirectX::SimpleMath::Color Colour;
 };
 
+class CPlanet;
+
+class CPlanetSeeder
+{
+public:
+    CPlanetSeeder(uint64_t seed);
+    void SeedPlanet(CPlanet* planet) const;
+
+    enum EType { Rocky, Habitable, GasGiant, _Max };
+
+    uint64_t Seed;
+    uint8_t Type = 0;
+    float Radius = 50.0f;
+};
+
 class CPlanet
 {
 public:
     CPlanet(ID3D11DeviceContext* context, ICamera& cam);
     ~CPlanet();
 
-    void Seed(uint64_t seed);
     void Update(float dt);
     void Render(float scale = 1.0f);
     void RenderUI();
@@ -75,37 +89,27 @@ public:
     void SetScale(float s);
     void SetPosition(DirectX::SimpleMath::Vector3 p);
     
-    template <class Component>
-    bool HasComponent();
-
-    template <class Component>
-    Component* GetComponent();
+    template <class Component> bool HasComponent();
+    template <class Component> Component* GetComponent();
+    template <class Component> void RemoveComponent();
+    void RemoveAllComponents();
 
     template <class Component, class... Args>
     void AddComponent(Args... args);
 
-    template <class Component>
-    void RemoveComponent();
-
-    void RemoveAllComponents();
-    
     float GetScale() const { return PlanetScale; }
-    float GetHeight(DirectX::SimpleMath::Vector3 normal);
-
     DirectX::SimpleMath::Vector3 GetPosition() const { return Position; }
 
     ID3D11Device* GetDevice() const { return Device; }
     ID3D11DeviceContext* GetContext() const { return Context; }
 
-    std::string to_string() const;
-    
-    enum EType { Rocky, Habitable, GasGiant, _Max };
+    std::string to_string() const;    
 
-    std::string Name = "Planet";
     uint8_t Type = 0;
     ICamera& Camera;
     float Radius = 50.0f;
     float SplitDistance = 200.0f;
+    std::string Name = "Planet";
 
     DirectX::SimpleMath::Vector3 LightSource;
     DirectX::SimpleMath::Matrix World;

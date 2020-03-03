@@ -2,6 +2,7 @@
 
 #include <set>
 #include <array>
+#include <chrono>
 #include <random>
 #include <algorithm>
 #include <imgui.h>
@@ -114,43 +115,6 @@ CPlanet::~CPlanet()
     
 }
 
-void CPlanet::Seed(uint64_t seed)
-{
-    RemoveAllComponents();
-
-    auto gen = std::default_random_engine { static_cast<unsigned int>(seed) };
-    std::uniform_int_distribution<> distType(0, EType::_Max);
-
-    Type = distType(gen);
-
-    // Habitable
-    if (Type == EType::Habitable)
-    {
-        std::normal_distribution<float> distRadius(30.0f, 2.0f);
-        Radius = distRadius(gen) + 30.0f;
-
-        AddComponent<CAtmosphereComponent>(this, seed);
-        AddComponent<CTerrainComponent<WaterHeightFunc>>(this, seed);
-        AddComponent<CTerrainComponent<TerrainHeightFunc>>(this, seed);
-    }
-    // Rocky
-    else if (Type == EType::Rocky)
-    {
-        AddComponent<CTerrainComponent<TerrainHeightFunc>>(this, seed);
-    }
-    // Gas Giant
-    else
-    {
-        std::normal_distribution<float> distRadius(220.0f, 2.0f);
-        Radius = distRadius(gen) + 100.0f;
-
-        AddComponent<CAtmosphereComponent>(this, seed);
-        AddComponent<CTerrainComponent<WaterHeightFunc>>(this, seed);
-    }
-
-    LOGM(to_string())
-}
-
 void CPlanet::Update(float dt)
 {
     for (auto& component : Components)
@@ -173,7 +137,10 @@ void CPlanet::RenderUI()
     {
         if (ImGui::Button("Randomise"))
         {
-            Seed(time(0));
+            auto t = std::chrono::system_clock::now().time_since_epoch();
+            auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(t);
+            CPlanetSeeder seeder(static_cast<uint64_t>(ms.count()));
+            seeder.SeedPlanet(this);
         }
 
         ImGui::Checkbox("Editable", &Editable);
@@ -246,7 +213,7 @@ void CPlanet::RemoveAllComponents()
 
 std::string CPlanet::to_string() const
 {
-    std::string type = (Type == Rocky) ? "Rocky" : (Type == Habitable ? "Habitable" : "Gas Giant");
+    std::string type = (Type == CPlanetSeeder::Rocky) ? "Rocky" : (Type == CPlanetSeeder::Habitable ? "Habitable" : "Gas Giant");
 
     std::ostringstream ss;
     ss << "Planet " << Name << " (" << type << ")\n";
@@ -269,4 +236,61 @@ void CPlanet::RefreshComponents()
 {
     for (auto& c : Components)
         c->Init();
+}
+
+CPlanetSeeder::CPlanetSeeder(uint64_t seed) : Seed(seed)
+{
+    auto gen = std::default_random_engine { static_cast<unsigned int>(seed) };
+    std::uniform_int_distribution<> distType(0, EType::_Max - 1);
+
+    Type = distType(gen);
+
+    // Habitable
+    if (Type == EType::Habitable)
+    {
+        std::uniform_real_distribution<float> distRadius(40.0f, 70.0f);
+        Radius = distRadius(gen);
+    }
+    // Gas Giant
+    else if (Type == EType::GasGiant)
+    {
+        std::uniform_real_distribution<float> distRadius(220.0f, 400.0f);
+        Radius = distRadius(gen);
+    }
+    // Rocky
+    else if (Type == EType::Rocky)
+    {
+        std::uniform_real_distribution<float> distRadius(40.0f, 70.0f);
+        Radius = distRadius(gen);
+    }
+
+    LOGM(Radius)
+}
+
+void CPlanetSeeder::SeedPlanet(CPlanet* planet) const
+{
+    planet->RemoveAllComponents();
+
+    planet->Type = Type;
+    planet->Radius = Radius;
+
+    switch (Type)
+    {
+    case Habitable:
+        planet->AddComponent<CAtmosphereComponent>(planet, Seed);
+        planet->AddComponent<CTerrainComponent<WaterHeightFunc>>(planet, Seed);
+        planet->AddComponent<CTerrainComponent<TerrainHeightFunc>>(planet, Seed);
+        break;
+
+    case GasGiant:
+        planet->AddComponent<CAtmosphereComponent>(planet, Seed);
+        planet->AddComponent<CTerrainComponent<WaterHeightFunc>>(planet, Seed);
+        break;
+
+    case Rocky:
+        planet->AddComponent<CTerrainComponent<TerrainHeightFunc>>(planet, Seed);
+        break;
+    }
+
+    LOGV(planet->to_string())
 }

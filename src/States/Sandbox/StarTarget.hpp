@@ -36,7 +36,7 @@ private:
         DirectX::SimpleMath::Matrix ViewProj;
         DirectX::SimpleMath::Matrix InvView;
         DirectX::SimpleMath::Vector3 Translation;
-        float Custom;
+        float Scale;
     };
 
     struct LerpConstantBuffer
