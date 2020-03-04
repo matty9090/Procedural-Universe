@@ -167,7 +167,7 @@ void StarTarget::BakeSkybox(Vector3 object)
         LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
         Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
         Context->GSSetShader(nullptr, 0, 0);
-        Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->OMSetBlendState(CommonStates->AlphaBlend(), DirectX::Colors::Black, 0xFFFFFFFF);
         Star->Draw(Context, viewProj, StarPipeline);
     });
 }
@@ -189,6 +189,7 @@ void StarTarget::Seed(uint64_t seed)
     {
         CPlanetSeeder seeder((seed << 5) + i);
         Particles[i].Scale = seeder.Radius * Scale * 2.0f;
+        Particles[i].Colour = DirectX::Colors::White;
         ParticleInfo[i] = seeder;
     }
 }
@@ -229,7 +230,7 @@ void StarTarget::CreateParticlePipeline()
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/PlanetParticle.gsh");
-    ParticlePipeline.CreateDepthState(Device, EDepthState::Read);
+    ParticlePipeline.CreateDepthState(Device, EDepthState::None);
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColourScale());
 
