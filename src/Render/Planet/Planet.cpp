@@ -266,8 +266,6 @@ CPlanetSeeder::CPlanetSeeder(uint64_t seed) : Seed(seed)
         std::uniform_real_distribution<float> distRadius(40.0f, 70.0f);
         Radius = distRadius(gen);
     }
-
-    LOGM(Radius)
 }
 
 void CPlanetSeeder::SeedPlanet(CPlanet* planet) const

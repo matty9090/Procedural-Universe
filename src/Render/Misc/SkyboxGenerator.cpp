@@ -4,6 +4,15 @@
 #include <wincodec.h>
 #include <ScreenGrab.h>
 
+#define CAPTURE_SKYBOX 0
+
+#if CAPTURE_SKYBOX
+    #include <DXGItype.h>
+    #include <dxgi1_2.h>
+    #include <dxgi1_3.h>
+    #include <DXProgrammableCapture.h>
+#endif
+
 bool CSkyboxGenerator::bMadeViews;
 D3D11_TEXTURE2D_DESC  CSkyboxGenerator::TexArrayDesc;
 std::array<RenderView, 6> CSkyboxGenerator::Views;
@@ -56,6 +65,16 @@ void CSkyboxGenerator::Render(std::function<void(const ICamera&)> renderFunc)
 
     Context->RSSetViewports(1, &vp);
 
+#if CAPTURE_SKYBOX
+    IDXGraphicsAnalysis* pGraphicsAnalysis;
+    HRESULT getAnalysis = DXGIGetDebugInterface1(0, __uuidof(pGraphicsAnalysis), reinterpret_cast<void**>(&pGraphicsAnalysis));
+
+    if (!FAILED(getAnalysis))
+    {
+        pGraphicsAnalysis->BeginCapture();
+    }
+#endif
+
     for (int i = 0; i < 6; ++i)
     {
         Views[i].Clear(Context);
@@ -63,6 +82,13 @@ void CSkyboxGenerator::Render(std::function<void(const ICamera&)> renderFunc)
         Context->OMSetRenderTargets(1, Views[i].Rtv.GetAddressOf(), Views[i].Dsv.Get());
         renderFunc(Camera);
     }
+
+#if CAPTURE_SKYBOX
+    if (!FAILED(getAnalysis))
+    {
+        pGraphicsAnalysis->EndCapture();
+    }
+#endif
 
     Context->RSSetViewports(1, &oldVp);
 
