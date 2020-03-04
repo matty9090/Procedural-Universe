@@ -21,6 +21,7 @@ CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, bool fade
     Pipeline.LoadGeometry(L"shaders/Misc/Billboard.gsh");
     Pipeline.LoadPixel(L"shaders/Misc/Billboard.psh");
     Pipeline.CreateInputLayout(device, layout);
+    Pipeline.CreateDepthState(device, EDepthState::Read);
     Pipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
 
     D3D11_BUFFER_DESC buffer;

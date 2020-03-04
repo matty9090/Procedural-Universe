@@ -131,8 +131,8 @@ void SandboxState::Render()
 
     if (CurrentTarget->IsTransitioning())
     {
-        CurrentTarget->RenderTransitionParent(CurrentTransitionT);
         CurrentTarget->Child->RenderTransitionChild(1.0f - CurrentTransitionT);
+        CurrentTarget->RenderTransitionParent(CurrentTransitionT);
     }
     else
     {
@@ -364,6 +364,7 @@ void SandboxState::CreateModelPipeline()
     ModelPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     ModelPipeline.LoadVertex(L"shaders/Standard/PositionTexture.vsh");
     ModelPipeline.LoadPixel(L"shaders/Standard/Texture.psh");
+    ModelPipeline.CreateDepthState(Device, EDepthState::Normal);
     ModelPipeline.CreateRasteriser(Device, ECullMode::Clockwise);
     ModelPipeline.CreateInputLayout(Device, layout);
 }

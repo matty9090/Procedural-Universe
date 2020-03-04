@@ -118,6 +118,28 @@ void RenderPipeline::LoadGeometry(std::wstring file)
     GeometryShader = RESM.GetGeometryShader(file);
 }
 
+void RenderPipeline::CreateDepthState(ID3D11Device* device, EDepthState depthMode)
+{
+    D3D11_DEPTH_STENCIL_DESC desc = {};
+
+    desc.DepthEnable = depthMode != EDepthState::None ? TRUE : FALSE;
+    desc.DepthWriteMask = depthMode == EDepthState::Normal ? D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+    desc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
+
+    desc.StencilEnable = FALSE;
+    desc.StencilReadMask = D3D11_DEFAULT_STENCIL_READ_MASK;
+    desc.StencilWriteMask = D3D11_DEFAULT_STENCIL_WRITE_MASK;
+
+    desc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+    desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+    desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+    desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_KEEP;
+
+    desc.BackFace = desc.FrontFace;
+
+    DX::ThrowIfFailed(device->CreateDepthStencilState(&desc, DepthState.ReleaseAndGetAddressOf()));
+}
+
 void RenderPipeline::CreateRasteriser(ID3D11Device* device, ECullMode cullMode)
 {
     D3D11_CULL_MODE cull = D3D11_CULL_NONE;
@@ -153,6 +175,7 @@ void RenderPipeline::SetState(ID3D11DeviceContext* context, std::function<void()
     context->GSSetShader(GeometryShader, 0, 0);
     context->PSSetShader(PixelShader, 0, 0);
     context->RSSetState(Raster.Get());
+    context->OMSetDepthStencilState(DepthState.Get(), 0);
 
     state();
 }

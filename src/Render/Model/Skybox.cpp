@@ -12,6 +12,7 @@ CSkyBox::CSkyBox(ID3D11DeviceContext* context) : Context(context)
     Pipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     Pipeline.LoadVertex(L"shaders/Misc/Skybox.vsh");
     Pipeline.LoadPixel(L"shaders/Misc/Skybox.psh");
+    Pipeline.CreateDepthState(device, EDepthState::Normal);
     Pipeline.CreateRasteriser(device, ECullMode::Clockwise);
     Pipeline.CreateInputLayout(device, CreateInputLayoutPositionTexture());
 

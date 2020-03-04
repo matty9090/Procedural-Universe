@@ -11,6 +11,7 @@
 #include "Render/Misc/Particle.hpp"
 
 enum class ECullMode { None, Clockwise, Anticlockwise };
+enum class EDepthState { Normal, Read, None };
 
 struct RenderView
 {
@@ -27,18 +28,20 @@ struct RenderView
 
 struct RenderPipeline
 {
-    ID3D11VertexShader*    VertexShader = nullptr;
-    ID3D11GeometryShader*  GeometryShader = nullptr;
-    ID3D11PixelShader*     PixelShader = nullptr;
+    ID3D11VertexShader*      VertexShader = nullptr;
+    ID3D11GeometryShader*    GeometryShader = nullptr;
+    ID3D11PixelShader*       PixelShader = nullptr;
 
     Microsoft::WRL::ComPtr<ID3D11InputLayout> InputLayout;
     Microsoft::WRL::ComPtr<ID3D11RasterizerState> Raster;
+    Microsoft::WRL::ComPtr<ID3D11DepthStencilState> DepthState;
 
     D3D_PRIMITIVE_TOPOLOGY Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
     void LoadVertex(std::wstring file);
     void LoadPixel(std::wstring file);
     void LoadGeometry(std::wstring file);
+    void CreateDepthState(ID3D11Device* device, EDepthState depthMode);
     void CreateRasteriser(ID3D11Device* device, ECullMode cullMode);
     void CreateInputLayout(ID3D11Device* device, std::vector<D3D11_INPUT_ELEMENT_DESC> layout);
 

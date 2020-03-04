@@ -110,6 +110,7 @@ void SimulationState::CreateDeviceDependentResources()
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/DrawParticle.gsh");
+    ParticlePipeline.CreateDepthState(Device, EDepthState::Read);
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColourScale());
 

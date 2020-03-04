@@ -12,6 +12,7 @@ Cube::Cube(ID3D11DeviceContext* context) : Context(context)
     Pipeline.LoadVertex(L"shaders/Standard/Position.vsh");
     Pipeline.LoadPixel(L"shaders/Standard/Tint.psh");
     Pipeline.CreateInputLayout(device, CreateInputLayoutPosition());
+    Pipeline.CreateDepthState(device, EDepthState::Normal);
     Pipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 
     Vertex vertices[] {

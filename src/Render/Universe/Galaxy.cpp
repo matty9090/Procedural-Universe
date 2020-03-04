@@ -23,6 +23,7 @@ Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/Particles/StarParticle.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/GalaxyParticle.gsh");
+    ParticlePipeline.CreateDepthState(Device, EDepthState::Read);
     ParticlePipeline.CreateRasteriser(Device, ECullMode::Anticlockwise);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColourScale());
 
@@ -104,8 +105,6 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
     if (Particles.size() <= 0)
         return;
 
-    Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
-
     Matrix view = cam.GetViewMatrix();
     Matrix viewProj = view * cam.GetProjectionMatrix();
 
@@ -150,15 +149,12 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
     DustRenderer->Render(cam, scale, voffset);
         
     Context->GSSetShader(nullptr, 0, 0);
-    Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
 }
 
 void Galaxy::RenderImposter(const ICamera& cam)
 {
     float dist = ((Vector3::Distance(cam.GetPosition(), Position) - ImposterFadeDist) / ImposterThreshold) - 1.0f;
     float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
-
-    Context->OMSetDepthStencilState(CommonStates->DepthRead(), 0);
 
     /*if (imposterT > 0.0f)
     {
@@ -174,8 +170,6 @@ void Galaxy::RenderImposter(const ICamera& cam)
 
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
     DustRenderer->Render(cam);
-
-    Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
 }
 
 Vector3 Galaxy::GetClosestObject(Vector3 pos)

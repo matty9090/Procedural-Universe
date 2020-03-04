@@ -48,12 +48,14 @@ void CTerrainComponent<HeightFunc>::Init()
         new(&TerrainAtmPipeline) RenderPipeline;
         TerrainAtmPipeline.LoadVertex(L"Shaders/Planet/PlanetFromAtmosphere.vsh");
         TerrainAtmPipeline.LoadPixel(HeightObj.PixelShader + L"FromAtmosphere.psh");
+        TerrainAtmPipeline.CreateDepthState(Planet->GetDevice(), EDepthState::Normal);
         TerrainAtmPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalColour());
         TerrainAtmPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
         new(&TerrainSpacePipeline) RenderPipeline;
         TerrainSpacePipeline.LoadVertex(L"Shaders/Planet/PlanetFromSpace.vsh");
         TerrainSpacePipeline.LoadPixel(HeightObj.PixelShader + L"FromSpace.psh");
+        TerrainSpacePipeline.CreateDepthState(Planet->GetDevice(), EDepthState::Normal);
         TerrainSpacePipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalColour());
         TerrainSpacePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     }
@@ -62,6 +64,7 @@ void CTerrainComponent<HeightFunc>::Init()
         new(&TerrainPipeline) RenderPipeline;
         TerrainPipeline.LoadVertex(L"Shaders/Planet/Planet.vsh");
         TerrainPipeline.LoadPixel(HeightObj.PixelShader + L".psh");
+        TerrainPipeline.CreateDepthState(Planet->GetDevice(), EDepthState::Normal);
         TerrainPipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalColour());
         TerrainPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     }
@@ -121,7 +124,6 @@ void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj)
     RenderPipeline& pipeline = HasAtmosphere ? (inAtm ? TerrainAtmPipeline : TerrainSpacePipeline) : TerrainPipeline;
     
     pipeline.SetState(Planet->GetContext(), [&]() {
-        Planet->GetContext()->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
         Planet->GetContext()->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
         Planet->GetContext()->RSSetState(Planet->Wireframe ? CommonStates->Wireframe() : CommonStates->CullCounterClockwise());
     });
