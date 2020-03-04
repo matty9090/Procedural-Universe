@@ -185,7 +185,7 @@ void SandboxState::Render()
         //if (Camera->GetForward().Dot(closest) > 0.0f)
         {
             ImGui::SetNextWindowPos(ImVec2(static_cast<float>(Maths::Clamp(x - 200, 10, w - 170)), static_cast<float>(Maths::Clamp(y - 160, 16, h - 110))));
-            ImGui::SetNextWindowSize(ImVec2(170, 140));
+            ImGui::SetNextWindowSize(ImVec2(170, 160));
             ImGui::SetNextWindowBgAlpha(0.5f);
 
             ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);

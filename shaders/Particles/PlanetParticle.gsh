@@ -61,7 +61,7 @@ void main
 
         outVert.Colour = float4(inParticle[0].Colour.rgb, Lerp);
         outVert.UV = UVs[i];
-		outStrip.Append( outVert );
+		outStrip.Append(outVert);
 	}
     
 	outStrip.RestartStrip();
