@@ -25,7 +25,9 @@ public:
     Vector3 GetLightDirection() const;
 
 private:
-    void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
+    void OnStartTransitionDownParent(Vector3 object) override;
+    void OnStartTransitionDownChild(Vector3 object) override;
+    void OnEndTransitionDownChild() override;
     void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f, bool single = false);
     void BakeSkybox(Vector3 object) override;
     void Seed(uint64_t seed) override;

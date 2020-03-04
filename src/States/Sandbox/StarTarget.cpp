@@ -83,6 +83,20 @@ Vector3 StarTarget::GetLightDirection() const
     return pos;
 }
 
+void StarTarget::OnStartTransitionDownParent(Vector3 object)
+{
+    GenerateSkybox(object);}
+
+void StarTarget::OnStartTransitionDownChild(Vector3 object)
+{
+    ParticlePipeline.CreateDepthState(Device, EDepthState::Normal);
+}
+
+void StarTarget::OnEndTransitionDownChild()
+{
+    ParticlePipeline.CreateDepthState(Device, EDepthState::None);
+}
+
 void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
 {
     Matrix view = Camera->GetViewMatrix();
@@ -230,7 +244,7 @@ void StarTarget::CreateParticlePipeline()
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/PlanetParticle.gsh");
-    ParticlePipeline.CreateDepthState(Device, EDepthState::None);
+    ParticlePipeline.CreateDepthState(Device, EDepthState::Normal);
     ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
     ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColourScale());
 
