@@ -47,7 +47,7 @@ private:
     RenderView ParticleRenderTarget;
     RenderPipeline ParticlePipeline;
 
-    std::vector<Particle> SeedParticles;
+    std::vector<LWParticle> SeedParticles;
     std::vector<BillboardInstance> SeedDustClouds;
 
     std::unique_ptr<Galaxy> GalaxyRenderer;

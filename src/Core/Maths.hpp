@@ -21,7 +21,30 @@ namespace Maths
     float RandFloat();
     float RandFloat(float min, float max);
 
-    const Particle& ClosestParticle(const DirectX::SimpleMath::Vector3& pos, const std::vector<Particle>& particles, size_t* outID = nullptr);
+    template <class T>
+    const T& ClosestParticle(const DirectX::SimpleMath::Vector3& pos, const std::vector<T>& particles, size_t* outID = nullptr)
+    {
+        const T* closest;
+        size_t id = 0;
+        float distance = (std::numeric_limits<float>::max)();
+
+        for (size_t i = 0; i < particles.size(); ++i)
+        {
+            float d = DirectX::SimpleMath::Vector3::DistanceSquared(pos, particles[i].Position);
+
+            if (d < distance)
+            {
+                closest = &particles[i];
+                id = i;
+                distance = d;
+            }
+        }
+
+        if (outID)
+            *outID = id;
+
+        return *closest;
+    }
 
     template <class T>
     const T& ClosestObject(const DirectX::SimpleMath::Vector3& pos, const std::vector<T>& particles, size_t* outID)

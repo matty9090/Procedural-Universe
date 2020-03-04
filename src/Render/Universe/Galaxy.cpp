@@ -75,7 +75,7 @@ void Galaxy::InitialSeed(uint64_t seed)
     DustRenderer->UpdateInstances(DustClouds);
 }
 
-void Galaxy::FinishSeed(const std::vector<Particle>& particles)
+void Galaxy::FinishSeed(const std::vector<LWParticle>& particles)
 {
     Particles = particles;
     RegenerateBuffer();
@@ -114,7 +114,7 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
 
     ParticlePipeline.SetState(Context, [&]() {
         unsigned int offset = 0;
-        unsigned int stride = sizeof(Particle);
+        unsigned int stride = sizeof(LWParticle);
 
         LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
@@ -190,7 +190,7 @@ void Galaxy::RegenerateBuffer()
 
     D3D11_MAPPED_SUBRESOURCE mapped;
     Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
+    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(LWParticle));
     Context->Unmap(ParticleBuffer.Get(), 0);
 
     DustRenderer->UpdateInstances(DustClouds);

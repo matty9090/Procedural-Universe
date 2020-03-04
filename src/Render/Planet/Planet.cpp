@@ -132,6 +132,9 @@ void CPlanet::RenderUI()
     ImGui::SetNextWindowSize(ImVec2(260, Camera.GetSize().y));
     ImGui::SetNextWindowPos(ImVec2(Camera.GetSize().x, 0), 0, ImVec2(1.0f, 0.0f));
     ImGui::Begin("Planet", 0, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+    ImGui::Text("Seed: %i", static_cast<int>(Seed));
+    ImGui::Text("Radius: %i", static_cast<int>(Radius));
     
     if (ImGui::CollapsingHeader("Planet"))
     {
@@ -271,6 +274,7 @@ void CPlanetSeeder::SeedPlanet(CPlanet* planet) const
 {
     planet->RemoveAllComponents();
 
+    planet->Seed = Seed;
     planet->Type = Type;
     planet->Radius = Radius;
 

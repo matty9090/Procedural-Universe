@@ -65,7 +65,9 @@ class CPlanet;
 class CPlanetSeeder
 {
 public:
+    CPlanetSeeder() {}
     CPlanetSeeder(uint64_t seed);
+
     void SeedPlanet(CPlanet* planet) const;
 
     enum EType { Rocky, Habitable, GasGiant, _Max };
@@ -106,6 +108,7 @@ public:
     std::string to_string() const;    
 
     uint8_t Type = 0;
+    uint64_t Seed;
     ICamera& Camera;
     float Radius = 50.0f;
     float SplitDistance = 200.0f;

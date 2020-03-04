@@ -1,6 +1,6 @@
 #include "StarSystemSeeder.hpp"
 #include "Physics.hpp"
-#include "Core/Event.hpp"
+//#include "Core/Event.hpp"
 
 #include <random>
 #include <DirectXColors.h>
@@ -17,13 +17,15 @@ StarSystemSeeder<T>::StarSystemSeeder(std::vector<T>& particles, float scale) : 
 template <class T>
 void StarSystemSeeder<T>::Seed(uint64_t seed)
 {
-    Particle& star = Particles[0];
-    star.Colour = DirectX::SimpleMath::Color(0.6f, 1.0f, 1.0f);
-    star.OriginalColour = star.Colour;
-    star.Mass = 1e30;
+    T& star = Particles[0];
     star.Position = DirectX::SimpleMath::Vector3::Zero;
-    star.Forces = Vec3d();
-    star.Velocity = Vec3d();
+
+    AddParticleVelocity(star, Vec3d());
+    AddParticleMass(star, 1e30);
+    AddParticleColour(star, DirectX::SimpleMath::Color(0.6f, 1.0f, 1.0f));
+    AddParticleOriginalColour(star, star.Colour);
+    AddParticleForces(star, Vec3d());
+    AddParticleScale(star, 1.0f);
 
     std::default_random_engine generator;
     std::uniform_real_distribution<float>  dist_col(0.2f, 1.0f);
@@ -35,19 +37,19 @@ void StarSystemSeeder<T>::Seed(uint64_t seed)
 
     for(int i = 1; i < Particles.size(); ++i)
     {
-        Particles[i].Mass = dist_mass(generator);
         Particles[i].Position.x = 0;
         Particles[i].Position.y = 0;
         Particles[i].Position.z = static_cast<float>(dist_rad(generator) / Phys::StarSystemScale);
 
-        Particles[i].Velocity.x = dist_vel(generator);
-        Particles[i].Velocity.y = dist_vel(generator) / 20.0;
-        Particles[i].Velocity.z = 0;
+        Vec3d vel(dist_vel(generator), dist_vel(generator) / 20.0, 0);
 
-        Particles[i].Colour = DirectX::SimpleMath::Color(dist_red(generator), dist_col(generator), dist_col(generator), 1.0f);
-        Particles[i].OriginalColour = Particles[i].Colour;
-        Particles[i].Forces = Vec3d();
+        AddParticleVelocity(Particles[i], vel);
+        AddParticleMass(Particles[i], dist_mass(generator));
+        AddParticleColour(Particles[i], DirectX::SimpleMath::Color(dist_red(generator), dist_col(generator), dist_col(generator), 1.0f));
+        AddParticleOriginalColour(Particles[i], Particles[i].Colour);
+        AddParticleForces(Particles[i], Vec3d());
+        AddParticleScale(Particles[i], 1.0f);
     }
 
-    EventStream::Report(EEvent::TrackParticle, ParticleEventData(&Particles[0]));
+    //EventStream::Report(EEvent::TrackParticle, ParticleEventData(&Particles[0]));
 }

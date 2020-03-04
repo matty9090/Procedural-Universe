@@ -27,7 +27,7 @@ public:
     Galaxy(ID3D11DeviceContext* context);
 
     void InitialSeed(uint64_t seed);
-    void FinishSeed(const std::vector<Particle>& particles);
+    void FinishSeed(const std::vector<LWParticle>& particles);
 
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float scale);
@@ -53,7 +53,6 @@ public:
     static Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
 
 private:
-    void RenderDust(const ICamera& cam);
     void RegenerateBuffer();
 
     ID3D11Device* Device;
@@ -80,7 +79,7 @@ private:
     uint64_t Seed = 0U;
     DirectX::SimpleMath::Vector3 Position;
 
-    std::vector<Particle> Particles;
+    std::vector<LWParticle> Particles;
     std::vector<BillboardInstance> DustClouds;
 
     std::unique_ptr<CBillboard> Imposter;

@@ -33,10 +33,12 @@ public:
     void Update(float dt);
     bool IsTransitioning() const { return State != EState::Idle; }
     Vector3 GetCentre() const { return Centre; }
+    uint64_t GetSeed() const { return SeedValue; }
     CSkyBox& GetSkyBox() { return SkyBox; }
 
     virtual void Render() = 0;
     virtual void RenderUI() {}
+    virtual void RenderObjectUI() {}
     virtual void RenderTransitionChild(float t) { Render(); }
     virtual void RenderTransitionParent(float t) { Render(); }
 
@@ -112,6 +114,7 @@ private:
         TransitioningChild
     } State;
     
+    uint64_t SeedValue;
     CThreadPool<std::function<void()>> Pool;
 
     void Worker(std::function<void()> func);

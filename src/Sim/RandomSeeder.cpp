@@ -18,7 +18,7 @@ void RandomSeeder<T>::Seed(uint64_t seed)
     std::uniform_real_distribution<double> dist_vel(0.0f, 0.2f);
     std::uniform_real_distribution<double> dist_mass(1e20, 1e30);
 
-    for(unsigned int i = 0; i < Particles.size(); ++i)
+    for (unsigned int i = 0; i < Particles.size(); ++i)
     {
         Particles[i].Position.x = static_cast<float>(dist(generator)) / Scale;
         Particles[i].Position.y = static_cast<float>(dist(generator)) / Scale;
@@ -27,12 +27,14 @@ void RandomSeeder<T>::Seed(uint64_t seed)
         auto normal = Particles[i].Position;
         normal.Normalize();
 
-        Particles[i].Velocity.x = normal.x * 10000000000000000.0f;
-        Particles[i].Velocity.y = normal.y * 10000000000000000.0f;
-        Particles[i].Velocity.z = normal.z * 10000000000000000.0f;
-        Particles[i].Mass   = dist_mass(generator);
-        Particles[i].Forces = Vec3d();
-        Particles[i].Colour = DirectX::SimpleMath::Color(dist_col(generator), dist_col(generator), dist_col(generator), 1.0f);
-        Particles[i].OriginalColour = Particles[i].Colour;
+        Vec3d vel(normal.x, normal.y, normal.z);
+        vel *= 10000000000000000.0f;
+
+        AddParticleVelocity(Particles[i], vel);
+        AddParticleMass(Particles[i], dist_mass(generator));
+        AddParticleColour(Particles[i], DirectX::SimpleMath::Color(dist_col(generator), dist_col(generator), dist_col(generator), 1.0f));
+        AddParticleOriginalColour(Particles[i], Particles[i].Colour);
+        AddParticleForces(Particles[i], Vec3d());
+        AddParticleScale(Particles[i], 1.0f);
     }
 }

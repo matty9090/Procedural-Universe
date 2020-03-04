@@ -34,33 +34,6 @@ void SetRenderTarget(ID3D11DeviceContext* context, RenderView& view)
     context->OMSetRenderTargets(1, view.Rtv.GetAddressOf(), view.Dsv.Get());
 }
 
-void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, const std::vector<Particle>& particles)
-{
-    D3D11_BUFFER_DESC desc;
-    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc.Usage = D3D11_USAGE_DYNAMIC;
-    desc.ByteWidth = static_cast<unsigned int>(particles.size()) * sizeof(Particle);
-    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    desc.MiscFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA init;
-    init.pSysMem = &particles[0];
-
-    DX::ThrowIfFailed(device->CreateBuffer(&desc, &init, buffer));
-}
-
-void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, unsigned int size)
-{
-    D3D11_BUFFER_DESC desc;
-    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    desc.Usage = D3D11_USAGE_DYNAMIC;
-    desc.ByteWidth = size * sizeof(Particle);
-    desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-    desc.MiscFlags = 0;
-
-    DX::ThrowIfFailed(device->CreateBuffer(&desc, nullptr, buffer));
-}
-
 std::vector<D3D11_INPUT_ELEMENT_DESC> CreateInputLayoutPosition()
 {
     std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {

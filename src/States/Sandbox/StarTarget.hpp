@@ -3,12 +3,15 @@
 #include <memory>
 #include <CommonStates.h>
 
+#include "Render/Planet/Planet.hpp"
+
 class StarTarget : public SandboxTarget
 {
 public:
     StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv);
 
     void Render() override;
+    void RenderObjectUI() override;
     void RenderTransitionChild(float t) override;
     void RenderTransitionParent(float t) override;
 
@@ -52,7 +55,8 @@ private:
     RenderPipeline StarPipeline;
     RenderPipeline ParticlePipeline;
 
-    std::vector<Particle> Particles;
+    std::vector<LWParticle> Particles;
+    std::vector<CPlanetSeeder> ParticleInfo;
     std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
     Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;

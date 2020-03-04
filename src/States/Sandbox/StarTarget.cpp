@@ -1,5 +1,7 @@
 #include "StarTarget.hpp"
 
+#include <imgui.h>
+
 #include "Sim/IParticleSeeder.hpp"
 
 #include "Services/Log.hpp"
@@ -27,6 +29,12 @@ void StarTarget::Render()
 {
     RenderParentSkybox();
     RenderLerp();
+}
+
+void StarTarget::RenderObjectUI()
+{
+    ImGui::Text("Seed: %i", static_cast<int>(ParticleInfo[CurrentClosestObjectID].Seed));
+    ImGui::Text("Radius: %i", static_cast<int>(ParticleInfo[CurrentClosestObjectID].Radius));
 }
 
 void StarTarget::RenderTransitionChild(float t)
@@ -85,7 +93,7 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
 
     ParticlePipeline.SetState(Context, [&]() {
         unsigned int offset = 0;
-        unsigned int stride = sizeof(Particle);
+        unsigned int stride = sizeof(LWParticle);
 
         LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
 
@@ -139,7 +147,7 @@ void StarTarget::BakeSkybox(Vector3 object)
 
         ParticlePipeline.SetState(Context, [&]() {
             unsigned int offset = 0;
-            unsigned int stride = sizeof(Particle);
+            unsigned int stride = sizeof(LWParticle);
 
             Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
             GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
@@ -166,18 +174,30 @@ void StarTarget::BakeSkybox(Vector3 object)
 
 void StarTarget::Seed(uint64_t seed)
 {
-    Particles.resize(12);
+    auto gen = std::default_random_engine { static_cast<unsigned int>(seed) };
+    std::uniform_int_distribution<> dist(4, 15);
+
+    Particles.resize(dist(gen));
+    ParticleInfo.resize(Particles.size());
+
     CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
 
     auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random, 2.0f);
     seeder->Seed(seed);
+
+    for (size_t i = 0; i < Particles.size(); ++i)
+    {
+        CPlanetSeeder seeder((seed << 5) + i);
+        Particles[i].Scale = seeder.Radius * Scale * 2.0f;
+        ParticleInfo[i] = seeder;
+    }
 }
 
 void StarTarget::UpdateParticleBuffer()
 {
     D3D11_MAPPED_SUBRESOURCE mapped;
     Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(Particle));
+    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(LWParticle));
     Context->Unmap(ParticleBuffer.Get(), 0);
 }
 

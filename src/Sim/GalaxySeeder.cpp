@@ -2,6 +2,7 @@
 #include "Core/Maths.hpp"
 #include "Services/Log.hpp"
 
+#include <type_traits>
 #include <DirectXColors.h>
 
 using DirectX::SimpleMath::Vector3;
@@ -85,12 +86,14 @@ bool GalaxySeeder<T>::AddParticle(
     if (LocalNum < Particles.size())
     {
         Particles[LocalNum].Position = Pos / Scale;
-        Particles[LocalNum].Velocity = Vel;
-        Particles[LocalNum].Mass = Mass;
-        Particles[LocalNum].Colour = Color(DistR(Gen), DistG(Gen), DistB(Gen));
-        Particles[LocalNum].OriginalColour = Particles[LocalNum].Colour;
-        Particles[LocalNum].Forces = Vec3d();
 
+        AddParticleVelocity(Particles[LocalNum], Vel);
+        AddParticleMass(Particles[LocalNum], Mass);
+        AddParticleColour(Particles[LocalNum], Color(DistR(Gen), DistG(Gen), DistB(Gen)));
+        AddParticleOriginalColour(Particles[LocalNum], Particles[LocalNum].Colour);
+        AddParticleForces(Particles[LocalNum], Vec3d());
+        AddParticleScale(Particles[LocalNum], 1.0f);
+        
         ++LocalNum;
 
         return true;
