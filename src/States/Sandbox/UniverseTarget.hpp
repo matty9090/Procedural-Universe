@@ -11,6 +11,7 @@ public:
     UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv);
 
     void Render() override;
+    void RenderInChildSpace() override;
     void RenderTransitionParent(float t) override;
 
     void MoveObjects(Vector3 v) override;

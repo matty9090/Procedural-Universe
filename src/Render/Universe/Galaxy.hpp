@@ -34,7 +34,7 @@ public:
     void SetFades(bool fade) { DustRenderer->SetFades(fade); }
 
     void Render(const ICamera& cam, float t, float scale = 1.0f, DirectX::SimpleMath::Vector3 voffset = DirectX::SimpleMath::Vector3::Zero, bool single = false);
-    void RenderImposter(const ICamera& cam);
+    void RenderImposter(const ICamera& cam, float scale = 1.0f);
 
     DirectX::SimpleMath::Color GetColour() const { return Colour; }
     DirectX::SimpleMath::Vector3 GetPosition() const { return Position; }
