@@ -114,11 +114,11 @@ void UniverseTarget::Seed(uint64_t seed)
 
 void UniverseTarget::BakeSkybox(Vector3 object)
 {
-    SkyboxGenerator->Render([&](const ICamera& cam) {
+    /*SkyboxGenerator->Render([&](const ICamera& cam) {
         for (size_t i = 0; i < Galaxies.size(); ++i)
         {
             if(i != CurrentClosestObjectID)
                 Galaxies[i]->RenderImposter(cam);
         }
-    });
+    });*/
 }

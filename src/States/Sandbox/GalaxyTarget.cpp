@@ -2,6 +2,7 @@
 #include "Sim/IParticleSeeder.hpp"
 
 #include <random>
+#include <imgui.h>
 
 GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Galactic", "Star", resources, camera, rtv)
@@ -31,9 +32,14 @@ void GalaxyTarget::Seed(uint64_t seed)
 
 void GalaxyTarget::Render()
 {
-    RenderParentSkybox();
-    //Parent->RenderInChildSpace();
+    //RenderParentSkybox();
+    Parent->RenderInChildSpace();
     RenderLerp(1.0f, 1.0f / Scale);
+}
+
+void GalaxyTarget::RenderUI()
+{
+    
 }
 
 void GalaxyTarget::RenderTransitionChild(float t)
@@ -51,7 +57,7 @@ void GalaxyTarget::MoveObjects(Vector3 v)
 {
     GalaxyRenderer->Move(v);
     Centre += v;
-    //Parent->MoveObjects(v);
+    Parent->MoveObjects(v);
 }
 
 void GalaxyTarget::ScaleObjects(float scale)
@@ -72,7 +78,7 @@ Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
 
 void GalaxyTarget::OnStartTransitionUpChild()
 {
-    //Parent->ScaleObjects(1.0f / Scale);
+    Parent->ScaleObjects(1.0f / Scale);
 }
 
 void GalaxyTarget::OnStartTransitionDownChild(Vector3 location)
@@ -97,8 +103,10 @@ void GalaxyTarget::OnEndTransitionDownChild()
 {
     FinishTask(EWorkerTask::Seed);
     GalaxyRenderer->FinishSeed(SeedParticles);
-    //Parent->ResetObjectPositions();
-    //Parent->ScaleObjects(Scale);
+    Tmp = Parent->GetClosestObject(Camera->GetPosition());
+    Parent->ResetObjectPositions();
+    Parent->ScaleObjects(Scale);
+    Parent->MoveObjects(-Tmp / Scale);
 }
 
 void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single)

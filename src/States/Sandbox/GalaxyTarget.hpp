@@ -11,6 +11,7 @@ public:
     GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv);
 
     void Render() override;
+    void RenderUI() override;
     void RenderTransitionChild(float t) override;
     void RenderTransitionParent(float t) override;
 
@@ -44,6 +45,8 @@ private:
         float Alpha;
         float Custom1, Custom2, Custom3;
     };
+
+    Vector3 Tmp;
 
     RenderView ParticleRenderTarget;
     RenderPipeline ParticlePipeline;
