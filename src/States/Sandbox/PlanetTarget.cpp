@@ -10,6 +10,7 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     Scale = 0.001f;
     BeginTransitionDist = 10.0f;
     EndTransitionDist = 0.3f;
+    //RenderParentInChildSpace = true;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -25,6 +26,7 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 void PlanetTarget::Render()
 {
     RenderParentSkybox();
+    //Parent->RenderInChildSpace();
     Planet->Render();
 }
 
@@ -66,6 +68,8 @@ void PlanetTarget::MoveObjects(Vector3 v)
 {
     Planet->Move(v);
     Centre += v;
+    //ParentOffset += v;
+    //Parent->MoveObjects(v);
 }
 
 void PlanetTarget::ScaleObjects(float scale)
@@ -80,14 +84,14 @@ Vector3 PlanetTarget::GetClosestObject(Vector3 pos)
 
 void PlanetTarget::ResetObjectPositions()
 {
-    MoveObjects(-Planet->GetPosition());
+    MoveObjects(-Centre);
     Planet->SetPosition(Vector3::Zero);
+    Centre = Vector3::Zero;
 }
 
 void PlanetTarget::OnStartTransitionDownChild(Vector3 location)
 {
     Planet->LightSource = -static_cast<StarTarget*>(Parent)->GetLightDirection();
-    //Planet->SetScale(Scale);
 }
 
 void PlanetTarget::CreatePlanetPipeline()

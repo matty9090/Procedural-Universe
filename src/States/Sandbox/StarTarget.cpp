@@ -13,6 +13,7 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     Scale = 0.0005f;
     BeginTransitionDist = 10.0f;
     EndTransitionDist = 0.2f;
+    RenderParentInChildSpace = true;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -27,7 +28,8 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
 
 void StarTarget::Render()
 {
-    RenderParentSkybox();
+    //RenderParentSkybox();
+    Parent->RenderInChildSpace();
     RenderLerp();
 }
 
@@ -49,7 +51,8 @@ void StarTarget::RenderTransitionChild(float t)
 
 void StarTarget::RenderTransitionParent(float t)
 {
-    RenderParentSkybox();
+    //RenderParentSkybox();
+    //Parent->RenderInChildSpace();
     RenderLerp(1.0f, Vector3::Zero, t, true);
 }
 
@@ -59,8 +62,11 @@ void StarTarget::MoveObjects(Vector3 v)
         particle.Position += v;
 
     Star->Move(v);
-    UpdateParticleBuffer();
     Centre += v;
+    UpdateParticleBuffer();
+
+    ParentOffset += v;
+    Parent->MoveObjects(v);
 }
 
 void StarTarget::ScaleObjects(float scale)
@@ -85,7 +91,8 @@ Vector3 StarTarget::GetLightDirection() const
 
 void StarTarget::OnStartTransitionDownParent(Vector3 object)
 {
-    GenerateSkybox(object);}
+    GenerateSkybox(object);
+}
 
 void StarTarget::OnStartTransitionDownChild(Vector3 object)
 {
@@ -218,7 +225,7 @@ void StarTarget::UpdateParticleBuffer()
 
 void StarTarget::ResetObjectPositions()
 {
-    MoveObjects(-Star->GetPosition());
+    MoveObjects(-Centre);
     Star->SetPosition(Vector3::Zero);
     Centre = Vector3::Zero;
 }

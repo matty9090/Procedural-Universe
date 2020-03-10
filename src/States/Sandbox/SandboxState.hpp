@@ -58,6 +58,7 @@ private:
     SandboxTarget* CurrentTarget;
     RenderPipeline ModelPipeline;
 
+    bool FreezeTransitions = false;
     float CamOriginSnapThreshold = 5000.0f;
     float CurrentTransitionT = 0.0f;
     int Frames = 0;

@@ -108,9 +108,16 @@ void SandboxState::Update(float dt)
 
     if (Tracker.IsKeyReleased(DirectX::Keyboard::F3))
         CPlanet::Wireframe = !CPlanet::Wireframe;
+    
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::F4))
+        FreezeTransitions = !FreezeTransitions;
 
     FloatingOrigin();
-    TransitionLogic();
+
+    if (!FreezeTransitions)
+    {
+        TransitionLogic();
+    }
 
     if (!CurrentTarget->IsTransitioning())
         Camera->VelocityScale = CurrentTarget->VelocityMultiplier;
@@ -208,14 +215,20 @@ void SandboxState::Render()
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
     auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale));
-    
+
     std::ostringstream cam;
     cam << "Cam: (" << Camera->GetPosition().x << ", " << Camera->GetPosition().y << ", " << Camera->GetPosition().z << ")";
+
+    std::ostringstream bb;
+    bb << "Billboards: " << CBillboard::NumInstances;
 
     SpriteBatch->Begin();
     Font->DrawString(SpriteBatch.get(), (std::string("Speed: ") + speed).c_str(), Vector3(2.0f, 2.0, 0.0f));
     Font->DrawString(SpriteBatch.get(), cam.str().c_str(), Vector3(2.0f, 28.0, 0.0f));
+    Font->DrawString(SpriteBatch.get(), bb.str().c_str(), Vector3(2.0f, 56.0, 0.0f));
     SpriteBatch->End();
+
+    CBillboard::NumInstances = 0;
 }
 
 void SandboxState::Clear()

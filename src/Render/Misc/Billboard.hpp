@@ -26,6 +26,8 @@ public:
     void SetPosition(Vector3 pos);
     void UpdateInstances(std::vector<BillboardInstance> instances);
 
+    static size_t NumInstances;
+
 private:
     struct VSBuffer
     {

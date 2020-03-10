@@ -42,14 +42,22 @@ void GalaxyTarget::RenderUI()
     
 }
 
+void GalaxyTarget::RenderInChildSpace()
+{
+    auto dsv = Resources->GetDepthStencilView();
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+
+    RenderLerp(1.0f, 100.0f / Child->Scale, Vector3::Zero, true);
+}
+
 void GalaxyTarget::RenderTransitionChild(float t)
 {
-    
+    // Universe target renders imposters, don't need to render anything here
 }
 
 void GalaxyTarget::RenderTransitionParent(float t)
 {
-    RenderParentSkybox();
+    Parent->RenderInChildSpace();
     RenderLerp(t, 1.0f / Scale, Vector3::Zero, true);
 }
 

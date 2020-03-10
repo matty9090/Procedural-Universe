@@ -28,11 +28,11 @@ void UniverseTarget::RenderInChildSpace()
 {
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-
+    
     for (size_t i = 0; i < Galaxies.size(); ++i)
     {
         if (i != CurrentClosestObjectID)
-            Galaxies[i]->RenderImposter(*Camera, 1.0f / Scale);
+            Galaxies[i]->RenderImposter(*Camera, 1.0f / Child->Scale);
     }
 }
 

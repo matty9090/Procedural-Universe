@@ -39,7 +39,7 @@ void CPostProcess::Render(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* d
 {
     Context->ResolveSubresource(SceneTexture.Get(), D3D11CalcSubresource(0, 0, 1), sceneTex, D3D11CalcSubresource(0, 0, 1), DXGI_FORMAT_R16G16B16A16_FLOAT);
 
-    if(UseBloom)
+    if (UseBloom)
     {
         RenderPP(Targets[Blur], [&]() {
             BasicPostProcess->SetEffect(DirectX::BasicPostProcess::GaussianBlur_5x5);
