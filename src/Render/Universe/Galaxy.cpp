@@ -15,7 +15,7 @@ float Galaxy::ImposterOffsetPercent = 0.4f;
 
 Microsoft::WRL::ComPtr<ID3D11Buffer> Galaxy::ParticleBuffer;
 
-Galaxy::Galaxy(ID3D11DeviceContext* context) : Context(context)
+Galaxy::Galaxy(ID3D11DeviceContext* context, bool onlyRenderDust) : Context(context), OnlyRenderDust(onlyRenderDust)
 {
     context->GetDevice(&Device);
 
@@ -182,10 +182,13 @@ void Galaxy::RegenerateBuffer()
     if (Particles.size() <= 0)
         return;
 
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(LWParticle));
-    Context->Unmap(ParticleBuffer.Get(), 0);
+    if (!OnlyRenderDust)
+    {
+        D3D11_MAPPED_SUBRESOURCE mapped;
+        Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+        memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(LWParticle));
+        Context->Unmap(ParticleBuffer.Get(), 0);
+    }
 
     DustRenderer->UpdateInstances(DustClouds);
 }

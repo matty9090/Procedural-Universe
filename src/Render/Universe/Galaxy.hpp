@@ -24,7 +24,7 @@
 class Galaxy
 {
 public:
-    Galaxy(ID3D11DeviceContext* context);
+    Galaxy(ID3D11DeviceContext* context, bool onlyRenderDust = false);
 
     void InitialSeed(uint64_t seed);
     void FinishSeed(const std::vector<LWParticle>& particles);
@@ -73,6 +73,7 @@ private:
         float Custom1, Custom2, Custom3;
     };
 
+    bool OnlyRenderDust = false;
     float ImposterSize = 250.0f;
     Color Colour;
     size_t CurrentClosestObjectID = 0;
