@@ -97,8 +97,10 @@ protected:
     void DispatchTask(EWorkerTask task, std::function<void()> func);
     void FinishTask(EWorkerTask task);
 
+    bool RenderParentInChildSpace = false;
+
     CSkyBox SkyBox;
-    Vector3 Centre;
+    Vector3 Centre, ParentInChildSpace, ParentOffset;
     ICamera* Camera = nullptr;
     ID3D11Device* Device = nullptr;
     ID3D11DeviceContext* Context = nullptr;

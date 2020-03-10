@@ -28,7 +28,6 @@ private:
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
 
     size_t CurrentClosestObjectID;
-    Vector3 UniversePosition;
     RenderView ParticleRenderTarget;
 
     std::unique_ptr<CSplatting> Splatting;

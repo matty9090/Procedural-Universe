@@ -23,7 +23,6 @@ public:
     size_t GetClosestObjectIndex() const override { return GalaxyRenderer->GetClosestObjectIndex(); }
 
 private:
-    void OnStartTransitionUpChild() override;
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
     void OnStartTransitionDownChild(Vector3 location) override;
     void OnEndTransitionDownChild() override;
@@ -45,8 +44,6 @@ private:
         float Alpha;
         float Custom1, Custom2, Custom3;
     };
-
-    Vector3 Tmp;
 
     RenderView ParticleRenderTarget;
     RenderPipeline ParticlePipeline;

@@ -66,8 +66,17 @@ void SandboxTarget::StartTransitionUpChild()
 {
     CTimer timer("start transition up (child)");
     State = EState::TransitioningChild;
+
+    if (RenderParentInChildSpace)
+    {
+        Parent->MoveObjects(Vector3(ParentInChildSpace / Scale) - ParentOffset);
+        Parent->ScaleObjects(1.0f / Scale);
+        Parent->GetClosestObject(Camera->GetPosition());
+    }
+
     ResetObjectPositions();
     ScaleObjects(1.0f / Scale);
+
     OnStartTransitionUpChild();
 }
 
@@ -96,6 +105,15 @@ void SandboxTarget::EndTransitionDownChild()
     CTimer timer("end transition down (child)");
     State = EState::Idle;
     ScaleObjects(Scale);
+
+    if (RenderParentInChildSpace)
+    {
+        ParentOffset = Vector3::Zero;
+        ParentInChildSpace = Parent->GetClosestObject(Camera->GetPosition());
+        Parent->ScaleObjects(Scale);
+        Parent->MoveObjects(-ParentInChildSpace / Scale);
+    }
+
     OnEndTransitionDownChild();
 }
 

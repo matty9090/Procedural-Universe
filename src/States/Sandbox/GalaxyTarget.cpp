@@ -10,6 +10,7 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     Scale = 0.01f;
     BeginTransitionDist = 1600.0f;
     EndTransitionDist = 200.0f;
+    RenderParentInChildSpace = true;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -32,7 +33,6 @@ void GalaxyTarget::Seed(uint64_t seed)
 
 void GalaxyTarget::Render()
 {
-    //RenderParentSkybox();
     Parent->RenderInChildSpace();
     RenderLerp(1.0f, 1.0f / Scale);
 }
@@ -57,6 +57,7 @@ void GalaxyTarget::MoveObjects(Vector3 v)
 {
     GalaxyRenderer->Move(v);
     Centre += v;
+    ParentOffset += v;
     Parent->MoveObjects(v);
 }
 
@@ -74,11 +75,6 @@ void GalaxyTarget::ResetObjectPositions()
 Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)
 {
     return GalaxyRenderer->GetClosestObject(pos);
-}
-
-void GalaxyTarget::OnStartTransitionUpChild()
-{
-    Parent->ScaleObjects(1.0f / Scale);
 }
 
 void GalaxyTarget::OnStartTransitionDownChild(Vector3 location)
@@ -103,17 +99,12 @@ void GalaxyTarget::OnEndTransitionDownChild()
 {
     FinishTask(EWorkerTask::Seed);
     GalaxyRenderer->FinishSeed(SeedParticles);
-    Tmp = Parent->GetClosestObject(Camera->GetPosition());
-    Parent->ResetObjectPositions();
-    Parent->ScaleObjects(Scale);
-    Parent->MoveObjects(-Tmp / Scale);
 }
 
 void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single)
 {
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-
     GalaxyRenderer->Render(*Camera, t, scale, voffset, single);
 }
 

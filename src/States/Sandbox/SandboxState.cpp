@@ -244,7 +244,7 @@ void SandboxState::FloatingOrigin()
     {
         Camera->SetPosition(Vector3::Zero);
         CurrentTarget->MoveObjects(-camPos);
-        //Planet->Move(-camPos);
+        // Planet->Move(-camPos);
     }
 }
 

@@ -58,9 +58,9 @@ void UniverseTarget::ScaleObjects(float scale)
 void UniverseTarget::ResetObjectPositions()
 {
     for (auto& galaxy : Galaxies)
-        galaxy->Move(-UniversePosition);
+        galaxy->Move(-Centre);
 
-    UniversePosition = Vector3::Zero;
+    Centre = Vector3::Zero;
 }
 
 Vector3 UniverseTarget::GetClosestObject(Vector3 pos)
