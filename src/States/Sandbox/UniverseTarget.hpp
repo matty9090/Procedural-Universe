@@ -11,7 +11,7 @@ public:
     UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv);
 
     void Render() override;
-    void RenderInChildSpace() override;
+    void RenderInChildSpace(const ICamera& cam, float scale = 1.0f) override;
     void RenderTransitionParent(float t) override;
 
     void MoveObjects(Vector3 v) override;
@@ -25,7 +25,7 @@ private:
     void RenderLerp(float t, bool single = false);
     void BakeSkybox(Vector3 object) override;
     void Seed(uint64_t seed) override;
-    void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
+    //void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
 
     size_t CurrentClosestObjectID;
     RenderView ParticleRenderTarget;

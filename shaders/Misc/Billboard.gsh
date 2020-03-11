@@ -5,7 +5,9 @@ cbuffer cb0
     row_major float4x4 ViewProjMatrix;
     row_major float4x4 InvViewMatrix;
     float3 Cam;
-    float DoesFade;
+    float  Pad0;
+    float3 Fade;
+    float  Pad1;
 };
 
 struct GS_VertIn
@@ -56,11 +58,8 @@ void main
         outVert.Position.z = LogDepthBuffer(outVert.Position.w);
         outVert.Colour = inParticle[0].Colour;
 
-        if (DoesFade > 0.5f)
-        {
-            float t = (length(Cam - inParticle[0].Position) + 100.0f) / 6000.0f;
-            outVert.Colour.a = clamp(lerp(0.0f, inParticle[0].Colour.a, t), 0.0f, inParticle[0].Colour.a);
-        }
+        float t = (length(Cam - inParticle[0].Position) + Fade.y) / Fade.z;
+        outVert.Colour.a = lerp(outVert.Colour.a, clamp(lerp(0.0f, inParticle[0].Colour.a, t), 0.0f, inParticle[0].Colour.a), Fade.x);
 
         outVert.UV = UVs[i];
 		outStrip.Append(outVert);

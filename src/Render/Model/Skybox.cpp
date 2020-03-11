@@ -17,7 +17,7 @@ CSkyBox::CSkyBox(ID3D11DeviceContext* context) : Context(context)
     Pipeline.CreateInputLayout(device, CreateInputLayoutPositionTexture());
 
     Sphere = std::make_unique<CModel>(device, RESM.GetMesh("assets/Skysphere.obj"));
-    Sphere->Scale(420000.0f);
+    Sphere->Scale(38000000.0f);
     Sphere->Rotate(DirectX::SimpleMath::Vector3(0.0f, 0.0f, 0.0f));
 
     CommonStates = std::make_unique<DirectX::CommonStates>(device);

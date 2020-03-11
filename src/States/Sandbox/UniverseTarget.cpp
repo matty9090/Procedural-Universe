@@ -24,15 +24,12 @@ void UniverseTarget::Render()
     RenderLerp(1.0f);
 }
 
-void UniverseTarget::RenderInChildSpace()
+void UniverseTarget::RenderInChildSpace(const ICamera& cam, float scale)
 {
-    auto dsv = Resources->GetDepthStencilView();
-    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-    
     for (size_t i = 0; i < Galaxies.size(); ++i)
     {
         if (i != CurrentClosestObjectID)
-            Galaxies[i]->RenderImposter(*Camera, 1.0f / Child->Scale);
+            Galaxies[i]->RenderImposter(cam, scale);
     }
 }
 
@@ -73,20 +70,9 @@ void UniverseTarget::RenderLerp(float t, bool single)
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    /*if (single)
+    for (auto& galaxy : Galaxies)
     {
-        for (size_t i = 0; i < Galaxies.size(); ++i)
-        {
-            if (i == CurrentClosestObjectID)
-                Galaxies[i]->Render(*Camera, t);
-            else
-                Galaxies[i]->RenderImposter(*Camera);
-        }
-    }
-    else*/
-    {
-        for (auto& galaxy : Galaxies)
-            galaxy->RenderImposter(*Camera);
+        galaxy->RenderImposter(*Camera);
     }
 }
 
@@ -114,11 +100,11 @@ void UniverseTarget::Seed(uint64_t seed)
 
 void UniverseTarget::BakeSkybox(Vector3 object)
 {
-    /*SkyboxGenerator->Render([&](const ICamera& cam) {
+    SkyboxGenerator->Render([&](const ICamera& cam) {
         for (size_t i = 0; i < Galaxies.size(); ++i)
         {
             if(i != CurrentClosestObjectID)
                 Galaxies[i]->RenderImposter(cam);
         }
-    });*/
+    });
 }

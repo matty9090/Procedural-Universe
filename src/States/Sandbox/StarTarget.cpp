@@ -28,8 +28,8 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
 
 void StarTarget::Render()
 {
-    //RenderParentSkybox();
-    Parent->RenderInChildSpace();
+    RenderParentSkybox();
+    Parent->RenderInChildSpace(*Camera);
     RenderLerp();
 }
 
@@ -51,6 +51,9 @@ void StarTarget::RenderTransitionChild(float t)
 
 void StarTarget::RenderTransitionParent(float t)
 {
+    auto dsv = Resources->GetDepthStencilView();
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+
     //RenderParentSkybox();
     //Parent->RenderInChildSpace();
     RenderLerp(1.0f, Vector3::Zero, t, true);

@@ -12,7 +12,7 @@ public:
 
     void Render() override;
     void RenderUI() override;
-    void RenderInChildSpace() override;
+    void RenderInChildSpace(const ICamera& cam, float scale = 1.0f) override;
     void RenderTransitionChild(float t) override;
     void RenderTransitionParent(float t) override;
 

@@ -32,6 +32,7 @@ public:
 
     void Update(float dt);
     bool IsTransitioning() const { return State != EState::Idle; }
+    void GenerateSkybox(Vector3 location);
     Vector3 GetCentre() const { return Centre; }
     uint64_t GetSeed() const { return SeedValue; }
     CSkyBox& GetSkyBox() { return SkyBox; }
@@ -39,7 +40,7 @@ public:
     virtual void Render() = 0;
     virtual void RenderUI() {}
     virtual void RenderObjectUI() {}
-    virtual void RenderInChildSpace() {}
+    virtual void RenderInChildSpace(const ICamera& cam, float scale = 1.0f) {}
     virtual void RenderTransitionChild(float t) { Render(); }
     virtual void RenderTransitionParent(float t) { Render(); }
 
@@ -92,7 +93,6 @@ protected:
     virtual void Seed(uint64_t seed) {}
     virtual void BakeSkybox(Vector3 object) {}
 
-    void GenerateSkybox(Vector3 location);
     void RenderParentSkybox();
     void DispatchTask(EWorkerTask task, std::function<void()> func);
     void FinishTask(EWorkerTask task);

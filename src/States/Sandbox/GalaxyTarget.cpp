@@ -33,7 +33,10 @@ void GalaxyTarget::Seed(uint64_t seed)
 
 void GalaxyTarget::Render()
 {
-    Parent->RenderInChildSpace();
+    auto dsv = Resources->GetDepthStencilView();
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+
+    Parent->RenderInChildSpace(*Camera, 1.0f / Scale);
     RenderLerp(1.0f, 1.0f / Scale);
 }
 
@@ -42,12 +45,12 @@ void GalaxyTarget::RenderUI()
     
 }
 
-void GalaxyTarget::RenderInChildSpace()
+void GalaxyTarget::RenderInChildSpace(const ICamera& cam, float scale)
 {
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    RenderLerp(1.0f, 100.0f / Child->Scale, Vector3::Zero, true);
+    GalaxyRenderer->Render(cam, 0.0f, 100.0f / Child->Scale, Vector3::Zero, true);
 }
 
 void GalaxyTarget::RenderTransitionChild(float t)
@@ -57,7 +60,7 @@ void GalaxyTarget::RenderTransitionChild(float t)
 
 void GalaxyTarget::RenderTransitionParent(float t)
 {
-    Parent->RenderInChildSpace();
+    Parent->RenderInChildSpace(*Camera, 1.0f / Scale);
     RenderLerp(t, 1.0f / Scale, Vector3::Zero, true);
 }
 
@@ -119,7 +122,6 @@ void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single
 void GalaxyTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
-        Parent->GetSkyBox().Draw(cam.GetViewMatrix() * cam.GetProjectionMatrix());
-        GalaxyRenderer->Render(cam, 0.0f, 1.0f / Scale, Vector3::Zero, true);
+        Parent->RenderInChildSpace(cam, 1.2f / Scale);
     });
 }

@@ -63,8 +63,13 @@ void CBillboard::Render(const ICamera& cam)
         unsigned int offset = 0;
         unsigned int stride = sizeof(BillboardInstance);
 
+        VSBuffer buf = {
+            world * cam.GetViewMatrix() * cam.GetProjectionMatrix(), inv, cam.GetPosition(), 0.0f,
+            Vector3(Fades ? 1.0f : 0.0f, 120.0f, 6000.0f), 0.0f
+        };
+
         Context->IASetVertexBuffers(0, 1, InstanceBuffer.GetAddressOf(), &stride, &offset);
-        VertexCB->SetData(Context, { world * cam.GetViewMatrix() * cam.GetProjectionMatrix(), inv, cam.GetPosition(), Fades ? 1.0f : 0.0f });
+        VertexCB->SetData(Context, buf);
         
         Context->GSSetConstantBuffers(0, 1, VertexCB->GetBuffer());
         Context->PSSetShaderResources(0, 1, Texture.GetAddressOf());
@@ -88,8 +93,13 @@ void CBillboard::Render(const ICamera& cam, float scale, Vector3 offset)
         unsigned int offset = 0;
         unsigned int stride = sizeof(BillboardInstance);
 
+        VSBuffer buf = {
+            world * cam.GetViewMatrix() * cam.GetProjectionMatrix(), inv, cam.GetPosition(), 0.0f,
+            Vector3(Fades ? 1.0f : 0.0f, 1.2f * scale, 60.0f * scale), 0.0f
+        };
+
         Context->IASetVertexBuffers(0, 1, InstanceBuffer.GetAddressOf(), &stride, &offset);
-        VertexCB->SetData(Context, { world * cam.GetViewMatrix() * cam.GetProjectionMatrix(), inv, cam.GetPosition(), Fades ? 1.0f : 0.0f });
+        VertexCB->SetData(Context, buf);
 
         Context->GSSetConstantBuffers(0, 1, VertexCB->GetBuffer());
         Context->PSSetShaderResources(0, 1, Texture.GetAddressOf());

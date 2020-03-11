@@ -34,7 +34,9 @@ private:
         Matrix ViewProj;
         Matrix InvView;
         Vector3 Cam;
-        float Fades;
+        float Pad0;
+        Vector3 Fade;
+        float Pad1;
     };
 
     bool Fades = false;
