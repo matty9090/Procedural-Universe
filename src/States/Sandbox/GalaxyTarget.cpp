@@ -47,10 +47,7 @@ void GalaxyTarget::RenderUI()
 
 void GalaxyTarget::RenderInChildSpace(const ICamera& cam, float scale)
 {
-    auto dsv = Resources->GetDepthStencilView();
-    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-
-    GalaxyRenderer->Render(cam, 0.0f, 100.0f / Child->Scale, Vector3::Zero, true);
+    GalaxyRenderer->Render(cam, 0.0f, scale, Vector3::Zero, true);
 }
 
 void GalaxyTarget::RenderTransitionChild(float t)

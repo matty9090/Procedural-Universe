@@ -10,7 +10,7 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     Scale = 0.001f;
     BeginTransitionDist = 10.0f;
     EndTransitionDist = 0.3f;
-    //RenderParentInChildSpace = true;
+    RenderParentInChildSpace = true;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
@@ -25,8 +25,10 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
 void PlanetTarget::Render()
 {
-    RenderParentSkybox();
-    //Parent->RenderInChildSpace();
+    auto dsv = Resources->GetDepthStencilView();
+    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
+
+    Parent->RenderInChildSpace(*Camera, 1.0f / Scale);
     Planet->Render();
 }
 
@@ -40,9 +42,6 @@ void PlanetTarget::RenderTransitionChild(float t)
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    //PlanetBuffer->SetData(Context, PlanetConstantBuffer { Planet->LightSource, t });
-    //Context->PSSetConstantBuffers(0, 1, PlanetBuffer->GetBuffer());
-
     Planet->Move(ParentLocationSpace);
     Planet->Render(Scale);
     Planet->Move(-ParentLocationSpace);
@@ -50,12 +49,7 @@ void PlanetTarget::RenderTransitionChild(float t)
 
 void PlanetTarget::RenderTransitionParent(float t)
 {
-    /*RenderParentSkybox();
-
-    PlanetBuffer->SetData(Context, PlanetConstantBuffer{ Planet->LightSource, t });
-    Context->PSSetConstantBuffers(0, 1, PlanetBuffer->GetBuffer());
-
-    Planet->Render();*/
+    
 }
 
 void PlanetTarget::Seed(uint64_t seed)
@@ -68,8 +62,8 @@ void PlanetTarget::MoveObjects(Vector3 v)
 {
     Planet->Move(v);
     Centre += v;
-    //ParentOffset += v;
-    //Parent->MoveObjects(v);
+    ParentOffset += v;
+    Parent->MoveObjects(v);
 }
 
 void PlanetTarget::ScaleObjects(float scale)

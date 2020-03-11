@@ -29,7 +29,7 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
 void StarTarget::Render()
 {
     RenderParentSkybox();
-    Parent->RenderInChildSpace(*Camera);
+    Parent->RenderInChildSpace(*Camera, 100.0f / Scale);
     RenderLerp();
 }
 
@@ -54,8 +54,8 @@ void StarTarget::RenderTransitionParent(float t)
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    //RenderParentSkybox();
-    //Parent->RenderInChildSpace();
+    RenderParentSkybox();
+    Parent->RenderInChildSpace(*Camera, 100.0f / Scale);
     RenderLerp(1.0f, Vector3::Zero, t, true);
 }
 
@@ -166,8 +166,7 @@ void StarTarget::BakeSkybox(Vector3 object)
         Matrix view = cam.GetViewMatrix();
         Matrix viewProj = view * cam.GetProjectionMatrix();
         
-        Context->OMSetBlendState(CommonStates->Opaque(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Parent->GetSkyBox().Draw(viewProj);
+        Parent->RenderInChildSpace(cam, 100.0f / Scale);
 
         ParticlePipeline.SetState(Context, [&]() {
             unsigned int offset = 0;
