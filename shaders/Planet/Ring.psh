@@ -12,5 +12,5 @@ struct PS_Input
 
 float4 main(in PS_Input v_in) : SV_Target
 {
-    return float4(0.1, 0.3, 0.9, 1.0);
+    return Colour;
 }

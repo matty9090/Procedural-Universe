@@ -26,9 +26,14 @@ public:
     std::string GetName() const override { return "Rings"; }
 
 private:
+    void AddRing(float diameter, DirectX::SimpleMath::Color col);
+
     CPlanet* Planet;
+    uint64_t Seed;
+    int NumRings;
     float RingRadius;
-    float Thickness = 10.0f;
+    float Thickness = 0.4f;
+    DirectX::SimpleMath::Color BaseColour;
 
     struct Vertex
     {
@@ -48,12 +53,18 @@ private:
         DirectX::SimpleMath::Color Colour;
     };
 
+    struct Ring
+    {
+        Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
+        DirectX::SimpleMath::Color Colour;
+    };
+
     RenderPipeline Pipeline;
     UINT NumIndices;
 
-    Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
-
+    std::unique_ptr<DirectX::CommonStates> CommonStates;
     std::unique_ptr<ConstantBuffer<VSBuffer>> VertexCB;
     std::unique_ptr<ConstantBuffer<PSBuffer>> PixelCB;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
+    std::vector<Ring> Rings;
 };

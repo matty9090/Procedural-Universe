@@ -266,7 +266,8 @@ CPlanetSeeder::CPlanetSeeder(uint64_t seed) : Seed(seed)
     else if (Type == EType::GasGiant)
     {
         std::uniform_real_distribution<float> distRadius(220.0f, 400.0f);
-        Radius = distRadius(gen);
+        std::uniform_int_distribution<> distRings(0, 1);
+        Radius = distRadius(gen), HasRings = distRings(gen) == 0;
     }
     // Rocky
     else if (Type == EType::Rocky)
