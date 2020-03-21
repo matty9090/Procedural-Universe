@@ -28,13 +28,10 @@ private:
     void OnStartTransitionDownParent(Vector3 object) override;
     void OnStartTransitionDownChild(Vector3 object) override;
     void OnEndTransitionDownChild() override;
-    void RenderLerp(float scale = 1.0f, Vector3 offset = Vector3::Zero, float t = 1.0f, bool single = false);
+    void RenderLerp(float scale = 1.0f, float t = 1.0f, bool single = false);
     void BakeSkybox(Vector3 object) override;
     void Seed(uint64_t seed) override;
-    void UpdateParticleBuffer();
-
     void CreateStarPipeline();
-    void CreateParticlePipeline();
 
     struct GSConstantBuffer
     {
@@ -55,14 +52,12 @@ private:
 
     RenderView ParticleRenderTarget;
     RenderPipeline StarPipeline;
-    RenderPipeline ParticlePipeline;
 
     std::vector<LWParticle> Particles;
+    std::vector<std::unique_ptr<CPlanet>> Planets;
     std::vector<CPlanetSeeder> ParticleInfo;
     std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
-    Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
 
-    std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
     std::unique_ptr<ConstantBuffer<LerpConstantBuffer>> LerpBuffer;
 };

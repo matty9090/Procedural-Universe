@@ -20,7 +20,7 @@ CRingComponent::CRingComponent(CPlanet* planet, uint64_t seed) : Planet(planet),
     PixelCB = std::make_unique<ConstantBuffer<PSBuffer>>(Planet->GetDevice());
 
     std::default_random_engine gen{ static_cast<unsigned int>(Seed) };
-    std::uniform_int_distribution<int> numDist(60, 900);
+    std::uniform_int_distribution<int> numDist(40, 400);
     std::uniform_real_distribution<float> radDist(1.4f, 1.6f);
 
     NumRings = numDist(gen);
@@ -34,7 +34,7 @@ void CRingComponent::Init()
     Rings.clear();
 
     std::default_random_engine gen { static_cast<unsigned int>(Seed) };
-    std::uniform_real_distribution<float> radSep(0.24f, 0.32f);
+    std::uniform_real_distribution<float> radSep(0.54f, 0.72f);
     std::uniform_real_distribution<float> colDist(-0.1f, 0.1f);
     std::uniform_int_distribution<int> gapDist(0, 60);
     std::uniform_real_distribution<float> gapSizeDist(7.0f, 12.0f);
@@ -113,11 +113,8 @@ void CRingComponent::Render(DirectX::SimpleMath::Matrix viewProj, float t)
 
         for (auto& ring : Rings)
         {
-            auto col = ring.Colour;
-            col.w *= t;
-
             Planet->GetContext()->IASetVertexBuffers(0, 1, ring.VertexBuffer.GetAddressOf(), &stride, &offset);
-            PixelCB->SetData(Planet->GetContext(), { col });
+            PixelCB->SetData(Planet->GetContext(), { ring.Colour });
             Planet->GetContext()->PSSetConstantBuffers(0, 1, PixelCB->GetBuffer());
             Planet->GetContext()->DrawIndexed(NumIndices, 0, 0);
         }

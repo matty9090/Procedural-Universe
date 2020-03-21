@@ -23,7 +23,6 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
     CreateStarPipeline();
-    CreateParticlePipeline();
 }
 
 void StarTarget::Render()
@@ -31,6 +30,11 @@ void StarTarget::Render()
     RenderParentSkybox();
     Parent->RenderInChildSpace(*Camera, 100.0f / Scale);
     RenderLerp();
+
+    for (auto& planet : Planets)
+    {
+        planet->Render();
+    }
 }
 
 void StarTarget::RenderObjectUI()
@@ -45,8 +49,15 @@ void StarTarget::RenderTransitionChild(float t)
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
     Star->Move(ParentLocationSpace);
-    RenderLerp(Scale, ParentLocationSpace, t, true);
+    RenderLerp(Scale, t, true);
     Star->Move(-ParentLocationSpace);
+
+    for (auto& planet : Planets)
+    {
+        planet->Move(ParentLocationSpace);
+        planet->Render(Scale, t);
+        planet->Move(-ParentLocationSpace);
+    }
 }
 
 void StarTarget::RenderTransitionParent(float t)
@@ -56,17 +67,16 @@ void StarTarget::RenderTransitionParent(float t)
 
     RenderParentSkybox();
     Parent->RenderInChildSpace(*Camera, 100.0f / Scale);
-    RenderLerp(1.0f, Vector3::Zero, t, true);
+    RenderLerp(1.0f, t, true);
 }
 
 void StarTarget::MoveObjects(Vector3 v)
 {
-    for (auto& particle : Particles)
-        particle.Position += v;
+    for (auto& planet : Planets)
+        planet->Move(v);
 
     Star->Move(v);
     Centre += v;
-    UpdateParticleBuffer();
 
     ParentOffset += v;
     Parent->MoveObjects(v);
@@ -74,10 +84,8 @@ void StarTarget::MoveObjects(Vector3 v)
 
 void StarTarget::ScaleObjects(float scale)
 {
-    for (auto& particle : Particles)
-        particle.Position /= scale;
-
-    UpdateParticleBuffer();
+    for (auto& planet : Planets)
+        planet->Scale(1.0f / scale);
 }
 
 Vector3 StarTarget::GetClosestObject(Vector3 pos)
@@ -99,52 +107,18 @@ void StarTarget::OnStartTransitionDownParent(Vector3 object)
 
 void StarTarget::OnStartTransitionDownChild(Vector3 object)
 {
-    //ParticlePipeline.CreateDepthState(Device, EDepthState::Normal);
+
 }
 
 void StarTarget::OnEndTransitionDownChild()
 {
-    //ParticlePipeline.CreateDepthState(Device, EDepthState::None);
+
 }
 
-void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
+void StarTarget::RenderLerp(float scale, float t, bool single)
 {
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
-
-    view = view.Invert();
-    view *= Matrix::CreateScale(scale);
-
-    ParticlePipeline.SetState(Context, [&]() {
-        unsigned int offset = 0;
-        unsigned int stride = sizeof(LWParticle);
-
-        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
-
-        Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-        GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view, voffset });
-        Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-        Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-
-        if (single && CurrentClosestObjectID < Particles.size())
-        {
-            auto pivot1 = static_cast<UINT>(CurrentClosestObjectID);
-            auto pivot2 = static_cast<UINT>(Particles.size() - CurrentClosestObjectID - 1);
-
-            Context->Draw(pivot1, 0);
-            Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
-
-            // Draw object of interest separately to lerp it's size
-            LerpBuffer->SetData(Context, LerpConstantBuffer { Maths::Map(t, 0.0f, 1.0f, 0.2f, 1.0f) });
-            Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-            Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
-        }
-        else
-        {
-            Context->Draw(static_cast<UINT>(Particles.size()), 0);
-        }
-    });
 
     if (single)
         LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
@@ -168,23 +142,10 @@ void StarTarget::BakeSkybox(Vector3 object)
         
         Parent->RenderInChildSpace(cam, 100.0f / Scale);
 
-        ParticlePipeline.SetState(Context, [&]() {
-            unsigned int offset = 0;
-            unsigned int stride = sizeof(LWParticle);
-
-            Context->IASetVertexBuffers(0, 1, ParticleBuffer.GetAddressOf(), &stride, &offset);
-            GSBuffer->SetData(Context, GSConstantBuffer { viewProj, view.Invert(), Vector3::Zero });
-            Context->GSSetConstantBuffers(0, 1, GSBuffer->GetBuffer());
-            Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
-            Context->RSSetState(CommonStates->CullNone());
-            Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-
-            auto pivot1 = static_cast<unsigned int>(CurrentClosestObjectID);
-            auto pivot2 = static_cast<unsigned int>(Particles.size() - CurrentClosestObjectID - 1);
-
-            Context->Draw(pivot1, 0);
-            Context->Draw(pivot2, static_cast<unsigned int>(CurrentClosestObjectID + 1));
-        });
+        for (auto& planet : Planets)
+        {
+            planet->Render();
+        }
 
         Context->GSSetShader(nullptr, 0, 0);
         LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
@@ -203,26 +164,22 @@ void StarTarget::Seed(uint64_t seed)
     Particles.resize(dist(gen));
     ParticleInfo.resize(Particles.size());
 
-    CreateParticleBuffer(Device, ParticleBuffer.ReleaseAndGetAddressOf(), Particles);
-
     auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random, 2.0f);
     seeder->Seed(seed);
 
-    for (size_t i = 0; i < Particles.size(); ++i)
-    {
-        CPlanetSeeder seeder((seed << 5) + i);
-        Particles[i].Scale = seeder.Radius * Scale * 2.0f;
-        Particles[i].Colour = DirectX::Colors::White;
-        ParticleInfo[i] = seeder;
-    }
-}
+    Planets.resize(Particles.size());
 
-void StarTarget::UpdateParticleBuffer()
-{
-    D3D11_MAPPED_SUBRESOURCE mapped;
-    Context->Map(ParticleBuffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
-    memcpy(mapped.pData, Particles.data(), Particles.size() * sizeof(LWParticle));
-    Context->Unmap(ParticleBuffer.Get(), 0);
+    for (size_t i = 0; i < Planets.size(); ++i)
+    {
+        Planets[i] = std::make_unique<CPlanet>(Context, *Camera);
+        CPlanetSeeder seeder((seed << 5) + i);
+        seeder.SeedPlanet(Planets[i].get());
+        ParticleInfo[i] = seeder;
+        Planets[i]->SetPosition(Particles[i].Position);
+        Planets[i]->Scale(Scale * 2.0f);
+        Planets[i]->LightSource = -Particles[i].Position;
+        Planets[i]->LightSource.Normalize();
+    }
 }
 
 void StarTarget::ResetObjectPositions()
@@ -245,20 +202,4 @@ void StarTarget::CreateStarPipeline()
     StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
 
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
-}
-
-void StarTarget::CreateParticlePipeline()
-{
-    ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
-    ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
-    ParticlePipeline.LoadPixel(L"shaders/Standard/PlainColour.psh");
-    ParticlePipeline.LoadGeometry(L"shaders/Particles/PlanetParticle.gsh");
-    ParticlePipeline.CreateDepthState(Device, EDepthState::Normal);
-    ParticlePipeline.CreateRasteriser(Device, ECullMode::None);
-    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColourScale());
-
-    GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
-
-    auto vp = Resources->GetScreenViewport();
-    ParticleRenderTarget = CreateTarget(Device, static_cast<int>(vp.Width), static_cast<int>(vp.Height));
 }

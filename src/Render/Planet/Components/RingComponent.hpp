@@ -32,7 +32,7 @@ private:
     uint64_t Seed;
     int NumRings;
     float RingRadius;
-    float Thickness = 0.4f;
+    float Thickness = 1.6f;
     DirectX::SimpleMath::Color BaseColour;
 
     struct Vertex

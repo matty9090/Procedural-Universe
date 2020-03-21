@@ -124,8 +124,11 @@ void CPlanet::Update(float dt)
 
 void CPlanet::Render(float scale, float t)
 {
+    auto view = DirectX::SimpleMath::Matrix(Camera.GetViewMatrix()).Invert();
+    view *= scale;
+
     for (auto& component : Components)
-        component->Render(Camera.GetViewMatrix() * Camera.GetProjectionMatrix(), t);
+        component->Render(view.Invert() * Camera.GetProjectionMatrix(), t);
 }
 
 void CPlanet::RenderUI()
