@@ -47,7 +47,7 @@ void StarTarget::RenderInChildSpace(const ICamera& cam, float scale)
 {
     RenderParentSkybox();
     Parent->RenderInChildSpace(cam, scale);
-    RenderLerp(Child->Scale, Vector3::Zero, 0.0f, true);
+    RenderLerp(Child->Scale, 0.0f, true);
 }
 
 void StarTarget::RenderTransitionChild(float t)
