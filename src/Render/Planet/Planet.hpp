@@ -75,6 +75,7 @@ public:
     uint64_t Seed;
     uint8_t Type = 0;
     float Radius = 50.0f;
+    bool HasRings = false;
 };
 
 class CPlanet

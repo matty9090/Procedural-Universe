@@ -8,6 +8,7 @@
 #include <imgui.h>
 
 #include "Misc/ProcUtils.hpp"
+#include "Components/RingComponent.hpp"
 #include "Components/TerrainComponent.hpp"
 #include "Components/AtmosphereComponent.hpp"
 
@@ -170,6 +171,13 @@ void CPlanet::RenderUI()
             {
                 chkWater ? AddComponent<CTerrainComponent<WaterHeightFunc>>(this) : RemoveComponent<CTerrainComponent<WaterHeightFunc>>();
             }
+
+            bool chkRings = HasComponent<CRingComponent>();
+
+            if (ImGui::Checkbox("Rings", &chkRings))
+            {
+                chkRings ? AddComponent<CRingComponent>(this) : RemoveComponent<CRingComponent>();
+            }
         }
     }
 
@@ -287,6 +295,7 @@ void CPlanetSeeder::SeedPlanet(CPlanet* planet) const
     case GasGiant:
         planet->AddComponent<CAtmosphereComponent>(planet, Seed);
         planet->AddComponent<CTerrainComponent<WaterHeightFunc>>(planet, Seed);
+        if (HasRings) planet->AddComponent<CRingComponent>(planet, Seed);
         break;
 
     case Rocky:
