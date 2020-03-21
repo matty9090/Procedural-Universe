@@ -4,7 +4,7 @@
 #include <wincodec.h>
 #include <ScreenGrab.h>
 
-#define CAPTURE_SKYBOX 1
+#define CAPTURE_SKYBOX 0
 
 #if CAPTURE_SKYBOX
     #include <DXGItype.h>

@@ -28,7 +28,7 @@ void PlanetTarget::Render()
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    Parent->RenderInChildSpace(*Camera, 1.0f / Scale);
+    Parent->RenderInChildSpace(*Camera, 200.0f / Scale);
     Planet->Render();
 }
 
