@@ -110,7 +110,7 @@ void CTerrainComponent<HeightFunc>::Update(float dt)
 }
 
 template <class HeightFunc>
-void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj)
+void CTerrainComponent<HeightFunc>::Render(DirectX::SimpleMath::Matrix viewProj, float t)
 {
     bool inAtm = false;
 

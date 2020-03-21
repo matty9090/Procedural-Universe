@@ -42,7 +42,7 @@ public:
 
     void Init() final;
     void Update(float dt) final;
-    void Render(DirectX::SimpleMath::Matrix viewProj) final;
+    void Render(DirectX::SimpleMath::Matrix viewProj, float t) final;
     void RenderUI() final;
 
     float GetRadius() const;

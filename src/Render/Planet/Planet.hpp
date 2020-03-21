@@ -85,7 +85,7 @@ public:
     ~CPlanet();
 
     void Update(float dt);
-    void Render(float scale = 1.0f);
+    void Render(float scale = 1.0f, float t = 1.0f);
     void RenderUI();
     void Move(DirectX::SimpleMath::Vector3 v);
     void Scale(float s);

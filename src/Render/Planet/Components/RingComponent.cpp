@@ -65,8 +65,7 @@ void CRingComponent::AddRing(float diameter, DirectX::SimpleMath::Color col)
 
     Ring ring;
 
-    Shapes::ComputeTorus(vertices, indices, diameter * RingRadius, Thickness, 128);
-    NumIndices = static_cast<UINT>(indices.size());
+    Shapes::ComputeTorus(vertices, indices, diameter * RingRadius, Thickness, 70, !IndexBuffer.Get());
 
     D3D11_BUFFER_DESC buffer;
     buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -83,6 +82,7 @@ void CRingComponent::AddRing(float diameter, DirectX::SimpleMath::Color col)
     // Index buffer is shared among all rings, only create once
     if (!IndexBuffer.Get())
     {
+        NumIndices = static_cast<UINT>(indices.size());
         buffer.BindFlags = D3D11_BIND_INDEX_BUFFER;
         buffer.ByteWidth = NumIndices * sizeof(uint16_t);
 
@@ -100,7 +100,7 @@ void CRingComponent::Update(float dt)
 
 }
 
-void CRingComponent::Render(DirectX::SimpleMath::Matrix viewProj)
+void CRingComponent::Render(DirectX::SimpleMath::Matrix viewProj, float t)
 {
     Pipeline.SetState(Planet->GetContext(), [&]() {
         unsigned int offset = 0;
@@ -113,8 +113,11 @@ void CRingComponent::Render(DirectX::SimpleMath::Matrix viewProj)
 
         for (auto& ring : Rings)
         {
+            auto col = ring.Colour;
+            col.w *= t;
+
             Planet->GetContext()->IASetVertexBuffers(0, 1, ring.VertexBuffer.GetAddressOf(), &stride, &offset);
-            PixelCB->SetData(Planet->GetContext(), { ring.Colour });
+            PixelCB->SetData(Planet->GetContext(), { col });
             Planet->GetContext()->PSSetConstantBuffers(0, 1, PixelCB->GetBuffer());
             Planet->GetContext()->DrawIndexed(NumIndices, 0, 0);
         }

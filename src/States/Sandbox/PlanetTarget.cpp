@@ -43,7 +43,7 @@ void PlanetTarget::RenderTransitionChild(float t)
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
     Planet->Move(ParentLocationSpace);
-    Planet->Render(Scale);
+    Planet->Render(Scale, t);
     Planet->Move(-ParentLocationSpace);
 }
 

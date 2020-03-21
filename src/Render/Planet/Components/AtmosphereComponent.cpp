@@ -57,7 +57,7 @@ void CAtmosphereComponent::Update(float dt)
 
 }
 
-void CAtmosphereComponent::Render(DirectX::SimpleMath::Matrix viewProj)
+void CAtmosphereComponent::Render(DirectX::SimpleMath::Matrix viewProj, float t)
 {
     Buffer.SetData(Planet->GetContext(), GetScatterBuffer());
 

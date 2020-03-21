@@ -122,10 +122,10 @@ void CPlanet::Update(float dt)
         component->Update(dt);
 }
 
-void CPlanet::Render(float scale)
+void CPlanet::Render(float scale, float t)
 {
     for (auto& component : Components)
-        component->Render(Camera.GetViewMatrix() * Camera.GetProjectionMatrix());
+        component->Render(Camera.GetViewMatrix() * Camera.GetProjectionMatrix(), t);
 }
 
 void CPlanet::RenderUI()

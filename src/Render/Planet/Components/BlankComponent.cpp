@@ -20,7 +20,7 @@ void CBlankComponent::Update(float dt)
 
 }
 
-void CBlankComponent::Render(DirectX::SimpleMath::Matrix viewProj)
+void CBlankComponent::Render(DirectX::SimpleMath::Matrix viewProj, float t)
 {
     
 }

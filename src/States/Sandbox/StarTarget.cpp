@@ -99,12 +99,12 @@ void StarTarget::OnStartTransitionDownParent(Vector3 object)
 
 void StarTarget::OnStartTransitionDownChild(Vector3 object)
 {
-    ParticlePipeline.CreateDepthState(Device, EDepthState::Normal);
+    //ParticlePipeline.CreateDepthState(Device, EDepthState::Normal);
 }
 
 void StarTarget::OnEndTransitionDownChild()
 {
-    ParticlePipeline.CreateDepthState(Device, EDepthState::None);
+    //ParticlePipeline.CreateDepthState(Device, EDepthState::None);
 }
 
 void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
@@ -136,7 +136,7 @@ void StarTarget::RenderLerp(float scale, Vector3 voffset, float t, bool single)
             Context->Draw(pivot2, static_cast<UINT>(CurrentClosestObjectID + 1));
 
             // Draw object of interest separately to lerp it's size
-            LerpBuffer->SetData(Context, LerpConstantBuffer { t });
+            LerpBuffer->SetData(Context, LerpConstantBuffer { Maths::Map(t, 0.0f, 1.0f, 0.2f, 1.0f) });
             Context->GSSetConstantBuffers(1, 1, LerpBuffer->GetBuffer());
             Context->Draw(1, static_cast<UINT>(CurrentClosestObjectID));
         }
