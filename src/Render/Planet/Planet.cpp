@@ -246,10 +246,13 @@ void CPlanet::UpdateMatrix()
             DirectX::SimpleMath::Matrix::CreateTranslation(Position); 
 }
 
-void CPlanet::RefreshComponents()
+void CPlanet::RefreshComponents(const IPlanetComponent* exclude)
 {
     for (auto& c : Components)
-        c->Init();
+    {
+        if (c.get() != exclude)
+            c->Init();
+    }
 }
 
 CPlanetSeeder::CPlanetSeeder(uint64_t seed) : Seed(seed)

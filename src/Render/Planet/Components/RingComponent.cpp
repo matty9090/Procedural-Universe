@@ -65,7 +65,7 @@ void CRingComponent::AddRing(float diameter, DirectX::SimpleMath::Color col)
 
     Ring ring;
 
-    Shapes::ComputeTorus(vertices, indices, diameter * RingRadius, Thickness, 70, !IndexBuffer.Get());
+    Shapes::ComputeTorus(vertices, indices, diameter * RingRadius, Thickness, 62, !IndexBuffer.Get());
 
     D3D11_BUFFER_DESC buffer;
     buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;

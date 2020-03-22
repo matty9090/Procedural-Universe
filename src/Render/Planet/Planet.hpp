@@ -131,7 +131,7 @@ private:
     std::list<std::unique_ptr<IPlanetComponent>> Components;
     
     void UpdateMatrix();
-    void RefreshComponents();
+    void RefreshComponents(const IPlanetComponent* exclude = nullptr);
 };
 
 template <class Component>
@@ -169,7 +169,7 @@ void CPlanet::AddComponent(Args... args)
     component->Init();
     Components.push_back(std::move(component));
 
-    RefreshComponents();
+    RefreshComponents(component.get());
 }
 
 template <class Component>

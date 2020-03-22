@@ -20,7 +20,7 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     Planet = std::make_unique<CPlanet>(Context, *Camera);
 
-    CreatePlanetPipeline();
+    CreateStarPipeline();
 }
 
 void PlanetTarget::Render()
@@ -88,12 +88,12 @@ void PlanetTarget::OnStartTransitionDownChild(Vector3 location)
     Planet->LightSource = -static_cast<StarTarget*>(Parent)->GetLightDirection();
 }
 
-void PlanetTarget::CreatePlanetPipeline()
+void PlanetTarget::CreateStarPipeline()
 {
     StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
     StarPipeline.LoadVertex(L"shaders/Standard/Position.vsh");
     StarPipeline.LoadPixel(L"shaders/Particles/Star.psh");
-    StarPipeline.CreateDepthState(Device, EDepthState::Read);
+    StarPipeline.CreateDepthState(Device, EDepthState::Normal);
     StarPipeline.CreateRasteriser(Device, ECullMode::Clockwise);
     StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
 
