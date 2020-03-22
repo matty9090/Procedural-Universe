@@ -29,6 +29,7 @@ void StarTarget::Render()
 {
     RenderParentSkybox();
     Parent->RenderInChildSpace(*Camera, 100.0f / Scale);
+
     RenderLerp();
 
     for (auto& planet : Planets)
