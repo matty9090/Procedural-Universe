@@ -75,7 +75,6 @@ void StarTarget::RenderTransitionParent(float t)
 
     RenderParentSkybox();
     Parent->RenderInChildSpace(*Camera, 100.0f / Scale);
-    RenderLerp(1.0f, t, true);
 }
 
 void StarTarget::MoveObjects(Vector3 v)

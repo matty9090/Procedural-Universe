@@ -138,8 +138,8 @@ void SandboxState::Render()
 
     if (CurrentTarget->IsTransitioning())
     {
-        CurrentTarget->RenderTransitionParent(CurrentTransitionT);
         CurrentTarget->Child->RenderTransitionChild(1.0f - CurrentTransitionT);
+        CurrentTarget->RenderTransitionParent(CurrentTransitionT);
     }
     else
     {
