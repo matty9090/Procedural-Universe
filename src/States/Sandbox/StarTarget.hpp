@@ -1,5 +1,6 @@
 #include "SandboxTarget.hpp"
 
+#include <deque>
 #include <memory>
 #include <CommonStates.h>
 
@@ -33,6 +34,7 @@ private:
     void BakeSkybox(Vector3 object) override;
     void Seed(uint64_t seed) override;
     void CreateStarPipeline();
+    void StateTransitioning(float dt) override;
 
     struct GSConstantBuffer
     {
@@ -48,12 +50,14 @@ private:
         float Custom1, Custom2, Custom3;
     };
 
+    int SeedFrames = 0;
     size_t CurrentClosestObjectID;
     std::unique_ptr<CModel> Star;
 
     RenderView ParticleRenderTarget;
     RenderPipeline StarPipeline;
 
+    std::deque<uint64_t> SeedQueue;
     std::vector<LWParticle> Particles;
     std::vector<std::unique_ptr<CPlanet>> Planets;
     std::vector<CPlanetSeeder> ParticleInfo;

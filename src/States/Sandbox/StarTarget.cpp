@@ -174,18 +174,18 @@ void StarTarget::Seed(uint64_t seed)
     auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random, 2.0f);
     seeder->Seed(seed);
 
+    SeedQueue.clear();
     Planets.resize(Particles.size());
 
     for (size_t i = 0; i < Planets.size(); ++i)
     {
         Planets[i] = std::make_unique<CPlanet>(Context, *Camera);
-        CPlanetSeeder seeder((seed << 5) + i);
-        seeder.SeedPlanet(Planets[i].get());
-        ParticleInfo[i] = seeder;
         Planets[i]->SetPosition(Particles[i].Position);
         Planets[i]->Scale(Scale * 2.0f);
         Planets[i]->LightSource = -Particles[i].Position;
         Planets[i]->LightSource.Normalize();
+
+        SeedQueue.push_back((seed << 5) + (Planets.size() - i - 1));
     }
 }
 
@@ -209,4 +209,21 @@ void StarTarget::CreateStarPipeline()
     StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
 
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
+}
+
+void StarTarget::StateTransitioning(float dt)
+{
+    ++SeedFrames;
+
+    if (!SeedQueue.empty() && SeedFrames > 10)
+    {
+        auto i = SeedQueue.size() - 1;
+
+        CPlanetSeeder seeder(SeedQueue.front());
+        seeder.SeedPlanet(Planets[i].get());
+        ParticleInfo[i] = seeder;
+
+        SeedQueue.pop_front();
+        SeedFrames = 0;
+    }
 }

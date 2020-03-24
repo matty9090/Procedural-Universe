@@ -123,7 +123,14 @@ void SandboxState::Update(float dt)
         Camera->VelocityScale = CurrentTarget->VelocityMultiplier;
 
     Camera->Events(Mouse, Mouse->GetState(), Keyboard->GetState(), dt);
+
     CurrentTarget->Update(dt);
+
+    if (CurrentTarget->IsTransitioning())
+    {
+        CurrentTarget->Child->Update(dt);
+    }
+
     Camera->Update(dt);
 
     if (CurrentTarget->Parent)
