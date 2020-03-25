@@ -8,7 +8,7 @@ using namespace DirectX;
 namespace Shapes
 {
 	template <class Vertex, class Index = uint32_t>
-	void ComputeTorus(std::vector<Vertex>& vertices, std::vector<Index>& indices, float diameter, float thickness, size_t tessellation, bool generateIndices)
+	void ComputeTorus(std::vector<Vertex>& vertices, std::vector<Index>& indices, float diameter, float thickness, size_t tessellation)
 	{
 		vertices.clear();
 		indices.clear();
@@ -49,20 +49,17 @@ namespace Shapes
 
 				vertices.push_back({ position, normal, textureCoordinate });
 
-				if (generateIndices)
-				{
-					// And create indices for two triangles.
-					size_t nextI = (i + 1) % stride;
-					size_t nextJ = (j + 1) % stride;
+				// And create indices for two triangles.
+				size_t nextI = (i + 1) % stride;
+				size_t nextJ = (j + 1) % stride;
 
-					indices.push_back(static_cast<Index>(i * stride + j));
-					indices.push_back(static_cast<Index>(i * stride + nextJ));
-					indices.push_back(static_cast<Index>(nextI * stride + j));
+				indices.push_back(static_cast<Index>(i * stride + j));
+				indices.push_back(static_cast<Index>(i * stride + nextJ));
+				indices.push_back(static_cast<Index>(nextI * stride + j));
 
-					indices.push_back(static_cast<Index>(i * stride + nextJ));
-					indices.push_back(static_cast<Index>(nextI * stride + nextJ));
-					indices.push_back(static_cast<Index>(nextI * stride + j));
-				}
+				indices.push_back(static_cast<Index>(i * stride + nextJ));
+				indices.push_back(static_cast<Index>(nextI * stride + nextJ));
+				indices.push_back(static_cast<Index>(nextI * stride + j));
 			}
 		}
 	}

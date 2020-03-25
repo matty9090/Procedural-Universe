@@ -26,8 +26,6 @@ public:
     std::string GetName() const override { return "Rings"; }
 
 private:
-    void AddRing(float diameter, DirectX::SimpleMath::Color col);
-
     CPlanet* Planet;
     uint64_t Seed;
     int NumRings;
@@ -55,7 +53,7 @@ private:
 
     struct Ring
     {
-        Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
+        float Radius;
         DirectX::SimpleMath::Color Colour;
     };
 
@@ -66,5 +64,6 @@ private:
     std::unique_ptr<ConstantBuffer<VSBuffer>> VertexCB;
     std::unique_ptr<ConstantBuffer<PSBuffer>> PixelCB;
     Microsoft::WRL::ComPtr<ID3D11Buffer> IndexBuffer;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
     std::vector<Ring> Rings;
 };
