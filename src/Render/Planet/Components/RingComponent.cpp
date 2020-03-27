@@ -35,28 +35,13 @@ void CRingComponent::Init()
 
     std::vector<Vertex> vertices;
     std::vector<uint16_t> indices;
-
+    
     Shapes::ComputeTorus(vertices, indices, 2.0f, 0.06f, 160);
 
-    D3D11_BUFFER_DESC buffer;
-    buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    buffer.Usage = D3D11_USAGE_DEFAULT;
-    buffer.ByteWidth = static_cast<UINT>(vertices.size() * sizeof(Vertex));
-    buffer.CPUAccessFlags = 0;
-    buffer.MiscFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA init;
-    init.pSysMem = vertices.data();
-
-    Planet->GetDevice()->CreateBuffer(&buffer, &init, VertexBuffer.ReleaseAndGetAddressOf());
+    CreateVertexBuffer(Planet->GetDevice(), vertices, VertexBuffer.ReleaseAndGetAddressOf());
+    CreateIndexBuffer(Planet->GetDevice(), indices, IndexBuffer.ReleaseAndGetAddressOf());
 
     NumIndices = static_cast<UINT>(indices.size());
-    buffer.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    buffer.ByteWidth = NumIndices * sizeof(uint16_t);
-
-    init.pSysMem = indices.data();
-
-    Planet->GetDevice()->CreateBuffer(&buffer, &init, IndexBuffer.ReleaseAndGetAddressOf());
 
     std::default_random_engine gen { static_cast<unsigned int>(Seed) };
     std::uniform_real_distribution<float> radSep(0.54f, 0.72f);

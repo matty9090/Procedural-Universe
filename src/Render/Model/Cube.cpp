@@ -15,7 +15,7 @@ Cube::Cube(ID3D11DeviceContext* context) : Context(context)
     Pipeline.CreateDepthState(device, EDepthState::Normal);
     Pipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
 
-    Vertex vertices[] {
+    std::vector<Vertex> vertices {
         {{ -1.0f,  1.0f, -1.0f }},
         {{ -1.0f,  1.0f,  1.0f }},
         {{  1.0f,  1.0f,  1.0f }},
@@ -26,30 +26,14 @@ Cube::Cube(ID3D11DeviceContext* context) : Context(context)
         {{  1.0f, -1.0f, -1.0f }}
     };
 
-    uint16_t indices[] {
+    std::vector<uint16_t> indices {
         0, 1, 1, 2, 2, 3, 3, 0, // Top
         4, 5, 5, 6, 6, 7, 7, 4, // Bottom
         0, 4, 1, 5, 2, 6, 3, 7  // Middle
     };
 
-    D3D11_BUFFER_DESC buffer;
-    buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-    buffer.Usage = D3D11_USAGE_DEFAULT;
-    buffer.ByteWidth = 8 * sizeof(Vertex);
-    buffer.CPUAccessFlags = 0;
-    buffer.MiscFlags = 0;
-
-    D3D11_SUBRESOURCE_DATA init;
-    init.pSysMem = vertices;
-
-    device->CreateBuffer(&buffer, &init, VertexBuffer.ReleaseAndGetAddressOf());
-
-    buffer.BindFlags = D3D11_BIND_INDEX_BUFFER;
-    buffer.ByteWidth = 24 * sizeof(uint16_t);
-
-    init.pSysMem = indices;
-
-    device->CreateBuffer(&buffer, &init, IndexBuffer.ReleaseAndGetAddressOf());
+    CreateVertexBuffer(device, vertices, VertexBuffer.ReleaseAndGetAddressOf());
+    CreateIndexBuffer(device, indices, IndexBuffer.ReleaseAndGetAddressOf());
 
     VertexCB = std::make_unique<ConstantBuffer<VSBuffer>>(device);
     PixelCB  = std::make_unique<ConstantBuffer<PSBuffer>>(device);

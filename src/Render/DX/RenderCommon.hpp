@@ -89,3 +89,35 @@ void CreateParticleBuffer(ID3D11Device* device, ID3D11Buffer** buffer, unsigned 
 
     DX::ThrowIfFailed(device->CreateBuffer(&desc, nullptr, buffer));
 }
+
+template <class T>
+void CreateVertexBuffer(ID3D11Device* device, const std::vector<T>& vertices, ID3D11Buffer** buffer, D3D11_USAGE usage = D3D11_USAGE_DEFAULT)
+{
+    D3D11_BUFFER_DESC desc;
+    desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+    desc.Usage = usage;
+    desc.ByteWidth = static_cast<UINT>(vertices.size() * sizeof(T));
+    desc.CPUAccessFlags = 0;
+    desc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA init;
+    init.pSysMem = vertices.data();
+
+    DX::ThrowIfFailed(device->CreateBuffer(&desc, &init, buffer));
+}
+
+template <class T>
+void CreateIndexBuffer(ID3D11Device* device, const std::vector<T>& indices, ID3D11Buffer** buffer)
+{
+    D3D11_BUFFER_DESC desc;
+    desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+    desc.Usage = D3D11_USAGE_DEFAULT;
+    desc.ByteWidth = static_cast<UINT>(indices.size() * sizeof(T));
+    desc.CPUAccessFlags = 0;
+    desc.MiscFlags = 0;
+
+    D3D11_SUBRESOURCE_DATA init;
+    init.pSysMem = indices.data();
+
+    DX::ThrowIfFailed(device->CreateBuffer(&desc, &init, buffer));
+}
