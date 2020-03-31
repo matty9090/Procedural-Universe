@@ -9,6 +9,8 @@
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
 
+bool StarTarget::ShowOrbits = false;
+
 StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Stellar", "Planet", resources, camera, rtv)
 {
@@ -141,25 +143,28 @@ void StarTarget::RenderLerp(float scale, float t, bool single, Vector3 offset)
     Star->SetScale(scale);
     Star->Draw(Context, viewProj, StarPipeline);
 
-    OrbitPipeline.SetState(Context, [&]() {
-        unsigned int off = 0;
-        unsigned int stride = sizeof(Vertex);
+    if (ShowOrbits)
+    {
+        OrbitPipeline.SetState(Context, [&]() {
+            unsigned int off = 0;
+            unsigned int stride = sizeof(Vertex);
 
-        Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Context->IASetIndexBuffer(OrbitIB.Get(), DXGI_FORMAT_R16_UINT, 0);
-        Context->VSSetConstantBuffers(0, 1, OrbitVCB->GetBuffer());
+            Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+            Context->IASetIndexBuffer(OrbitIB.Get(), DXGI_FORMAT_R16_UINT, 0);
+            Context->VSSetConstantBuffers(0, 1, OrbitVCB->GetBuffer());
 
-        for (auto& orbit : Orbits)
-        {
-            auto world = orbit.Orientation * Matrix::CreateScale(scale) * Matrix::CreateTranslation(offset);
-            orbit.Colour.A(t);
-            OrbitVCB->SetData(Context, { world * viewProj, world });
-            OrbitPCB->SetData(Context, { orbit.Colour });
-            Context->PSSetConstantBuffers(0, 1, OrbitPCB->GetBuffer());
-            Context->IASetVertexBuffers(0, 1, orbit.VertexBuffer.GetAddressOf(), &stride, &off);
-            Context->DrawIndexed(NumOrbitIndices, 0, 0);
-        }
-    });
+            for (auto& orbit : Orbits)
+            {
+                auto world = orbit.Orientation * Matrix::CreateScale(scale) * Matrix::CreateTranslation(offset);
+                orbit.Colour.A(t);
+                OrbitVCB->SetData(Context, { world * viewProj, world });
+                OrbitPCB->SetData(Context, { orbit.Colour });
+                Context->PSSetConstantBuffers(0, 1, OrbitPCB->GetBuffer());
+                Context->IASetVertexBuffers(0, 1, orbit.VertexBuffer.GetAddressOf(), &stride, &off);
+                Context->DrawIndexed(NumOrbitIndices, 0, 0);
+            }
+        });
+    }
 }
 
 void StarTarget::BakeSkybox(Vector3 object)
@@ -231,7 +236,7 @@ void StarTarget::Seed(uint64_t seed)
         orbit.Colour = ProcUtils::RandomColour(gen);
         orbit.Orientation = Matrix::CreateFromQuaternion(rot);
         
-        Shapes::ComputeTorus(vertices, indices, orbit.Radius * 2.0f, 0.03f, 200);
+        Shapes::ComputeTorus(vertices, indices, orbit.Radius * 2.0f, 0.032f, 200);
         CreateVertexBuffer(Device, vertices, orbit.VertexBuffer.ReleaseAndGetAddressOf());
 
         Orbits.push_back(orbit);

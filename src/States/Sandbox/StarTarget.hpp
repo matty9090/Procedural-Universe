@@ -26,6 +26,8 @@ public:
 
     Vector3 GetLightDirection() const;
 
+    static bool ShowOrbits;
+
 private:
     void OnStartTransitionDownParent(Vector3 object) override;
     void OnStartTransitionDownChild(Vector3 object) override;

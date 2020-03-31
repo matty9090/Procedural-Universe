@@ -110,6 +110,9 @@ void SandboxState::Update(float dt)
         CPlanet::Wireframe = !CPlanet::Wireframe;
     
     if (Tracker.IsKeyReleased(DirectX::Keyboard::F4))
+        StarTarget::ShowOrbits = !StarTarget::ShowOrbits;
+
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::F5))
         FreezeTransitions = !FreezeTransitions;
 
     FloatingOrigin();
