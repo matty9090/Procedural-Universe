@@ -34,6 +34,7 @@ private:
     void BakeSkybox(Vector3 object) override;
     void Seed(uint64_t seed) override;
     void CreateStarPipeline();
+    void CreateOrbitPipeline();
     void StateTransitioning(float dt) override;
 
     struct GSConstantBuffer
@@ -50,12 +51,30 @@ private:
         float Custom1, Custom2, Custom3;
     };
 
+    struct Vertex
+    {
+        DirectX::SimpleMath::Vector3 Position;
+        DirectX::SimpleMath::Vector3 Normal;
+        DirectX::SimpleMath::Vector2 UV;
+    };
+
+    struct Orbit
+    {
+        float Radius;
+        DirectX::SimpleMath::Color Colour;
+        DirectX::SimpleMath::Matrix Orientation;
+        Microsoft::WRL::ComPtr<ID3D11Buffer> VertexBuffer;
+    };
+
     int SeedFrames = 0;
     size_t CurrentClosestObjectID;
+
     std::unique_ptr<CModel> Star;
+    std::vector<Orbit> Orbits;
 
     RenderView ParticleRenderTarget;
     RenderPipeline StarPipeline;
+    RenderPipeline OrbitPipeline;
 
     std::deque<uint64_t> SeedQueue;
     std::vector<LWParticle> Particles;
@@ -63,6 +82,24 @@ private:
     std::vector<CPlanetSeeder> ParticleInfo;
     std::unique_ptr<CPostProcess> PostProcess;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
-
     std::unique_ptr<ConstantBuffer<LerpConstantBuffer>> LerpBuffer;
+    
+    struct OrbitVSBuffer
+    {
+        DirectX::SimpleMath::Matrix WorldViewProj;
+        DirectX::SimpleMath::Matrix World;
+    };
+
+    struct OrbitPSBuffer
+    {
+        DirectX::SimpleMath::Color Colour;
+    };
+
+    UINT NumOrbitIndices;
+    float OrbitThickness = 1.0f;
+
+    Microsoft::WRL::ComPtr<ID3D11Buffer> OrbitIB;
+
+    std::unique_ptr<ConstantBuffer<OrbitVSBuffer>> OrbitVCB;
+    std::unique_ptr<ConstantBuffer<OrbitPSBuffer>> OrbitPCB;
 };

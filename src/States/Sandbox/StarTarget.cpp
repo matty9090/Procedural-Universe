@@ -3,6 +3,8 @@
 #include <imgui.h>
 
 #include "Sim/IParticleSeeder.hpp"
+#include "Misc/Shapes.hpp"
+#include "Misc/ProcUtils.hpp"
 
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
@@ -23,6 +25,7 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
 
     CreateStarPipeline();
+    CreateOrbitPipeline();
 }
 
 void StarTarget::Render()
@@ -137,6 +140,26 @@ void StarTarget::RenderLerp(float scale, float t, bool single)
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
     Star->SetScale(scale);
     Star->Draw(Context, viewProj, StarPipeline);
+
+    OrbitPipeline.SetState(Context, [&]() {
+        unsigned int offset = 0;
+        unsigned int stride = sizeof(Vertex);
+
+        Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Context->IASetIndexBuffer(OrbitIB.Get(), DXGI_FORMAT_R16_UINT, 0);
+        Context->VSSetConstantBuffers(0, 1, OrbitVCB->GetBuffer());
+
+        for (auto& orbit : Orbits)
+        {
+            auto world = orbit.Orientation * Matrix::CreateTranslation(Centre) * Matrix::CreateScale(scale);
+            orbit.Colour.A(t);
+            OrbitVCB->SetData(Context, { world * viewProj, world });
+            OrbitPCB->SetData(Context, { orbit.Colour });
+            Context->PSSetConstantBuffers(0, 1, OrbitPCB->GetBuffer());
+            Context->IASetVertexBuffers(0, 1, orbit.VertexBuffer.GetAddressOf(), &stride, &offset);
+            Context->DrawIndexed(NumOrbitIndices, 0, 0);
+        }
+    });
 }
 
 void StarTarget::BakeSkybox(Vector3 object)
@@ -171,21 +194,47 @@ void StarTarget::Seed(uint64_t seed)
     Particles.resize(dist(gen));
     ParticleInfo.resize(Particles.size());
 
-    auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random, 2.0f);
+    auto seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random, 4.0f);
     seeder->Seed(seed);
 
     SeedQueue.clear();
+    Orbits.clear();
     Planets.resize(Particles.size());
 
     for (size_t i = 0; i < Planets.size(); ++i)
     {
+        auto pos = Particles[i].Position;
+
         Planets[i] = std::make_unique<CPlanet>(Context, *Camera);
-        Planets[i]->SetPosition(Particles[i].Position);
+        Planets[i]->SetPosition(pos);
         Planets[i]->Scale(Scale * 2.0f);
-        Planets[i]->LightSource = -Particles[i].Position;
+        Planets[i]->LightSource = -pos;
         Planets[i]->LightSource.Normalize();
 
         SeedQueue.push_back((seed << 5) + (Planets.size() - i - 1));
+        
+        std::vector<Vertex> vertices;
+        std::vector<uint16_t> indices;
+
+        Vector3 axis = { pos.x, 0.0f, pos.z };
+        axis = axis.Cross(Vector3::Up);
+        axis.Normalize();
+
+        float angleh = atan2f(pos.x, pos.z);
+        float anglev = atanf(pos.y / Vector2(pos.x, pos.z).Length());
+
+        auto rot = Quaternion::CreateFromAxisAngle(Vector3::Up, angleh);
+        rot *= Quaternion::CreateFromAxisAngle(axis, anglev);
+
+        Orbit orbit;
+        orbit.Radius = pos.Length();
+        orbit.Colour = ProcUtils::RandomColour(gen);
+        orbit.Orientation = Matrix::CreateFromQuaternion(rot);
+        
+        Shapes::ComputeTorus(vertices, indices, orbit.Radius * 2.0f, 0.03f, 200);
+        CreateVertexBuffer(Device, vertices, orbit.VertexBuffer.ReleaseAndGetAddressOf());
+
+        Orbits.push_back(orbit);
     }
 }
 
@@ -209,6 +258,26 @@ void StarTarget::CreateStarPipeline()
     StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
 
     LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
+}
+
+void StarTarget::CreateOrbitPipeline()
+{
+    std::vector<Vertex> vertices;
+    std::vector<uint16_t> indices;
+
+    Shapes::ComputeTorus(vertices, indices, BeginTransitionDist / 2.0f, 0.002f, 200);
+    CreateIndexBuffer(Device, indices, OrbitIB.ReleaseAndGetAddressOf());
+
+    OrbitPipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    OrbitPipeline.LoadVertex(L"shaders/Standard/PositionNormalTexture.vsh");
+    OrbitPipeline.LoadPixel(L"shaders/Planet/Ring.psh");
+    OrbitPipeline.CreateDepthState(Device, EDepthState::Normal);
+    OrbitPipeline.CreateInputLayout(Device, CreateInputLayoutPositionNormalTexture());
+
+    NumOrbitIndices = static_cast<UINT>(indices.size());
+
+    OrbitVCB = std::make_unique<ConstantBuffer<OrbitVSBuffer>>(Device);
+    OrbitPCB = std::make_unique<ConstantBuffer<OrbitPSBuffer>>(Device);
 }
 
 void StarTarget::StateTransitioning(float dt)
