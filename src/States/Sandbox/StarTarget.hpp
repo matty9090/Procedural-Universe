@@ -30,7 +30,7 @@ private:
     void OnStartTransitionDownParent(Vector3 object) override;
     void OnStartTransitionDownChild(Vector3 object) override;
     void OnEndTransitionDownChild() override;
-    void RenderLerp(float scale = 1.0f, float t = 1.0f, bool single = false);
+    void RenderLerp(float scale = 1.0f, float t = 1.0f, bool single = false, Vector3 offset = Vector3::Zero);
     void BakeSkybox(Vector3 object) override;
     void Seed(uint64_t seed) override;
     void CreateStarPipeline();

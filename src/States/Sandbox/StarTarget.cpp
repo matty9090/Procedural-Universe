@@ -60,7 +60,7 @@ void StarTarget::RenderTransitionChild(float t)
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
     Star->Move(ParentLocationSpace);
-    RenderLerp(Scale, t, true);
+    RenderLerp(Scale, t, true, ParentLocationSpace);
     Star->Move(-ParentLocationSpace);
 
     for (auto& planet : Planets)
@@ -125,7 +125,7 @@ void StarTarget::OnEndTransitionDownChild()
 
 }
 
-void StarTarget::RenderLerp(float scale, float t, bool single)
+void StarTarget::RenderLerp(float scale, float t, bool single, Vector3 offset)
 {
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
@@ -142,7 +142,7 @@ void StarTarget::RenderLerp(float scale, float t, bool single)
     Star->Draw(Context, viewProj, StarPipeline);
 
     OrbitPipeline.SetState(Context, [&]() {
-        unsigned int offset = 0;
+        unsigned int off = 0;
         unsigned int stride = sizeof(Vertex);
 
         Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -151,12 +151,12 @@ void StarTarget::RenderLerp(float scale, float t, bool single)
 
         for (auto& orbit : Orbits)
         {
-            auto world = orbit.Orientation * Matrix::CreateTranslation(Centre) * Matrix::CreateScale(scale);
+            auto world = orbit.Orientation * Matrix::CreateScale(scale) * Matrix::CreateTranslation(offset);
             orbit.Colour.A(t);
             OrbitVCB->SetData(Context, { world * viewProj, world });
             OrbitPCB->SetData(Context, { orbit.Colour });
             Context->PSSetConstantBuffers(0, 1, OrbitPCB->GetBuffer());
-            Context->IASetVertexBuffers(0, 1, orbit.VertexBuffer.GetAddressOf(), &stride, &offset);
+            Context->IASetVertexBuffers(0, 1, orbit.VertexBuffer.GetAddressOf(), &stride, &off);
             Context->DrawIndexed(NumOrbitIndices, 0, 0);
         }
     });
