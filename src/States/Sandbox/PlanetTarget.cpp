@@ -39,12 +39,7 @@ void PlanetTarget::RenderUI()
 
 void PlanetTarget::RenderTransitionChild(float t)
 {
-    auto dsv = Resources->GetDepthStencilView();
-    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    Planet->Move(ParentLocationSpace);
-    Planet->Render(Scale, t);
-    Planet->Move(-ParentLocationSpace);
 }
 
 void PlanetTarget::RenderTransitionParent(float t)

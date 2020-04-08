@@ -34,7 +34,6 @@ void StarTarget::Render()
 {
     RenderParentSkybox();
     Parent->RenderInChildSpace(*Camera, 100.0f / Scale);
-
     RenderLerp();
 
     for (auto& planet : Planets)
@@ -75,11 +74,14 @@ void StarTarget::RenderTransitionChild(float t)
 
 void StarTarget::RenderTransitionParent(float t)
 {
-    auto dsv = Resources->GetDepthStencilView();
-    Context->OMSetRenderTargets(1, &RenderTarget, dsv);
-
     RenderParentSkybox();
     Parent->RenderInChildSpace(*Camera, 100.0f / Scale);
+    RenderLerp(1.0f, t, true);
+
+    for (auto& planet : Planets)
+    {
+        planet->Render();
+    }
 }
 
 void StarTarget::MoveObjects(Vector3 v)
