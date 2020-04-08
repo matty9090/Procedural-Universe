@@ -49,9 +49,6 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     PostProcess->GaussianBlur = 5.0f;
-
-    //Planet = std::make_unique<CPlanet>(Context, *Camera);
-    //Planet->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
     
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
@@ -138,8 +135,6 @@ void SandboxState::Update(float dt)
 
     if (CurrentTarget->Parent)
         CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
-
-    //Planet->Update(dt);
 }
 
 void SandboxState::Render()
@@ -156,8 +151,6 @@ void SandboxState::Render()
         CurrentTarget->Render();
     }
 
-    //Planet->Render();
-
     auto rtv = DeviceResources->GetRenderTargetView();
     auto dsv = DeviceResources->GetDepthStencilView();
 
@@ -172,6 +165,29 @@ void SandboxState::Render()
     Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
     Context->PSSetSamplers(0, 1, &sampler);
 
+    RenderUI();
+}
+
+void SandboxState::Clear()
+{
+    DeviceResources->PIXBeginEvent(L"Clear");
+
+    auto depthStencil = DeviceResources->GetDepthStencilView();
+    auto renderTarget = DeviceResources->GetRenderTargetView();
+    auto sceneTarget  = DeviceResources->GetSceneRenderTargetView();
+
+    Context->ClearRenderTargetView(renderTarget, DirectX::Colors::Black);
+    Context->ClearRenderTargetView(sceneTarget , DirectX::Colors::Black);
+    Context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+
+    auto viewport = DeviceResources->GetScreenViewport();
+    Context->RSSetViewports(1, &viewport);
+
+    DeviceResources->PIXEndEvent();
+}
+
+void SandboxState::RenderUI()
+{
     ImGui_ImplDX11_NewFrame();
     ImGui_ImplWin32_NewFrame();
     ImGui::NewFrame();
@@ -185,6 +201,17 @@ void SandboxState::Render()
     {
         CurrentTarget->RenderUI();
     }
+
+    ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+    ImGui::SetNextWindowBgAlpha(0.5f);
+    ImGui::Begin("Main", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+        auto cam = Camera->GetPosition();
+        auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale));
+
+        ImGui::Text("(%i, %i, %i)", static_cast<int>(cam.x), static_cast<int>(cam.y), static_cast<int>(cam.z));
+        ImGui::Text("Speed: %s", speed);
+        ImGui::Text("Billboards: %i", CBillboard::NumInstances);
+    ImGui::End();
 
     if (bShowClosestObject && CurrentTarget->Child != nullptr)
     {
@@ -206,17 +233,17 @@ void SandboxState::Render()
             ImGui::SetNextWindowBgAlpha(0.5f);
 
             ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-            ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
+                ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
 
-            if (CurrentTarget->Parent)
-                ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());
+                if (CurrentTarget->Parent)
+                    ImGui::Text("Parent index: %i", CurrentTarget->Parent->GetClosestObjectIndex());
 
-            ImGui::Text("Distance: %i", static_cast<int>(Vector3::Distance(Camera->GetPosition(), closest)));
+                ImGui::Text("Distance: %i", static_cast<int>(Vector3::Distance(Camera->GetPosition(), closest)));
 
-            if (CurrentTarget->IsTransitioning())
-                ImGui::Text("Transition: %i%%", static_cast<int>(CurrentTransitionT * 100.0f));
+                if (CurrentTarget->IsTransitioning())
+                    ImGui::Text("Transition: %i%%", static_cast<int>(CurrentTransitionT * 100.0f));
 
-            CurrentTarget->RenderObjectUI();
+                CurrentTarget->RenderObjectUI();
             ImGui::End();
         }
     }
@@ -224,39 +251,7 @@ void SandboxState::Render()
     ImGui::Render();
     ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-    auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale));
-
-    std::ostringstream cam;
-    cam << "Cam: (" << Camera->GetPosition().x << ", " << Camera->GetPosition().y << ", " << Camera->GetPosition().z << ")";
-
-    std::ostringstream bb;
-    bb << "Billboards: " << CBillboard::NumInstances;
-
-    SpriteBatch->Begin();
-    Font->DrawString(SpriteBatch.get(), (std::string("Speed: ") + speed).c_str(), Vector3(2.0f, 2.0, 0.0f));
-    Font->DrawString(SpriteBatch.get(), cam.str().c_str(), Vector3(2.0f, 28.0, 0.0f));
-    Font->DrawString(SpriteBatch.get(), bb.str().c_str(), Vector3(2.0f, 56.0, 0.0f));
-    SpriteBatch->End();
-
     CBillboard::NumInstances = 0;
-}
-
-void SandboxState::Clear()
-{
-    DeviceResources->PIXBeginEvent(L"Clear");
-
-    auto depthStencil = DeviceResources->GetDepthStencilView();
-    auto renderTarget = DeviceResources->GetRenderTargetView();
-    auto sceneTarget  = DeviceResources->GetSceneRenderTargetView();
-
-    Context->ClearRenderTargetView(renderTarget, DirectX::Colors::Black);
-    Context->ClearRenderTargetView(sceneTarget , DirectX::Colors::Black);
-    Context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-
-    auto viewport = DeviceResources->GetScreenViewport();
-    Context->RSSetViewports(1, &viewport);
-
-    DeviceResources->PIXEndEvent();
 }
 
 void SandboxState::FloatingOrigin()
@@ -267,7 +262,6 @@ void SandboxState::FloatingOrigin()
     {
         Camera->SetPosition(Vector3::Zero);
         CurrentTarget->MoveObjects(-camPos);
-        // Planet->Move(-camPos);
     }
 }
 
