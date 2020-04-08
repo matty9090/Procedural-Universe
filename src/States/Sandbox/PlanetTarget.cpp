@@ -8,8 +8,8 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     : SandboxTarget(context, "Planetary", "N/A", resources, camera, rtv)
 {
     Scale = 0.001f;
-    BeginTransitionDist = 10.0f;
-    EndTransitionDist = 0.3f;
+    BeginTransitionDist = 12.0f;
+    EndTransitionDist = 0.6f;
     RenderParentInChildSpace = true;
 
     auto vp = Resources->GetScreenViewport();
