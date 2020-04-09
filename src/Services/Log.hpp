@@ -41,6 +41,7 @@ public:
     void operator=(FLog const&) = delete;
 
     void Log(int num, ELogType logLevel = Info);
+    void Log(float num, ELogType logLevel = Info);
     void Log(double num, ELogType logLevel = Info);
     void Log(std::string msg, ELogType logLevel = Info);
     void Log(Vec3d v, ELogType logLevel = Info);

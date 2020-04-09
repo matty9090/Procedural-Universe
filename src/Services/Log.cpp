@@ -14,7 +14,7 @@ void FLog::Log(int num, ELogType logLevel)
 #endif
 }
 
-void FLog::Log(double num, ELogType logLevel)
+void FLog::Log(float num, ELogType logLevel)
 {
 #ifdef _DEBUG
     std::cout << "[" << LogTypes[logLevel] << "] " << num << std::endl;
@@ -24,6 +24,15 @@ void FLog::Log(double num, ELogType logLevel)
 #endif
 }
 
+void FLog::Log(double num, ELogType logLevel)
+{
+#ifdef _DEBUG
+    std::cout << "[" << LogTypes[logLevel] << "] " << num << std::endl;
+#else
+    if (logLevel != Verbose)
+        std::cout << "[" << LogTypes[logLevel] << "] " << num << std::endl;
+#endif
+}
 
 void FLog::Log(std::string msg, ELogType logLevel)
 {

@@ -65,8 +65,9 @@ private:
     enum ETravelState { Panning, Travelling };
 
     float PanSpeed = 0.4f;
-    float TravelSpeed = 100.0f;
+    float TravelSpeed = 0.4f;
     float TravelT = 0.0f;
+    float TravelStopDist = 210.0f;
     bool IsTravelling = false;
     EObjectType TravelType, CurrentTravelType;
     ETravelState TravelState;

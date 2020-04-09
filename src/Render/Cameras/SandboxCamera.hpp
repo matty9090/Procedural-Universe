@@ -103,6 +103,13 @@ class CSandboxCamera : public ICamera
         Vector3 GetUp() const { return View.Invert().Up(); }
 
         /**
+        * @brief Get the forward vector of the camera
+        *
+        * @return Vector3
+        */
+        Vector3 GetRight() const { return View.Invert().Right(); }
+
+        /**
          * @brief Get the x and y pixel coordinates for the given world point
          * 
          * @return bool 

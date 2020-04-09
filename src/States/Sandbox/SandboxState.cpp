@@ -432,8 +432,12 @@ void SandboxState::Travel(EObjectType type)
     TravelType = type;
     TravelState = Panning;
     CurrentTravelType = Galaxy;
-    TravelTarget = RootTarget.get()->GetRandomObjectPosition();
     Camera->SetEnableInput(false);
+    
+    auto obj = RootTarget.get()->GetRandomObjectPosition();
+    auto v = obj - Camera->GetPosition();
+    v.Normalize();
+    TravelTarget = obj - v * TravelStopDist;
 
     // Turn the view matrix into a rotation matrix by inverting and removing any translation
     Matrix view = Camera->GetViewMatrix();
@@ -442,8 +446,7 @@ void SandboxState::Travel(EObjectType type)
     TravelRotStart = Quaternion::CreateFromRotationMatrix(view);
 
     // Find target rotation
-    auto v = TravelTarget - Camera->GetPosition();
-    auto l = Matrix::CreateLookAt(Vector3::Zero, v, Camera->GetUp());
+    auto l = Matrix::CreateLookAt(Vector3::Zero, v, Vector3::Up);
     TravelRotEnd = Quaternion::CreateFromRotationMatrix(l.Invert());
 }
 
@@ -452,10 +455,10 @@ void SandboxState::TravelUpdate(float dt)
     if (TravelState == Panning)
     {
         // Interpolate quaternions
-        TravelRotStart = Quaternion::Slerp(TravelRotStart, TravelRotEnd, Maths::Clamp(TravelT, 0.0f, 1.0f));
+        auto rot = Quaternion::Slerp(TravelRotStart, TravelRotEnd, Maths::Clamp(Maths::EaseInOutQuad(TravelT), 0.0f, 1.0f));
 
         // Convert quaternion back to a view matrix
-        Matrix m = Matrix::CreateFromQuaternion(TravelRotStart);
+        Matrix m = Matrix::CreateFromQuaternion(rot);
         m.m[3][0] = Camera->GetPosition().x;
         m.m[3][1] = Camera->GetPosition().y;
         m.m[3][2] = Camera->GetPosition().z;
@@ -463,11 +466,38 @@ void SandboxState::TravelUpdate(float dt)
         Camera->SetMatrix(m.Invert());
 
         TravelT += dt * PanSpeed;
-        TravelState = TravelT > 1.0f ? Travelling : Panning;
+
+        if (TravelT > 1.0f)
+        {
+            TravelState = Travelling;
+            TravelT = 0.0f;
+        }
     }
     else if (TravelState == Travelling)
     {
+        // float d = v.Length();
+        // auto v = TravelTarget - Camera->GetPosition();
 
+        Matrix m = Camera->GetViewMatrix();
+        auto pos = Vector3::Lerp(Camera->GetPosition(), TravelTarget, Maths::EaseInOutQuint(TravelT));
+        m = m.Invert();
+        m.Translation(pos);
+        Camera->SetMatrix(m.Invert());
+               
+        TravelT += dt * TravelSpeed;
+        
+        if (TravelT > 1.0f)
+        {
+            IsTravelling = false;
+
+            auto f = m.Forward();
+            Camera->Yaw = -atan2f(-f.x, f.z);
+            Camera->Pitch = -asinf(-f.y);
+            Camera->Roll = 0.0f;;
+
+            Camera->SetPosition(pos);
+            Camera->SetEnableInput(true);
+        }
     }
 }
 

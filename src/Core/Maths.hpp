@@ -24,6 +24,37 @@ namespace Maths
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 
+    template <class T>
+    T EaseInOutQuad(T t) {
+        return t < 0.5f ? 2 * t * t : t * (4 - 2 * t) - 1;
+    }
+
+    template <class T>
+    T EaseInOutCubic(T t)
+    {
+        if (t < 0.5f)
+            return 4 * t * t * t;
+        else
+        {
+            t = ((2 * t) - 2);
+            return 0.5f * t * t * t + 1;
+        }
+    }
+
+    template <class T>
+    T EaseInOutQuint(T t)
+    {
+        if (t < 0.5f) {
+            t *= t;
+            return 8 * t * t;
+        }
+        else
+        {
+            t = (--t) * t;
+            return 1 - 8 * t * t;
+        }
+    }
+
     int   RandInt(int min, int max);
     float RandFloat();
     float RandFloat(float min, float max);
