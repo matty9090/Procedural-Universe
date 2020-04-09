@@ -51,42 +51,42 @@ class CSandboxCamera : public ICamera
          * 
          * @param p 
          */
-        void SetPosition(Vector3 p);
+        void SetPosition(Vector3 p) override;
 
         /**
          * @brief Move the camera
          *
          * @param p
          */
-        void Move(Vector3 v);
+        void Move(Vector3 v) override;
 
         /**
          * @brief Get the view matrix
          * 
          * @return DirectX::XMMATRIX 
          */
-        DirectX::XMMATRIX GetViewMatrix() const;
+        DirectX::XMMATRIX GetViewMatrix() const override;
 
         /**
          * @brief Get the projection matrix
          * 
          * @return DirectX::XMMATRIX 
          */
-        DirectX::XMMATRIX GetProjectionMatrix() const { return Proj; }
+        DirectX::XMMATRIX GetProjectionMatrix() const override { return Proj; }
 
         /**
          * @brief Get the width and height of the viewport
          *
          * @return DirectX::SimpleMath::Vector2
          */
-        DirectX::SimpleMath::Vector2 GetSize() const;
+        DirectX::SimpleMath::Vector2 GetSize() const override;
 
         /**
          * @brief Get the position of the camera
          * 
          * @return Vector3 
          */
-        Vector3 GetPosition() const { return Position; }
+        Vector3 GetPosition() const override { return Position; }
 
         /**
         * @brief Get the forward vector of the camera
@@ -94,6 +94,13 @@ class CSandboxCamera : public ICamera
         * @return Vector3
         */
         Vector3 GetForward() const { return View.Invert().Forward(); }
+
+        /**
+        * @brief Get the forward vector of the camera
+        *
+        * @return Vector3
+        */
+        Vector3 GetUp() const { return View.Invert().Up(); }
 
         /**
          * @brief Get the x and y pixel coordinates for the given world point
@@ -112,9 +119,23 @@ class CSandboxCamera : public ICamera
         /**
          * @brief Get the current speed of the camera
          *
-         * @return Vector3
+         * @return float
          */
         float GetSpeed() const { return Speed * VelocityScale; }
+
+        /**
+         * @brief Get the current speed of the camera
+         *
+         * @return void
+         */
+        void SetEnableInput(bool enable) { EnableInput = enable; }
+
+        /**
+         * @brief Set the camera matrix
+         *
+         * @return void
+         */
+        void SetMatrix(Matrix matrix) { View = matrix; }
 
         /**
          * @brief Return camera position as a string
@@ -127,13 +148,14 @@ class CSandboxCamera : public ICamera
         size_t GetHeight() const { return Height; }
 
         float VelocityScale = 1.0f;
+        float Yaw = 0.0f, Pitch = 0.0f, Roll = 0.0f;
 
     private:
         Matrix View, Proj;
         size_t Width, Height;
 
+        bool EnableInput = true;
         float NearPlane = 0.01f, FarPlane = 2000.0f;
-        float Yaw = 0.0f, Pitch = 0.0f, Roll = 0.0f;
         float InitialSpeed = 10000.0f, Speed;
 
         Vector3 Position;

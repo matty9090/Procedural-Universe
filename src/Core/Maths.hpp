@@ -24,6 +24,7 @@ namespace Maths
         return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
     }
 
+    int   RandInt(int min, int max);
     float RandFloat();
     float RandFloat(float min, float max);
 

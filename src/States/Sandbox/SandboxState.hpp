@@ -31,12 +31,16 @@ public:
     // End IState override
 
 private:
+    enum EObjectType { Galaxy, Star, Planet };
+
     void Clear();
     void RenderUI();
     void FloatingOrigin();
     void TransitionLogic();
     void CreateModelPipeline();
     void SetupTargets();
+    void Travel(EObjectType type);
+    void TravelUpdate(float dt);
     std::string GetSpeedStr(double speed);
 
     ID3D11Device* Device;
@@ -57,6 +61,17 @@ private:
 
     SandboxTarget* CurrentTarget;
     RenderPipeline ModelPipeline;
+
+    enum ETravelState { Panning, Travelling };
+
+    float PanSpeed = 0.4f;
+    float TravelSpeed = 100.0f;
+    float TravelT = 0.0f;
+    bool IsTravelling = false;
+    EObjectType TravelType, CurrentTravelType;
+    ETravelState TravelState;
+    Vector3 TravelTarget;
+    Quaternion TravelRotStart, TravelRotEnd;
 
     bool FreezeTransitions = false;
     float CamOriginSnapThreshold = 5000.0f;

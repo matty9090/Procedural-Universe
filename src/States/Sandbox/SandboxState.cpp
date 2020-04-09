@@ -120,7 +120,9 @@ void SandboxState::Update(float dt)
     }
 
     if (!CurrentTarget->IsTransitioning())
+    {
         Camera->VelocityScale = CurrentTarget->VelocityMultiplier;
+    }
 
     Camera->Events(Mouse, Mouse->GetState(), Keyboard->GetState(), dt);
 
@@ -131,10 +133,17 @@ void SandboxState::Update(float dt)
         CurrentTarget->Child->Update(dt);
     }
 
+    if (IsTravelling)
+    {
+        TravelUpdate(dt);
+    }
+
     Camera->Update(dt);
 
     if (CurrentTarget->Parent)
+    {
         CurrentTarget->Parent->GetSkyBox().SetPosition(Camera->GetPosition());
+    }
 }
 
 void SandboxState::Render()
@@ -211,6 +220,10 @@ void SandboxState::RenderUI()
         ImGui::Text("(%i, %i, %i)", static_cast<int>(cam.x), static_cast<int>(cam.y), static_cast<int>(cam.z));
         ImGui::Text("Speed: %s", speed);
         ImGui::Text("Billboards: %i", CBillboard::NumInstances);
+        
+        if (ImGui::Button("Random Galaxy")) Travel(Galaxy);
+        if (ImGui::Button("Random Star System")) Travel(Star);
+        if (ImGui::Button("Random Planet")) Travel(Planet);
     ImGui::End();
 
     if (bShowClosestObject && CurrentTarget->Child != nullptr)
@@ -410,6 +423,52 @@ void SandboxState::SetupTargets()
 
     CurrentTarget = Universe.get();
     RootTarget = std::move(Universe);
+}
+
+void SandboxState::Travel(EObjectType type)
+{
+    TravelT = 0.0f;
+    IsTravelling = true;
+    TravelType = type;
+    TravelState = Panning;
+    CurrentTravelType = Galaxy;
+    TravelTarget = RootTarget.get()->GetRandomObjectPosition();
+    Camera->SetEnableInput(false);
+
+    // Turn the view matrix into a rotation matrix by inverting and removing any translation
+    Matrix view = Camera->GetViewMatrix();
+    view = view.Invert();
+    view.m[3][0] = view.m[3][1] = view.m[3][2] = 0.0f;
+    TravelRotStart = Quaternion::CreateFromRotationMatrix(view);
+
+    // Find target rotation
+    auto v = TravelTarget - Camera->GetPosition();
+    auto l = Matrix::CreateLookAt(Vector3::Zero, v, Camera->GetUp());
+    TravelRotEnd = Quaternion::CreateFromRotationMatrix(l.Invert());
+}
+
+void SandboxState::TravelUpdate(float dt)
+{
+    if (TravelState == Panning)
+    {
+        // Interpolate quaternions
+        TravelRotStart = Quaternion::Slerp(TravelRotStart, TravelRotEnd, Maths::Clamp(TravelT, 0.0f, 1.0f));
+
+        // Convert quaternion back to a view matrix
+        Matrix m = Matrix::CreateFromQuaternion(TravelRotStart);
+        m.m[3][0] = Camera->GetPosition().x;
+        m.m[3][1] = Camera->GetPosition().y;
+        m.m[3][2] = Camera->GetPosition().z;
+
+        Camera->SetMatrix(m.Invert());
+
+        TravelT += dt * PanSpeed;
+        TravelState = TravelT > 1.0f ? Travelling : Panning;
+    }
+    else if (TravelState == Travelling)
+    {
+
+    }
 }
 
 std::string SandboxState::GetSpeedStr(double speed)

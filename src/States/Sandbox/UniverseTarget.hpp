@@ -18,8 +18,9 @@ public:
     void ScaleObjects(float scale) override;
     void ResetObjectPositions() override;
 
+    Vector3 GetRandomObjectPosition() const override;
     Vector3 GetClosestObject(Vector3 pos) override;
-    size_t GetClosestObjectIndex() const override { return CurrentClosestObjectID; }
+    size_t  GetClosestObjectIndex() const override { return CurrentClosestObjectID; }
 
 private:
     void RenderLerp(float t, bool single = false);

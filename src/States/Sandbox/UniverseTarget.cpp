@@ -60,6 +60,12 @@ void UniverseTarget::ResetObjectPositions()
     Centre = Vector3::Zero;
 }
 
+Vector3 UniverseTarget::GetRandomObjectPosition() const
+{
+    int m = static_cast<int>(Galaxies.size()) - 1;
+    return Galaxies[static_cast<size_t>(Maths::RandInt(0, m))]->GetPosition();
+}
+
 Vector3 UniverseTarget::GetClosestObject(Vector3 pos)
 {
     return Maths::ClosestObject(pos, Galaxies, &CurrentClosestObjectID)->GetPosition();

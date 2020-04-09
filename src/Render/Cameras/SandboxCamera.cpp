@@ -18,6 +18,9 @@ CSandboxCamera::CSandboxCamera(size_t width, size_t height)
 
 void CSandboxCamera::Update(float dt)
 {
+    if (!EnableInput)
+        return;
+
     float y = sinf(Pitch);
     float r = cosf(Pitch);
     float z = r * cosf(Yaw);
@@ -28,6 +31,9 @@ void CSandboxCamera::Update(float dt)
 
 void CSandboxCamera::Events(DirectX::Mouse *mouse, DirectX::Mouse::State &ms, DirectX::Keyboard::State kb, float dt)
 {
+    if (!EnableInput)
+        return;
+
     if ((ms.positionMode == Mouse::MODE_ABSOLUTE && ms.x < Width - 260) || ms.positionMode == Mouse::MODE_RELATIVE)
     {
         if (ms.positionMode == Mouse::MODE_RELATIVE)
