@@ -114,27 +114,27 @@ void CPostProcess::RenderDepth(ID3D11RenderTargetView* rtv, ID3D11DepthStencilVi
 void CPostProcess::RegisterEvents()
 {
     EventStream::Register(EEvent::UseBloomChanged, [this](const EventData& data) {
-        UseBloom = static_cast<const BoolEventData&>(data).Value;
+        UseBloom = EventValue<BoolEventData>(data);
     });
 
     EventStream::Register(EEvent::GaussianBlurChanged, [this](const EventData& data) {
-        GaussianBlur = static_cast<const FloatEventData&>(data).Value;
+        GaussianBlur = EventValue<FloatEventData>(data);
     });
 
     EventStream::Register(EEvent::BloomBaseChanged, [this](const EventData& data) {
-        BloomBase = static_cast<const FloatEventData&>(data).Value;
+        BloomBase = EventValue<FloatEventData>(data);
     });
 
     EventStream::Register(EEvent::BloomAmountChanged, [this](const EventData& data) {
-        BloomAmount = static_cast<const FloatEventData&>(data).Value;
+        BloomAmount = EventValue<FloatEventData>(data);
     });
 
     EventStream::Register(EEvent::BloomSatChanged, [this](const EventData& data) {
-        BloomSat = static_cast<const FloatEventData&>(data).Value;
+        BloomSat = EventValue<FloatEventData>(data);
     });
 
     EventStream::Register(EEvent::BloomBaseSatChanged, [this](const EventData& data) {
-        BloomBaseSat = static_cast<const FloatEventData&>(data).Value;
+        BloomBaseSat = EventValue<FloatEventData>(data);
     });
 }
 

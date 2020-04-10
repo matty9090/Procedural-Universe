@@ -27,7 +27,7 @@ BarnesHut::BarnesHut(ID3D11DeviceContext* context)
     }
 
     EventStream::Register(EEvent::BHThetaChanged, [&](const EventData& data) {
-        Octree::Theta = static_cast<const FloatEventData&>(data).Value;
+        Octree::Theta = EventValue<FloatEventData>(data);
     });
 }
 

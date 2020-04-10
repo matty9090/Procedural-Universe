@@ -154,17 +154,17 @@ void SimulationState::Clear()
 void SimulationState::RegisterEvents()
 {
     EventStream::Register(EEvent::SimSpeedChanged, [this](const EventData& data) {
-        SimSpeed = static_cast<const FloatEventData&>(data).Value;
+        SimSpeed = EventValue<FloatEventData>(data);
     });
 
     EventStream::Register(EEvent::NumParticlesChanged, [this](const EventData& data) {
-        NumParticles = static_cast<const IntEventData&>(data).Value;
+        NumParticles = EventValue<IntEventData>(data);
         InitParticles();
     });
 
     EventStream::Register(EEvent::SimTypeChanged, [this](const EventData& data) {
         Sim.reset();
-        Sim = CreateNBodySim(DeviceResources->GetD3DDeviceContext(), static_cast<const SimTypeEventData&>(data).Value);
+        Sim = CreateNBodySim(DeviceResources->GetD3DDeviceContext(), EventValue<SimTypeEventData>(data));
         Sim->Init(Particles);
     });
 
@@ -173,12 +173,12 @@ void SimulationState::RegisterEvents()
     });
 
     EventStream::Register(EEvent::SeederChanged, [this](const EventData& data) {
-        Seeder = CreateParticleSeeder(Particles, static_cast<EParticleSeeder>(static_cast<const SeederTypeEventData&>(data).Value));
+        Seeder = CreateParticleSeeder(Particles, static_cast<EParticleSeeder>(EventValue<SeederTypeEventData>(data)));
         InitParticles();
     });
 
     EventStream::Register(EEvent::ForceFrame, [this](const EventData& data) {
-        float dt = static_cast<const FloatEventData&>(data).Value;
+        float dt = EventValue<FloatEventData>(data);
         Sim->Update(dt * SimSpeed);
     });
 
@@ -187,17 +187,17 @@ void SimulationState::RegisterEvents()
     });
 
     EventStream::Register(EEvent::DrawDebugChanged, [this](const EventData& data) {
-        bDrawDebug = static_cast<const BoolEventData&>(data).Value;
+        bDrawDebug = EventValue<BoolEventData>(data);
     });
 
     EventStream::Register(EEvent::TrackParticle, [this](const EventData& data) {
-        auto p = static_cast<const ParticleEventData&>(data).Value;
+        auto p = EventValue<ParticleEventData>(data);
         Camera->Track(p);
         LOGM("Tracking particle")
     });
 
     EventStream::Register(EEvent::LoadParticleFile, [this](const EventData& data) {
-        if (InitParticlesFromFile(static_cast<const StringEventData&>(data).Value, Particles))
+        if (InitParticlesFromFile(EventValue<StringEventData>(data), Particles))
         {
             NumParticles = static_cast<unsigned int>(Particles.size());
 
@@ -209,7 +209,7 @@ void SimulationState::RegisterEvents()
     });
 
     EventStream::Register(EEvent::UseSplattingChanged, [this](const EventData& data) {
-        bUseSplatting = static_cast<const BoolEventData&>(data).Value;
+        bUseSplatting = EventValue<BoolEventData>(data);
     });
 }
 
