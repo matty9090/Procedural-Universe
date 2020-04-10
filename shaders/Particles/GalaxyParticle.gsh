@@ -54,14 +54,14 @@ void main
 	for (int i = 0; i < 4; ++i)
 	{
 		const float scale = 0.01f;
-        float3 corner = Corners[i] * scale;
+        float3 corner = Corners[i] * scale * Lerp;
         float3 worldPosition = inParticle[0].Position + mul(corner, (float3x3)InvViewMatrix) + Translation;
         
 		outVert.ViewportPosition = mul(float4(worldPosition, 1.0f), ViewProjMatrix);
         outVert.ViewportPosition.z = LogDepthBuffer(outVert.ViewportPosition.w);
 
         outVert.Colour = inParticle[0].Colour;
-        outVert.Colour.a = Lerp;
+        outVert.Colour.a = Lerp * 0.8f + 0.2f;
         outVert.UV = UVs[i];
 		outStrip.Append( outVert );
 	}
