@@ -38,7 +38,9 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     CTerrainComponent<TerrainHeightFunc>::GeneratePermutations();
     CTerrainComponent<WaterHeightFunc>::GeneratePermutations();
 
-    CreateParticleBuffer<LWParticle>(Device, Galaxy::ParticleBuffer.ReleaseAndGetAddressOf(), PARTICLES_PER_GALAXY);
+    Galaxy::LoadCache(Device, Context);
+    CPlanet::LoadCache(Device);
+    CBillboard::LoadCache(Device);
 
     CreateModelPipeline();
     SetupTargets();
@@ -235,8 +237,8 @@ void SandboxState::RenderUI()
         }
 
         if (ImGui::Button("Random Galaxy")) Travel(Galaxy);
-        if (ImGui::Button("Random Star System")) Travel(Star);
-        if (ImGui::Button("Random Planet")) Travel(Planet);
+        //if (ImGui::Button("Random Star System")) Travel(Star);
+        //if (ImGui::Button("Random Planet")) Travel(Planet);
     ImGui::End();
 
     if (bShowClosestObject && CurrentTarget->Child != nullptr)
@@ -445,10 +447,11 @@ void SandboxState::Travel(EObjectType type)
     TravelType = type;
     TravelState = Panning;
     CurrentTravelType = Galaxy;
+    TravelStartPos = Camera->GetPosition(); 
     Camera->SetEnableInput(false);
     
     auto obj = RootTarget.get()->GetRandomObjectPosition();
-    auto v = obj - Camera->GetPosition();
+    auto v = obj - TravelStartPos;
     v.Normalize();
     TravelTarget = obj - v * TravelStopDist;
 
@@ -472,9 +475,9 @@ void SandboxState::TravelUpdate(float dt)
 
         // Convert quaternion back to a view matrix
         Matrix m = Matrix::CreateFromQuaternion(rot);
-        m.m[3][0] = Camera->GetPosition().x;
-        m.m[3][1] = Camera->GetPosition().y;
-        m.m[3][2] = Camera->GetPosition().z;
+        m.m[3][0] = TravelStartPos.x;
+        m.m[3][1] = TravelStartPos.y;
+        m.m[3][2] = TravelStartPos.z;
 
         Camera->SetMatrix(m.Invert());
 
@@ -488,13 +491,11 @@ void SandboxState::TravelUpdate(float dt)
     }
     else if (TravelState == Travelling)
     {
-        // float d = v.Length();
-        // auto v = TravelTarget - Camera->GetPosition();
-
         Matrix m = Camera->GetViewMatrix();
-        auto pos = Vector3::Lerp(Camera->GetPosition(), TravelTarget, Maths::EaseInOutQuint(TravelT));
+        auto pos = Vector3::Lerp(TravelStartPos, TravelTarget, Maths::EaseInOutQuint(TravelT));
         m = m.Invert();
         m.Translation(pos);
+
         Camera->SetMatrix(m.Invert());
                
         TravelT += dt * TravelSpeed;

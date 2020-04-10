@@ -116,6 +116,14 @@ CPlanet::~CPlanet()
     
 }
 
+void CPlanet::LoadCache(ID3D11Device* device)
+{
+    CRingComponent::LoadCache(device);
+    CAtmosphereComponent::LoadCache(device);
+    CTerrainComponent<WaterHeightFunc>::LoadCache(device);
+    CTerrainComponent<TerrainHeightFunc>::LoadCache(device);
+}
+
 void CPlanet::Update(float dt)
 {
     for (auto& component : Components)

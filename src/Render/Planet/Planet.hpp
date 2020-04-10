@@ -84,6 +84,8 @@ public:
     CPlanet(ID3D11DeviceContext* context, ICamera& cam);
     ~CPlanet();
 
+    static void LoadCache(ID3D11Device* device);
+
     void Update(float dt);
     void Render(float scale = 1.0f, float t = 1.0f);
     void RenderUI();

@@ -33,6 +33,7 @@ public:
     CTerrainComponent(CPlanet* planet, uint64_t seed = 0);
     ~CTerrainComponent();
 
+    static void LoadCache(ID3D11Device* device);
     static void GeneratePermutations();
 
     void Init() final;
@@ -61,16 +62,9 @@ private:
     bool Dirty = false;
     bool HasAtmosphere = false;
 
-    union
-    {
-        RenderPipeline TerrainPipeline;
-
-        struct
-        {
-            RenderPipeline TerrainAtmPipeline;
-            RenderPipeline TerrainSpacePipeline;
-        };
-    };
+    static RenderPipeline TerrainPipeline;
+    static RenderPipeline TerrainAtmPipeline;
+    static RenderPipeline TerrainSpacePipeline;
 
     std::string Name;
     std::array<FTerrainNode*, 6> Nodes;

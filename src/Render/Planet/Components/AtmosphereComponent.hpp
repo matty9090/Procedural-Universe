@@ -40,6 +40,8 @@ class CAtmosphereComponent : public IPlanetComponent
 public:
     CAtmosphereComponent(CPlanet* planet, uint64_t seed = 0);
 
+    static void LoadCache(ID3D11Device* device);
+
     void Init() final;
     void Update(float dt) final;
     void Render(DirectX::SimpleMath::Matrix viewProj, float t) final;
@@ -67,8 +69,8 @@ private:
     CPlanet* Planet;
     ConstantBuffer<ScatterBuffer> Buffer;
     
-    RenderPipeline PipelineSky;
-    RenderPipeline PipelineSpace;
+    static RenderPipeline PipelineSky;
+    static RenderPipeline PipelineSpace;
 
     std::unique_ptr<CModel> Sphere;
     std::unique_ptr<DirectX::CommonStates> CommonStates;

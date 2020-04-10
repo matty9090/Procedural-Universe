@@ -10,6 +10,11 @@ CBlankComponent::CBlankComponent(CPlanet* planet, uint64_t seed) : Planet(planet
 
 }
 
+void CBlankComponent::LoadCache(ID3D11Device* device)
+{
+
+}
+
 void CBlankComponent::Init()
 {
 

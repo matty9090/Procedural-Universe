@@ -46,9 +46,6 @@ private:
         float Custom1, Custom2, Custom3;
     };
 
-    RenderView ParticleRenderTarget;
-    RenderPipeline ParticlePipeline;
-
     std::vector<LWParticle> SeedParticles;
     std::vector<BillboardInstance> SeedDustClouds;
 

@@ -18,6 +18,8 @@ class CRingComponent : public IPlanetComponent
 public:
     CRingComponent(CPlanet* planet, uint64_t seed = 0);
 
+    static void LoadCache(ID3D11Device* device);
+
     void Init() final;
     void Update(float dt) final;
     void Render(DirectX::SimpleMath::Matrix viewProj, float t) final;
@@ -57,7 +59,7 @@ private:
         DirectX::SimpleMath::Color Colour;
     };
 
-    RenderPipeline Pipeline;
+    static RenderPipeline Pipeline;
     UINT NumIndices;
 
     std::unique_ptr<DirectX::CommonStates> CommonStates;

@@ -18,13 +18,15 @@
 #ifdef _DEBUG
     #define PARTICLES_PER_GALAXY  100000
 #else
-    #define PARTICLES_PER_GALAXY 1000000
+    #define PARTICLES_PER_GALAXY 500000
 #endif
 
 class Galaxy
 {
 public:
     Galaxy(ID3D11DeviceContext* context, bool onlyRenderDust = false);
+
+    static void LoadCache(ID3D11Device* device, ID3D11DeviceContext* context);
 
     void InitialSeed(uint64_t seed);
     void FinishSeed(const std::vector<LWParticle>& particles);
@@ -47,17 +49,15 @@ public:
     static float ImposterFadeDist;
     static float ImposterOffsetPercent;
 
-    unsigned int NumDustClouds = 840;
-
-    // Only one galaxy should render stars at any time
-    static Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
+    static unsigned int NumDustClouds;
 
 private:
     void RegenerateBuffer();
 
     ID3D11Device* Device;
     ID3D11DeviceContext* Context;
-    RenderPipeline ParticlePipeline;
+
+    static RenderPipeline ParticlePipeline;
 
     struct GSConstantBuffer
     {
@@ -80,15 +80,15 @@ private:
     uint64_t Seed = 0U;
     DirectX::SimpleMath::Vector3 Position;
 
+    // Only one galaxy should render stars at any time
+    static Microsoft::WRL::ComPtr<ID3D11Buffer> ParticleBuffer;
+
     std::vector<LWParticle> Particles;
     std::vector<BillboardInstance> DustClouds;
-
-    std::unique_ptr<CBillboard> Imposter;
     std::unique_ptr<CBillboard> DustRenderer;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> StarTexture;
-    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> DustTexture;
+    static Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> StarTexture;
 
     std::unique_ptr<ConstantBuffer<GSConstantBuffer>> GSBuffer;
     std::unique_ptr<ConstantBuffer<LerpConstantBuffer>> LerpBuffer;

@@ -7,7 +7,7 @@
 
 #include "Services/Log.hpp"
 
-#define DISPLAY_TIMERS false
+#define DISPLAY_TIMERS true
 
 class CTimer
 {

@@ -12,28 +12,34 @@ using namespace DirectX::SimpleMath;
 float Galaxy::ImposterThreshold = 8000.0f;
 float Galaxy::ImposterFadeDist = 600.0f;
 float Galaxy::ImposterOffsetPercent = 0.4f;
+unsigned int Galaxy::NumDustClouds = 840;
 
+RenderPipeline Galaxy::ParticlePipeline;
 Microsoft::WRL::ComPtr<ID3D11Buffer> Galaxy::ParticleBuffer;
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Galaxy::StarTexture;
 
 Galaxy::Galaxy(ID3D11DeviceContext* context, bool onlyRenderDust) : Context(context), OnlyRenderDust(onlyRenderDust)
 {
     context->GetDevice(&Device);
 
+    CommonStates = std::make_unique<DirectX::CommonStates>(Device);
+    GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
+    LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
+    DustRenderer = std::make_unique<CBillboard>(context, L"assets/Fog.png", false, NumDustClouds);
+}
+
+void Galaxy::LoadCache(ID3D11Device* device, ID3D11DeviceContext* context)
+{
     ParticlePipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
     ParticlePipeline.LoadVertex(L"shaders/PassThruGS.vsh");
     ParticlePipeline.LoadPixel(L"shaders/Particles/StarParticle.psh");
     ParticlePipeline.LoadGeometry(L"shaders/Particles/GalaxyParticle.gsh");
-    ParticlePipeline.CreateDepthState(Device, EDepthState::Read);
-    ParticlePipeline.CreateRasteriser(Device, ECullMode::Anticlockwise);
-    ParticlePipeline.CreateInputLayout(Device, CreateInputLayoutPositionColourScale());
-
-    CommonStates = std::make_unique<DirectX::CommonStates>(Device);
-    GSBuffer = std::make_unique<ConstantBuffer<GSConstantBuffer>>(Device);
-    LerpBuffer = std::make_unique<ConstantBuffer<LerpConstantBuffer>>(Device);
-    Imposter = std::make_unique<CBillboard>(Context, L"assets/GalaxyImposter.png");
-    DustRenderer = std::make_unique<CBillboard>(Context, L"assets/Fog.png", false, NumDustClouds);
+    ParticlePipeline.CreateDepthState(device, EDepthState::Read);
+    ParticlePipeline.CreateRasteriser(device, ECullMode::Anticlockwise);
+    ParticlePipeline.CreateInputLayout(device, CreateInputLayoutPositionColourScale());
 
     StarTexture = RESM.GetTexture(L"assets/StarImposter.png");
+    CreateParticleBuffer<LWParticle>(device, ParticleBuffer.ReleaseAndGetAddressOf(), PARTICLES_PER_GALAXY);
 }
 
 void Galaxy::InitialSeed(uint64_t seed)
@@ -44,10 +50,6 @@ void Galaxy::InitialSeed(uint64_t seed)
     std::uniform_real_distribution<float> distCol(0.0f, 1.0f);
 
     Colour = Color(distCol(gen), distCol(gen), distCol(gen));
-
-    BillboardInstance inst = { Vector3::Zero, ImposterSize, Colour };
-    Imposter->UpdateInstances(std::vector<BillboardInstance> { inst });
-    Imposter->SetPosition(Position);
 
     const float Variation = 0.12f;
 
@@ -88,7 +90,6 @@ void Galaxy::Move(Vector3 v)
     for (auto& cloud : DustClouds) cloud.Position += v;
 
     Position += v;
-    Imposter->SetPosition(Position);
     RegenerateBuffer();
 }
 
@@ -153,21 +154,6 @@ void Galaxy::Render(const ICamera& cam, float t, float scale, Vector3 voffset, b
 
 void Galaxy::RenderImposter(const ICamera& cam, float scale)
 {
-    float dist = ((Vector3::Distance(cam.GetPosition(), Position) - ImposterFadeDist) / ImposterThreshold) - 1.0f;
-    float imposterT = Maths::Clamp(dist + ImposterOffsetPercent, 0.0f, 1.0f);
-
-    /*if (imposterT > 0.0f)
-    {
-        BillboardInstance inst = { Vector3::Zero, ImposterSize, Color(Colour.R(), Colour.G(), Colour.B(), imposterT) };
-
-        auto sampler = CommonStates->AnisotropicClamp();
-        Context->PSSetSamplers(0, 1, &sampler);
-
-        Context->OMSetBlendState(CommonStates->Additive(), DirectX::Colors::Black, 0xFFFFFFFF);
-        Imposter->UpdateInstances(std::vector<BillboardInstance> { inst });
-        Imposter->Render(cam);
-    }*/
-
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
     DustRenderer->Render(cam, scale, Vector3::Zero);
 }

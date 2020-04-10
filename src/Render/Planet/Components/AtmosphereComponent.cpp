@@ -7,24 +7,14 @@
 #include <random>
 #include <imgui.h>
 
+RenderPipeline CAtmosphereComponent::PipelineSky;
+RenderPipeline CAtmosphereComponent::PipelineSpace;
+
 CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, uint64_t seed)
     : Planet(planet),
       Buffer(planet->GetDevice())
 {
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
-
-    PipelineSky.LoadVertex(L"shaders/Volumetric/SkyFromAtmosphere.vsh");
-    PipelineSky.LoadPixel(L"shaders/Volumetric/SkyFromAtmosphere.psh");
-    PipelineSky.CreateRasteriser(Planet->GetDevice(), ECullMode::Anticlockwise);
-    PipelineSky.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPosition());
-    PipelineSky.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
-    PipelineSpace.LoadVertex(L"shaders/Volumetric/SkyFromSpace.vsh");
-    PipelineSpace.LoadPixel(L"shaders/Volumetric/SkyFromSpace.psh");
-    PipelineSpace.CreateRasteriser(Planet->GetDevice(), ECullMode::Anticlockwise);
-    PipelineSpace.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPosition());
-    PipelineSpace.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
     Sphere = std::make_unique<CModel>(Planet->GetDevice(), RESM.GetMesh("assets/Sphere.obj"));
 
     std::default_random_engine gen { static_cast<unsigned int>(seed) };
@@ -45,6 +35,21 @@ CAtmosphereComponent::CAtmosphereComponent(CPlanet* planet, uint64_t seed)
     ProcUtils::HSLToRGB(HueDist(gen), static_cast<float>(S), static_cast<float>(L), col);
 
     Colour = { col.R(), col.G(), col.B() };
+}
+
+void CAtmosphereComponent::LoadCache(ID3D11Device* device)
+{
+    PipelineSky.LoadVertex(L"shaders/Volumetric/SkyFromAtmosphere.vsh");
+    PipelineSky.LoadPixel(L"shaders/Volumetric/SkyFromAtmosphere.psh");
+    PipelineSky.CreateRasteriser(device, ECullMode::Anticlockwise);
+    PipelineSky.CreateInputLayout(device, CreateInputLayoutPosition());
+    PipelineSky.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+
+    PipelineSpace.LoadVertex(L"shaders/Volumetric/SkyFromSpace.vsh");
+    PipelineSpace.LoadPixel(L"shaders/Volumetric/SkyFromSpace.psh");
+    PipelineSpace.CreateRasteriser(device, ECullMode::Anticlockwise);
+    PipelineSpace.CreateInputLayout(device, CreateInputLayoutPosition());
+    PipelineSpace.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 }
 
 void CAtmosphereComponent::Init()

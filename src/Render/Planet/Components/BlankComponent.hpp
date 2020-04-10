@@ -17,6 +17,8 @@ class CBlankComponent : public IPlanetComponent
 public:
     CBlankComponent(CPlanet* planet, uint64_t seed = 0);
 
+    static void LoadCache(ID3D11Device* device);
+
     void Init() final;
     void Update(float dt) final;
     void Render(DirectX::SimpleMath::Matrix viewProj, float t) final;

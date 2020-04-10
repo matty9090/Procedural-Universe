@@ -71,7 +71,7 @@ private:
     bool IsTravelling = false;
     EObjectType TravelType, CurrentTravelType;
     ETravelState TravelState;
-    Vector3 TravelTarget;
+    Vector3 TravelStartPos, TravelTarget;
     Quaternion TravelRotStart, TravelRotEnd;
 
     bool FreezeTransitions = false;

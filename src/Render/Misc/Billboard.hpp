@@ -18,6 +18,8 @@ public:
     CBillboard(ID3D11DeviceContext* context, std::wstring tex, bool fades = false, unsigned int reserve = 1, std::vector<BillboardInstance> instances = {});
     ~CBillboard();
 
+    static void LoadCache(ID3D11Device* device);
+
     void Render(const ICamera& cam);
     void Render(const ICamera& cam, float scale, Vector3 offset);
 
@@ -46,7 +48,7 @@ private:
     ID3D11DeviceContext* Context;
     std::vector<BillboardInstance> Instances;
 
-    RenderPipeline Pipeline;
+    static RenderPipeline Pipeline;
     Microsoft::WRL::ComPtr<ID3D11Buffer> InstanceBuffer;
     Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Texture;
 

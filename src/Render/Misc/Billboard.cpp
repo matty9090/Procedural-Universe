@@ -3,6 +3,8 @@
 
 size_t CBillboard::NumInstances = 0;
 
+RenderPipeline CBillboard::Pipeline;
+
 CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, bool fades, unsigned int reserve, std::vector<BillboardInstance> instances)
     : Context(context),
       Instances(instances),
@@ -12,19 +14,6 @@ CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, bool fade
     Context->GetDevice(&device);
 
     Texture = FResourceManager::Get().GetTexture(tex);
-
-    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT         , 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 }
-    };
-
-    Pipeline.LoadVertex(L"shaders/Misc/Billboard.vsh");
-    Pipeline.LoadGeometry(L"shaders/Misc/Billboard.gsh");
-    Pipeline.LoadPixel(L"shaders/Misc/Billboard.psh");
-    Pipeline.CreateInputLayout(device, layout);
-    Pipeline.CreateDepthState(device, EDepthState::Read);
-    Pipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
 
     D3D11_BUFFER_DESC buffer;
     buffer.BindFlags = D3D11_BIND_VERTEX_BUFFER;
@@ -50,6 +39,22 @@ CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, bool fade
 CBillboard::~CBillboard()
 {
 
+}
+
+void CBillboard::LoadCache(ID3D11Device* device)
+{
+    std::vector<D3D11_INPUT_ELEMENT_DESC> layout = {
+        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT   , 0, 0,  D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "TEXCOORD", 0, DXGI_FORMAT_R32_FLOAT         , 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+        { "COLOR",    0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+    };
+
+    Pipeline.LoadVertex(L"shaders/Misc/Billboard.vsh");
+    Pipeline.LoadGeometry(L"shaders/Misc/Billboard.gsh");
+    Pipeline.LoadPixel(L"shaders/Misc/Billboard.psh");
+    Pipeline.CreateInputLayout(device, layout);
+    Pipeline.CreateDepthState(device, EDepthState::Read);
+    Pipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
 }
 
 void CBillboard::Render(const ICamera& cam)

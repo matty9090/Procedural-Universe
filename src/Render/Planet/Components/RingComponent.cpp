@@ -7,14 +7,10 @@
 #include <random>
 #include <imgui.h>
 
+RenderPipeline CRingComponent::Pipeline;
+
 CRingComponent::CRingComponent(CPlanet* planet, uint64_t seed) : Planet(planet), Seed(seed)
 {
-    Pipeline.LoadVertex(L"shaders/Standard/PositionNormalTexture.vsh");
-    Pipeline.LoadPixel(L"shaders/Planet/Ring.psh");
-    Pipeline.CreateInputLayout(Planet->GetDevice(), CreateInputLayoutPositionNormalTexture());
-    Pipeline.CreateDepthState(Planet->GetDevice(), EDepthState::Normal);
-    Pipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-
     CommonStates = std::make_unique<DirectX::CommonStates>(Planet->GetDevice());
     VertexCB = std::make_unique<ConstantBuffer<VSBuffer>>(Planet->GetDevice());
     PixelCB = std::make_unique<ConstantBuffer<PSBuffer>>(Planet->GetDevice());
@@ -27,6 +23,15 @@ CRingComponent::CRingComponent(CPlanet* planet, uint64_t seed) : Planet(planet),
     RingRadius = radDist(gen);
     BaseColour = ProcUtils::RandomColour(gen);
     BaseColour.A(0.1f);
+}
+
+void CRingComponent::LoadCache(ID3D11Device* device)
+{
+    Pipeline.LoadVertex(L"shaders/Standard/PositionNormalTexture.vsh");
+    Pipeline.LoadPixel(L"shaders/Planet/Ring.psh");
+    Pipeline.CreateInputLayout(device, CreateInputLayoutPositionNormalTexture());
+    Pipeline.CreateDepthState(device, EDepthState::Normal);
+    Pipeline.Topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 }
 
 void CRingComponent::Init()
