@@ -1,6 +1,8 @@
 #include "PlanetTarget.hpp"
 #include "StarTarget.hpp"
 
+#include "Core/Event.hpp"
+
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
 
@@ -39,7 +41,7 @@ void PlanetTarget::RenderUI()
 
 void PlanetTarget::RenderTransitionChild(float t)
 {
-
+    EventStream::Report(EEvent::SandboxBloomBaseChanged, FloatEventData { 1.0f - t });
 }
 
 void PlanetTarget::RenderTransitionParent(float t)
@@ -81,6 +83,11 @@ void PlanetTarget::ResetObjectPositions()
 void PlanetTarget::OnStartTransitionDownChild(Vector3 location)
 {
     Planet->LightSource = -static_cast<StarTarget*>(Parent)->GetLightDirection();
+}
+
+void PlanetTarget::OnEndTransitionUpChild()
+{
+    EventStream::Report(EEvent::SandboxBloomBaseChanged, FloatEventData { 1.0f });
 }
 
 void PlanetTarget::CreateStarPipeline()

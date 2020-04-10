@@ -2,7 +2,9 @@
 
 #include <imgui.h>
 
+#include "Core/Event.hpp"
 #include "Sim/IParticleSeeder.hpp"
+
 #include "Misc/Shapes.hpp"
 #include "Misc/ProcUtils.hpp"
 

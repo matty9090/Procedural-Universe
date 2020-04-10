@@ -55,9 +55,9 @@ private:
     std::unique_ptr<DirectX::SpriteBatch> SpriteBatch;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
-    std::unique_ptr<Cube>             ClosestObjCube;
-    std::unique_ptr<CSandboxCamera>   Camera;
-    std::unique_ptr<SandboxTarget>    RootTarget;
+    std::unique_ptr<Cube>            ClosestObjCube;
+    std::unique_ptr<CSandboxCamera>  Camera;
+    std::unique_ptr<SandboxTarget>   RootTarget;
 
     SandboxTarget* CurrentTarget;
     RenderPipeline ModelPipeline;

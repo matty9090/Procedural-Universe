@@ -24,6 +24,7 @@ public:
 private:
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
     void OnStartTransitionDownChild(Vector3 location) override;
+    void OnEndTransitionUpChild() override;
     void OnEndTransitionDownChild() override { /*Planet->SetScale(1.0f / Scale);*/ }
     void CreateStarPipeline();
     void StateIdle(float dt) override;

@@ -1,5 +1,7 @@
 #include "SandboxState.hpp"
+
 #include "Core/Maths.hpp"
+#include "Core/Event.hpp"
 
 #include "Services/Log.hpp"
 #include "Services/ResourceManager.hpp"
@@ -58,6 +60,11 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
 
     ImGui_ImplWin32_Init(resources->GetWindow());
     ImGui_ImplDX11_Init(Device, Context);
+
+    EventStream::Register(EEvent::SandboxBloomBaseChanged, [&](const EventData& data) {
+        auto t = EventValue<FloatEventData>(data);
+        PostProcess->BloomBase = Maths::Lerp(0.2f, 1.0f, t);
+    });
 }
 
 void SandboxState::Cleanup()
@@ -221,6 +228,12 @@ void SandboxState::RenderUI()
         ImGui::Text("Speed: %s", speed);
         ImGui::Text("Billboards: %i", CBillboard::NumInstances);
         
+        if (ImGui::CollapsingHeader("Bloom"))
+        {
+            ImGui::SliderFloat("Bloom Amt", &PostProcess->BloomAmount, 0.0f, 1.0f);
+            ImGui::SliderFloat("Bloom Base", &PostProcess->BloomBase, 0.0f, 1.5f);
+        }
+
         if (ImGui::Button("Random Galaxy")) Travel(Galaxy);
         if (ImGui::Button("Random Star System")) Travel(Star);
         if (ImGui::Button("Random Planet")) Travel(Planet);
@@ -314,7 +327,7 @@ void SandboxState::TransitionLogic()
         float scaledDistToObject = (objectDist - CurrentTarget->Child->EndTransitionDist) / CurrentTarget->Child->BeginTransitionDist;
 
         // Cancel transition if there's another close object (TODO: Re-enable this if needed)
-        /*if (CurrentTarget->IsTransitioning() && newIndex != ClosestObjIndex)
+        if (CurrentTarget->IsTransitioning() && newIndex != ClosestObjIndex)
         {
             ClosestObjIndex = newIndex;
             LOGM("There's another close object, switching to new one")
@@ -324,7 +337,7 @@ void SandboxState::TransitionLogic()
 
             CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, 1.0f, scaledDistToObject);
             Camera->VelocityScale = CurrentTransitionT;
-        }*/
+        }
 
         if (!CurrentTarget->IsTransitioning())
         {

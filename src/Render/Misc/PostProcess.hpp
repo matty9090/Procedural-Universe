@@ -18,8 +18,8 @@ public:
     void RenderDepth(ID3D11RenderTargetView* rtv, ID3D11DepthStencilView* dsv, ID3D11ShaderResourceView* depthTex);
 
     bool UseBloom = true;
-    float GaussianBlur = 2.0f;
-    float BloomAmount = 1.0f, BloomBase = 1.4f;
+    float GaussianBlur = 1.0f;
+    float BloomAmount = 1.0f, BloomBase = 1.0f;
     float BloomSat = 1.0f, BloomBaseSat = 1.0f;
 
 private:

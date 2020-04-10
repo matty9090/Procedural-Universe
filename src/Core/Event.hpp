@@ -26,10 +26,17 @@ enum class EEvent
     LoadParticleFile,
     BHThetaChanged,
     UseBloomChanged,
-    UseSplattingChanged
+    UseSplattingChanged,
+    SandboxBloomBaseChanged
 };
 
 typedef std::function<void(const EventData&)> EventCallback;
+
+template <class T>
+auto EventValue(const EventData& data) -> decltype(static_cast<const T&>(data).Value)
+{
+    return static_cast<const T&>(data).Value;
+}
 
 class EventStream
 {
