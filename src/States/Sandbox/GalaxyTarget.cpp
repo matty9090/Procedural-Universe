@@ -8,6 +8,7 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     : SandboxTarget(context, "Galactic", "Star", resources, camera, rtv)
 {
     Scale = 0.01f;
+    ObjectScale = 0.05f;
     BeginTransitionDist = 1600.0f;
     EndTransitionDist = 200.0f;
     RenderParentInChildSpace = true;

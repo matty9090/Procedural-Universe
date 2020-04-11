@@ -6,6 +6,7 @@
 #include "Render/Cameras/SandboxCamera.hpp"
 #include "Render/Misc/Particle.hpp"
 #include "Render/Misc/PostProcess.hpp"
+#include "Render/Misc/Billboard.hpp"
 #include "Render/DX/ConstantBuffer.hpp"
 #include "Render/Model/Cube.hpp"
 #include "Render/Planet/Planet.hpp"
@@ -55,7 +56,7 @@ private:
     std::unique_ptr<DirectX::SpriteBatch> SpriteBatch;
     std::unique_ptr<DirectX::CommonStates> CommonStates;
 
-    std::unique_ptr<Cube>            ClosestObjCube;
+    std::unique_ptr<CBillboard>      Circle;
     std::unique_ptr<CSandboxCamera>  Camera;
     std::unique_ptr<SandboxTarget>   RootTarget;
 

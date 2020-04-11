@@ -24,6 +24,7 @@ public:
     void Render(const ICamera& cam, float scale, Vector3 offset);
 
     void Scale(float s) { RelativeScale *= s; }
+    void SetScale(float s) { RelativeScale = s; }
     void SetFades(bool fade) { Fades = fade; }
     void SetPosition(Vector3 pos);
     void UpdateInstances(std::vector<BillboardInstance> instances);

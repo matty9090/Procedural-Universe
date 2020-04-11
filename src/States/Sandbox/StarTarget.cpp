@@ -17,6 +17,7 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
     : SandboxTarget(context, "Stellar", "Planet", resources, camera, rtv)
 {
     Scale = 0.0005f;
+    ObjectScale = 0.01f;
     BeginTransitionDist = 10.0f;
     EndTransitionDist = 0.2f;
     RenderParentInChildSpace = true;

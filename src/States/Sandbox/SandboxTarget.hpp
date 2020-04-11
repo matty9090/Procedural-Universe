@@ -67,8 +67,9 @@ public:
     std::string Name, ObjName;
 
     double GlobalScale = 0.0;
-    float Scale = 1.0f;
     float VelocityMultiplier = 1.0f;
+    float ObjectScale = 1.0f;
+    float Scale = 1.0f;
 
     Vector3 ParentLocationSpace;
     SandboxTarget* Parent = nullptr;

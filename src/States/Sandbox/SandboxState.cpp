@@ -45,11 +45,13 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     CreateModelPipeline();
     SetupTargets();
 
-    CommonStates = std::make_unique<DirectX::CommonStates>(Device);
-    ClosestObjCube = std::make_unique<Cube>(Context);
-    
+    CommonStates = std::make_unique<DirectX::CommonStates>(Device);    
     Font = std::make_unique<DirectX::SpriteFont>(Device, L"assets/SegoeUI.font");
     SpriteBatch = std::make_unique<DirectX::SpriteBatch>(Context);
+
+    Circle = std::make_unique<CBillboard>(Context, L"assets/Circle.png", false, 1, std::vector<BillboardInstance> {
+        { Vector3::Zero, 120.0f, Color(1.0f, 1.0f, 1.0f, 1.0f) }
+    });
 
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     PostProcess->GaussianBlur = 5.0f;
@@ -64,8 +66,7 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     ImGui_ImplDX11_Init(Device, Context);
 
     EventStream::Register(EEvent::SandboxBloomBaseChanged, [&](const EventData& data) {
-        auto t = EventValue<FloatEventData>(data);
-        PostProcess->BloomBase = Maths::Lerp(0.2f, 1.0f, t);
+        PostProcess->BloomBase = Maths::Lerp(0.2f, 1.0f, EventValue<FloatEventData>(data));
     });
 }
 
@@ -184,6 +185,10 @@ void SandboxState::Render()
     Context->PSSetSamplers(0, 1, &sampler);
 
     RenderUI();
+
+    Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+    Circle->SetScale(CurrentTarget->ObjectScale);
+    Circle->Render(*Camera.get());
 }
 
 void SandboxState::Clear()
@@ -227,7 +232,7 @@ void SandboxState::RenderUI()
         auto speed = GetSpeedStr(static_cast<double>(Camera->GetSpeed()) / (CurrentTarget->GlobalScale));
 
         ImGui::Text("(%i, %i, %i)", static_cast<int>(cam.x), static_cast<int>(cam.y), static_cast<int>(cam.z));
-        ImGui::Text("Speed: %s", speed);
+        ImGui::Text("Speed: %s", speed.c_str());
         ImGui::Text("Billboards: %i", CBillboard::NumInstances);
         
         if (ImGui::CollapsingHeader("Bloom"))
@@ -244,10 +249,10 @@ void SandboxState::RenderUI()
     if (bShowClosestObject && CurrentTarget->Child != nullptr)
     {
         auto closest = CurrentTarget->GetClosestObject(Camera->GetPosition());
-        ClosestObjCube->Render(closest, 2.0f, Camera->GetViewMatrix() * Camera->GetProjectionMatrix(), false);
-
         int x, y;
+
         Camera->PixelFromWorldPoint(closest, x, y);
+        Circle->SetPosition(closest);
 
         const auto vp = DeviceResources->GetScreenViewport();
         const int w = static_cast<int>(vp.Width);

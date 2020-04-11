@@ -25,12 +25,13 @@ CBillboard::CBillboard(ID3D11DeviceContext* context, std::wstring tex, bool fade
     if (instances.size() > 0)
     {
         D3D11_SUBRESOURCE_DATA init;
-        init.pSysMem = &instances;
-        device->CreateBuffer(&buffer, &init, InstanceBuffer.ReleaseAndGetAddressOf());
+        init.pSysMem = instances.data();
+        
+        DX::ThrowIfFailed(device->CreateBuffer(&buffer, &init, InstanceBuffer.ReleaseAndGetAddressOf()));
     }
     else
     {
-        device->CreateBuffer(&buffer, nullptr, InstanceBuffer.ReleaseAndGetAddressOf());
+        DX::ThrowIfFailed(device->CreateBuffer(&buffer, nullptr, InstanceBuffer.ReleaseAndGetAddressOf()));
     }    
 
     VertexCB = std::make_unique<ConstantBuffer<VSBuffer>>(device);

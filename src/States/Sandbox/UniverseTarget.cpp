@@ -5,6 +5,7 @@ UniverseTarget::UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources
     : SandboxTarget(context, "Universal", "Galaxy", resources, camera, rtv)
 {
     Scale = 0.006f;
+    ObjectScale = 1.0f;
     BeginTransitionDist = 3200.0f;
     EndTransitionDist = 300.0f;
 
