@@ -4,6 +4,7 @@
 #include "Services/ResourceManager.hpp"
 #include "Sim/IParticleSeeder.hpp"
 #include "Render/DX/RenderCommon.hpp"
+#include "Misc/ProcUtils.hpp"
 
 #include <random>
 
@@ -51,7 +52,7 @@ void Galaxy::InitialSeed(uint64_t seed)
 
     Colour = Color(distCol(gen), distCol(gen), distCol(gen));
 
-    const float Variation = 0.12f;
+    const float Variation = 0.22f;
 
     DustClouds.clear();
     Particles.resize(NumDustClouds);
@@ -68,10 +69,17 @@ void Galaxy::InitialSeed(uint64_t seed)
 
     for (size_t i = 0; i < Particles.size() && i < NumDustClouds; ++i)
     {
+        const auto& p = Particles[static_cast<int>(distParticles(gen))];
+        Color col;
+
+        int H, S, L;
+        ProcUtils::RGBToHSL(p.Colour, H, S, L);
+        ProcUtils::HSLToRGB(static_cast<float>(H), static_cast<float>(S), static_cast<float>(L * 1.5f), col);
+
         DustClouds.push_back(BillboardInstance {
-            Particles[static_cast<int>(distParticles(gen))].Position / 0.002f,
+            p.Position / 0.002f,
             distScale(gen),
-            Color(1.0f, 1.0f, 1.0f, distAlpha(gen))
+            Color(col.R(), col.G(), col.B(), distAlpha(gen))
         });
     }
 
