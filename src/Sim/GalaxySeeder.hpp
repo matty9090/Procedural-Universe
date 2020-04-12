@@ -38,6 +38,7 @@ class GalaxySeeder : public IParticleSeeder
         
         std::default_random_engine Gen;
         DirectX::SimpleMath::Vector3 Centre;
+        DirectX::SimpleMath::Matrix Orientation;
 };
 
 #include "GalaxySeeder.cpp"

@@ -46,20 +46,23 @@ void GalaxySeeder<T>::Seed(uint64_t seed)
 
     LocalNum = 0;
 
-    std::uniform_real_distribution<float> dist_pos(-2000.0f, 2000.0f);
+    std::uniform_real_distribution<float>  dist_pos(-2000.0f, 2000.0f);
+    std::uniform_real_distribution<float>  dist_rot(0.0f, 2.0f * DirectX::XM_PI);
     std::uniform_real_distribution<double> dist_vel(0.8, 1.2);
+
+    Orientation = Matrix::CreateFromYawPitchRoll(dist_rot(Gen), dist_rot(Gen), dist_rot(Gen));
 
     CreateSpiralArm(0.0f, ArmPDist / 2);
     CreateSpiralArm(3.14f, ArmPDist / 2);
 
-    for(int i = LocalNum; i < Particles.size(); ++i)
+    for (int i = LocalNum; i < Particles.size(); ++i)
     {
         Vector3 pos;
         pos.x = static_cast<float>(dist_pos(Gen));
         pos.y = static_cast<float>(dist_pos(Gen));
         pos.z = static_cast<float>(DistZ(Gen));
 
-        if (Vector3::Distance(pos, Centre) > 720.0f)
+        if (Vector3::DistanceSquared(pos, Centre) > 720.0f * 720.0f )
         {
             --i;
             continue;
@@ -85,8 +88,8 @@ bool GalaxySeeder<T>::AddParticle(
 {
     if (LocalNum < Particles.size())
     {
-        Particles[LocalNum].Position = Pos / Scale;
-
+        Particles[LocalNum].Position = Vector3::Transform(Pos / Scale, Orientation);
+        
         AddParticleVelocity(Particles[LocalNum], Vel);
         AddParticleMass(Particles[LocalNum], Mass);
         AddParticleColour(Particles[LocalNum], Color(DistR(Gen), DistG(Gen), DistB(Gen)));
