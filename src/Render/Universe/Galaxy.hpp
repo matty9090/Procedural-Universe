@@ -44,6 +44,7 @@ public:
     
     size_t GetClosestObjectIndex() const { return CurrentClosestObjectID; }
     uint64_t GetSeed() const { return Seed; }
+    LWParticle GetParticle(size_t index) const { return Particles[index]; }
 
     static float ImposterThreshold;
     static float ImposterFadeDist;

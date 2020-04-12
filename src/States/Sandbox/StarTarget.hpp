@@ -49,8 +49,7 @@ private:
 
     struct LerpConstantBuffer
     {
-        float Alpha;
-        float Custom1, Custom2, Custom3;
+        DirectX::SimpleMath::Color Colour;
     };
 
     struct Vertex
@@ -71,6 +70,7 @@ private:
     int SeedFrames = 0;
     size_t CurrentClosestObjectID;
 
+    DirectX::SimpleMath::Color Colour;
     std::unique_ptr<CModel> Star;
     std::vector<Orbit> Orbits;
 

@@ -1,4 +1,5 @@
 #include "StarTarget.hpp"
+#include "GalaxyTarget.hpp"
 
 #include <imgui.h>
 
@@ -124,7 +125,8 @@ void StarTarget::OnStartTransitionDownParent(Vector3 object)
 
 void StarTarget::OnStartTransitionDownChild(Vector3 object)
 {
-
+    auto star = static_cast<GalaxyTarget*>(Parent)->GetParticle(Parent->GetClosestObjectIndex());
+    Colour = star.Colour;
 }
 
 void StarTarget::OnEndTransitionDownChild()
@@ -137,11 +139,7 @@ void StarTarget::RenderLerp(float scale, float t, bool single, Vector3 offset)
     Matrix view = Camera->GetViewMatrix();
     Matrix viewProj = view * Camera->GetProjectionMatrix();
 
-    if (single)
-        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
-    else
-        LerpBuffer->SetData(Context, LerpConstantBuffer { t });
-    
+    LerpBuffer->SetData(Context, LerpConstantBuffer { Colour });
     Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
     Context->GSSetShader(nullptr, 0, 0);
     Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
@@ -175,8 +173,6 @@ void StarTarget::RenderLerp(float scale, float t, bool single, Vector3 offset)
 void StarTarget::BakeSkybox(Vector3 object)
 {
     SkyboxGenerator->Render([&](const ICamera& cam) {
-        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
-
         Matrix view = cam.GetViewMatrix();
         Matrix viewProj = view * cam.GetProjectionMatrix();
         
@@ -188,7 +184,7 @@ void StarTarget::BakeSkybox(Vector3 object)
         }
 
         Context->GSSetShader(nullptr, 0, 0);
-        LerpBuffer->SetData(Context, LerpConstantBuffer { 1.0f });
+        LerpBuffer->SetData(Context, LerpConstantBuffer { Colour });
         Context->PSSetConstantBuffers(0, 1, LerpBuffer->GetBuffer());
         Context->GSSetShader(nullptr, 0, 0);
         Context->OMSetBlendState(CommonStates->AlphaBlend(), DirectX::Colors::Black, 0xFFFFFFFF);

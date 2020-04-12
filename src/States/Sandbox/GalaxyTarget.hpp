@@ -22,6 +22,7 @@ public:
 
     Vector3 GetClosestObject(Vector3 pos) override;
     size_t GetClosestObjectIndex() const override { return GalaxyRenderer->GetClosestObjectIndex(); }
+    LWParticle GetParticle(size_t index) const { return GalaxyRenderer->GetParticle(index); }
 
 private:
     void OnStartTransitionDownParent(Vector3 object) override { GenerateSkybox(object); }
