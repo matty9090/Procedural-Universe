@@ -22,8 +22,7 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
     CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     Planet = std::make_unique<CPlanet>(Context, *Camera);
-
-    CreateStarPipeline();
+    PlanetBuffer = std::make_unique<ConstantBuffer<PlanetConstantBuffer>>(Device);
 }
 
 void PlanetTarget::Render()
@@ -89,18 +88,6 @@ void PlanetTarget::OnStartTransitionDownChild(Vector3 location)
 void PlanetTarget::OnEndTransitionUpChild()
 {
     EventStream::Report(EEvent::SandboxBloomBaseChanged, FloatEventData { 1.0f });
-}
-
-void PlanetTarget::CreateStarPipeline()
-{
-    StarPipeline.Topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-    StarPipeline.LoadVertex(L"shaders/Standard/Position.vsh");
-    StarPipeline.LoadPixel(L"shaders/Particles/Star.psh");
-    StarPipeline.CreateDepthState(Device, EDepthState::Normal);
-    StarPipeline.CreateRasteriser(Device, ECullMode::Clockwise);
-    StarPipeline.CreateInputLayout(Device, CreateInputLayoutPosition());
-
-    PlanetBuffer = std::make_unique<ConstantBuffer<PlanetConstantBuffer>>(Device);
 }
 
 void PlanetTarget::StateIdle(float dt)
