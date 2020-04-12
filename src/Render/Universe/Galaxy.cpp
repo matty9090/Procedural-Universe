@@ -50,6 +50,7 @@ void Galaxy::InitialSeed(uint64_t seed)
     std::default_random_engine gen { static_cast<unsigned int>(Seed) };
     std::uniform_real_distribution<float> distCol(0.0f, 1.0f);
 
+    Name = ProcUtils::RandomGalaxyName(gen);
     Colour = Color(distCol(gen), distCol(gen), distCol(gen));
 
     const float Variation = 0.22f;

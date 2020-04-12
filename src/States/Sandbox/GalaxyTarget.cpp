@@ -1,4 +1,6 @@
 #include "GalaxyTarget.hpp"
+
+#include "Misc/ProcUtils.hpp"
 #include "Sim/IParticleSeeder.hpp"
 
 #include <random>
@@ -79,6 +81,14 @@ void GalaxyTarget::ResetObjectPositions()
 {
     GalaxyRenderer->Move(-Centre);
     Centre = Vector3::Zero;
+}
+
+std::string GalaxyTarget::GetObjectName() const
+{
+    uint64_t seed = GalaxyRenderer->GetSeed() + static_cast<uint64_t>(GalaxyRenderer->GetClosestObjectIndex());
+    std::default_random_engine gen { static_cast<unsigned int>(seed) };
+
+    return ProcUtils::RandomStarName(gen);
 }
 
 Vector3 GalaxyTarget::GetClosestObject(Vector3 pos)

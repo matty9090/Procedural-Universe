@@ -88,7 +88,12 @@ void UniverseTarget::Seed(uint64_t seed)
     Galaxies.clear();
 
     std::vector<Particle> particles;
+
+#ifdef _DEBUG
+    particles.resize(200);
+#else
     particles.resize(2000);
+#endif
 
     auto seeder = CreateParticleSeeder(particles, EParticleSeeder::Random);
     seeder->Seed(seed);

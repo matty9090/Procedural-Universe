@@ -48,6 +48,7 @@ public:
     virtual void ScaleObjects(float scale) {}
     virtual void ResetObjectPositions() {}
 
+    virtual std::string GetObjectName() const = 0;
     virtual Vector3 GetRandomObjectPosition() const { return Centre; }
     virtual Vector3 GetClosestObject(Vector3 pos) = 0;
     virtual size_t  GetClosestObjectIndex() const { return 0; };

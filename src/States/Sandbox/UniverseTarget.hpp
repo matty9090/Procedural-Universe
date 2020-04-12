@@ -18,6 +18,7 @@ public:
     void ScaleObjects(float scale) override;
     void ResetObjectPositions() override;
 
+    std::string GetObjectName() const override { return Galaxies[CurrentClosestObjectID]->Name; }
     Vector3 GetRandomObjectPosition() const override;
     Vector3 GetClosestObject(Vector3 pos) override;
     size_t  GetClosestObjectIndex() const override { return CurrentClosestObjectID; }

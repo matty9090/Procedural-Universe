@@ -46,6 +46,8 @@ public:
     uint64_t GetSeed() const { return Seed; }
     LWParticle GetParticle(size_t index) const { return Particles[index]; }
 
+    std::string Name;
+
     static float ImposterThreshold;
     static float ImposterFadeDist;
     static float ImposterOffsetPercent;

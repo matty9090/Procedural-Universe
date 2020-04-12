@@ -1,4 +1,5 @@
 #include "ProcUtils.hpp"
+#include <sstream>
 
 float Min(float f1, float f2, float f3) {
 	float fMin = f1;
@@ -68,6 +69,73 @@ void ProcUtils::HSLToRGB(float H, float S, float L, DirectX::SimpleMath::Color& 
 	float m = L - C / 2.0f;
 
 	rgb = DirectX::SimpleMath::Color(fR + m, fG + m, fB + m);
+}
+
+std::string ProcUtils::RandomGalaxyName(std::default_random_engine& gen)
+{
+	std::uniform_int_distribution<> numDist(100, 9999);
+	std::uniform_int_distribution<> prefixDist(2, 3);
+	std::uniform_int_distribution<> letterDist('A', 'Z');
+
+	std::ostringstream name;
+
+	for (int i = 0; i < prefixDist(gen); ++i)
+		name << static_cast<char>(letterDist(gen));
+
+	name << " " << numDist(gen);
+
+	return name.str();
+}
+
+std::string ProcUtils::RandomStarName(std::default_random_engine& gen)
+{
+	std::uniform_int_distribution<> numDist(0, 2);
+	std::uniform_int_distribution<> lenDist(4, 7);
+	std::uniform_int_distribution<> boolDist(0, 1);
+	std::uniform_int_distribution<> conDist(0, 20);
+	std::uniform_int_distribution<> vowDist(0, 4);
+	std::uniform_int_distribution<> idDist(1, 99);
+	std::uniform_int_distribution<> letterDist('A', 'Z');
+
+	std::string S = "BCDFGHJKLMNPQRSTVWXYZ";
+	std::string L = "AEIOU";
+	std::string C = "bcdfghjklmnpqrstvwxyz";
+	std::string V = "aeiou";
+	std::string name;
+
+	bool sv = boolDist(gen);
+	name += sv ? S[conDist(gen)] : L[vowDist(gen)];
+
+	for (int i = 0; i < lenDist(gen); ++i) {
+		sv = !sv;
+		name += sv ? C[conDist(gen)] : V[vowDist(gen)];
+	}
+
+	switch (numDist(gen))
+	{
+		case 0: {
+			std::ostringstream ss;
+			ss << static_cast<char>(letterDist(gen));
+			ss << static_cast<char>(letterDist(gen));
+			name = ss.str() + " " + name;
+		}
+		break;
+
+		case 1: {
+			std::ostringstream ss;
+			ss << static_cast<char>(letterDist(gen));
+			ss << static_cast<char>(letterDist(gen));
+			name = ss.str() + " " + name + " " + std::to_string(idDist(gen));
+		}
+		break;
+
+		case 2: {
+			name = name + " " + std::to_string(idDist(gen));
+		}
+		break;
+	}
+
+	return name;
 }
 
 DirectX::SimpleMath::Color ProcUtils::RandomColour(std::default_random_engine& gen)

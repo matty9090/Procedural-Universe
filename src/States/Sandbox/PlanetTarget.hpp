@@ -19,6 +19,7 @@ public:
     void ScaleObjects(float scale) override;
     void ResetObjectPositions() override;
 
+    std::string GetObjectName() const override { return ""; }
     Vector3 GetClosestObject(Vector3 pos) override;
 
 private:

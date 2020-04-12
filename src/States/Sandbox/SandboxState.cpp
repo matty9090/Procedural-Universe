@@ -270,7 +270,9 @@ void SandboxState::RenderUI()
             ImGui::SetNextWindowSize(ImVec2(170, 160));
             ImGui::SetNextWindowBgAlpha(0.5f);
 
-            ImGui::Begin(CurrentTarget->ObjName.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
+            std::string title = CurrentTarget->ObjName + " - " + CurrentTarget->GetObjectName();
+
+            ImGui::Begin(title.c_str(), nullptr, ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
                 ImGui::Text("Index: %i", CurrentTarget->GetClosestObjectIndex());
 
                 if (CurrentTarget->Parent)

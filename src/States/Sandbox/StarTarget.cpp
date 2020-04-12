@@ -106,6 +106,12 @@ void StarTarget::ScaleObjects(float scale)
         planet->Scale(1.0f / scale);
 }
 
+std::string StarTarget::GetObjectName() const
+{
+    auto a = static_cast<char>(CurrentClosestObjectID + 'A');
+    return Parent->GetObjectName() + " " + a;
+}
+
 Vector3 StarTarget::GetClosestObject(Vector3 pos)
 {
     return Maths::ClosestParticle(pos, Particles, &CurrentClosestObjectID).Position;
