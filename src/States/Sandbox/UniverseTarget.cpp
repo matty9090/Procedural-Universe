@@ -4,7 +4,7 @@
 UniverseTarget::UniverseTarget(ID3D11DeviceContext* context, DX::DeviceResources* resources, ICamera* camera, ID3D11RenderTargetView* rtv)
     : SandboxTarget(context, "Universal", "Galaxy", resources, camera, rtv)
 {
-    Scale = 0.006f;
+    Scale = 1.0f;
     ObjectScale = 1.0f;
     BeginTransitionDist = 3200.0f;
     EndTransitionDist = 300.0f;
@@ -88,7 +88,7 @@ void UniverseTarget::Seed(uint64_t seed)
     Galaxies.clear();
 
     std::vector<Particle> particles;
-    particles.resize(200);
+    particles.resize(2000);
 
     auto seeder = CreateParticleSeeder(particles, EParticleSeeder::Random);
     seeder->Seed(seed);
@@ -100,7 +100,7 @@ void UniverseTarget::Seed(uint64_t seed)
         Galaxies.push_back(std::make_unique<Galaxy>(Context, true));
         Galaxies.back()->InitialSeed(i++);
         Galaxies.back()->Scale(5000.0f);
-        Galaxies.back()->Move(particle.Position / 0.02f);
+        Galaxies.back()->Move(particle.Position / 0.014f);
         Galaxies.back()->SetFades(false);
     }
 }

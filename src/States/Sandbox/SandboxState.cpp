@@ -27,6 +27,8 @@ void SandboxState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse, D
     DeviceResources = resources;
     Mouse = mouse;
     Keyboard = keyboard;
+
+    srand(static_cast<unsigned int>(time(0)));
     
     auto vp = DeviceResources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
