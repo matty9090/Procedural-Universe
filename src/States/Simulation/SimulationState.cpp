@@ -10,6 +10,8 @@ void SimulationState::Init(DX::DeviceResources* resources, DirectX::Mouse* mouse
     Context = resources->GetD3DDeviceContext();
     DeviceResources = resources;
 
+    SetWindowTextA(DeviceResources->GetWindow(), "NBody Simulator");
+
     Mouse = mouse;
     Seeder = CreateParticleSeeder(Particles, EParticleSeeder::Random);
 

@@ -103,7 +103,7 @@ void SandboxState::Update(float dt)
     if (FrameTimer >= 1.0f)
     {
         std::string fps = std::to_string(static_cast<int>((1.0f * Frames) / FrameTimer));
-        SetWindowTextA(DeviceResources->GetWindow(), (std::string("NBody Simulator [FPS: ") + fps + "]").c_str());
+        SetWindowTextA(DeviceResources->GetWindow(), (std::string("Procedural Universe [FPS: ") + fps + "]").c_str());
         Frames = 0, FrameTimer = 0.0f;
     }
 
