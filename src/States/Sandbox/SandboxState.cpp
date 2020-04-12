@@ -186,9 +186,12 @@ void SandboxState::Render()
 
     RenderUI();
 
-    Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
-    Circle->SetScale(CurrentTarget->ObjectScale);
-    Circle->Render(*Camera.get());
+    if (bShowClosestObject)
+    {
+        Context->OMSetBlendState(CommonStates->NonPremultiplied(), DirectX::Colors::Black, 0xFFFFFFFF);
+        Circle->SetScale(CurrentTarget->ObjectScale);
+        Circle->Render(*Camera.get());
+    }
 }
 
 void SandboxState::Clear()
