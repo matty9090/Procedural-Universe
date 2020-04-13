@@ -364,7 +364,8 @@ void SandboxState::TransitionLogic()
 
                 LOGM("Starting down transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
                 
-                CurrentTarget->Child->StartTransitionDownChild(object, CurrentTarget->GetClosestObjectIndex());
+                ClosestObjIndex = CurrentTarget->GetClosestObjectIndex();
+                CurrentTarget->Child->StartTransitionDownChild(object, ClosestObjIndex);
                 CurrentTarget->StartTransitionDownParent(object);
             }
         }
