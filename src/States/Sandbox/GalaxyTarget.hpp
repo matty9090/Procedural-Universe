@@ -2,6 +2,7 @@
 #include "Render/Misc/Splatting.hpp"
 #include "Render/Universe/Galaxy.hpp"
 
+#include <future>
 #include <memory>
 #include <CommonStates.h>
 
@@ -48,7 +49,7 @@ private:
         float Custom1, Custom2, Custom3;
     };
 
-    std::vector<LWParticle> SeedParticles;
+    std::future<std::vector<LWParticle>> Future;
     std::vector<BillboardInstance> SeedDustClouds;
 
     std::unique_ptr<Galaxy> GalaxyRenderer;

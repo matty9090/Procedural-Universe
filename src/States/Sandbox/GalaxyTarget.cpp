@@ -25,8 +25,6 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
     GalaxyRenderer = std::make_unique<Galaxy>(Context);
     GalaxyRenderer->SetFades(true);
-
-    SeedParticles.resize(PARTICLES_PER_GALAXY);
 }
 
 void GalaxyTarget::Seed(uint64_t seed)
@@ -103,21 +101,26 @@ void GalaxyTarget::OnStartTransitionDownChild(Vector3 location)
 
     GalaxyRenderer->Scale(50.0f);
 
-    DispatchTask(EWorkerTask::Seed, [&]() {
+    Future = std::async(std::launch::async, [](uint64_t seed, Color col) {
         const float Variation = 0.12f;
 
-        auto seeder = CreateParticleSeeder(SeedParticles, EParticleSeeder::Galaxy, 0.1f);
+        std::vector<LWParticle> particles;
+        particles.resize(PARTICLES_PER_GALAXY);
+
+        auto seeder = CreateParticleSeeder(particles, EParticleSeeder::Galaxy, 0.1f);
         seeder->SetRedDist(col.R() - Variation, col.R() + Variation);
         seeder->SetGreenDist(col.G() - Variation, col.G() + Variation);
         seeder->SetBlueDist(col.B() - Variation, col.B() + Variation);
         seeder->Seed(seed);
-    });
+
+        return particles;
+    }, seed, col);
 }
 
 void GalaxyTarget::OnEndTransitionDownChild()
 {
-    FinishTask(EWorkerTask::Seed);
-    GalaxyRenderer->FinishSeed(SeedParticles);
+    Future.wait();
+    GalaxyRenderer->FinishSeed(Future.get());
 }
 
 void GalaxyTarget::RenderLerp(float t, float scale, Vector3 voffset, bool single)
