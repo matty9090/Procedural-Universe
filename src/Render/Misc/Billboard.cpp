@@ -121,7 +121,7 @@ void CBillboard::SetPosition(Vector3 pos)
     Position = pos;
 }
 
-void CBillboard::UpdateInstances(std::vector<BillboardInstance> instances)
+void CBillboard::UpdateInstances(const std::vector<BillboardInstance>& instances)
 {
     Instances = instances;
 

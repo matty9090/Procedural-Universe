@@ -27,7 +27,7 @@ public:
     void SetScale(float s) { RelativeScale = s; }
     void SetFades(bool fade) { Fades = fade; }
     void SetPosition(Vector3 pos);
-    void UpdateInstances(std::vector<BillboardInstance> instances);
+    void UpdateInstances(const std::vector<BillboardInstance>& instances);
 
     static size_t NumInstances;
 
