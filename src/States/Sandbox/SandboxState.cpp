@@ -340,7 +340,7 @@ void SandboxState::TransitionLogic()
         float objectDist = Vector3::Distance(Camera->GetPosition(), object);
         float scaledDistToObject = (objectDist - CurrentTarget->Child->EndTransitionDist) / CurrentTarget->Child->BeginTransitionDist;
 
-        // Cancel transition if there's another close object (TODO: Re-enable this if needed)
+        // Cancel transition if there's another close object
         if (CurrentTarget->IsTransitioning() && newIndex != ClosestObjIndex)
         {
             ClosestObjIndex = newIndex;
