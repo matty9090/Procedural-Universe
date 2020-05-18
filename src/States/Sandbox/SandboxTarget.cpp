@@ -80,7 +80,7 @@ void SandboxTarget::StartTransitionUpChild()
     OnStartTransitionUpChild();
 }
 
-void SandboxTarget::StartTransitionDownChild(Vector3 location, uint64_t seed = 0)
+void SandboxTarget::StartTransitionDownChild(Vector3 location, uint64_t seed)
 {
     CTimer timer("start transition down (child)");
     State = EState::TransitioningChild;

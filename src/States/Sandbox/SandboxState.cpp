@@ -360,7 +360,7 @@ void SandboxState::TransitionLogic()
             {
                 // Parent starts rendering and lerping any visuals
                 // Child starts rendering in the parent's world space
-                // Correct the ships posititon
+                // Correct the cameras posititon
 
                 LOGM("Starting down transition from " + CurrentTarget->Name + " to " + CurrentTarget->Child->Name)
                 

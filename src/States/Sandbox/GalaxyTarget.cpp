@@ -31,7 +31,7 @@ GalaxyTarget::GalaxyTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
 
 void GalaxyTarget::Seed(uint64_t seed)
 {
-    GalaxyRenderer->InitialSeed(seed);
+    GalaxyRenderer->InitialSeed((Parent->GetSeed() << 21) + seed);
 }
 
 void GalaxyTarget::Render()

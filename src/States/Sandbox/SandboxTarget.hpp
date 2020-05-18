@@ -60,7 +60,7 @@ public:
     void EndTransitionDownParent(Vector3 object);
 
     void StartTransitionUpChild();
-    void StartTransitionDownChild(Vector3 location, uint64_t seed);
+    void StartTransitionDownChild(Vector3 location, uint64_t seed = 0);
 
     void EndTransitionUpChild();
     void EndTransitionDownChild();
