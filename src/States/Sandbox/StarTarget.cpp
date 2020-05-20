@@ -228,13 +228,20 @@ void StarTarget::Seed(uint64_t seed)
         std::vector<Vertex> vertices;
         std::vector<uint16_t> indices;
 
+        // Finds the axis for which to rotate vertically on
         Vector3 axis = { pos.x, 0.0f, pos.z };
         axis = axis.Cross(Vector3::Up);
         axis.Normalize();
 
+        // Find the angle about the y plane from xz
         float angleh = atan2f(pos.x, pos.z);
+
+        // Find the angle from the xz plane to the y position
         float anglev = atanf(pos.y / Vector2(pos.x, pos.z).Length());
 
+        // Combine rotations using quaternions
+        // 1. Rotate the torus to match the planet on the xz plane
+        // 2. Tilt the torus up or down to match the planet's y
         auto rot = Quaternion::CreateFromAxisAngle(Vector3::Up, angleh);
         rot *= Quaternion::CreateFromAxisAngle(axis, anglev);
 
