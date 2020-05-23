@@ -90,7 +90,6 @@ void PlanetTarget::OnEndTransitionUpChild()
 
 void PlanetTarget::StateIdle(float dt)
 {
-    Planet->Update(dt);
 
     float dist = Vector3::Distance(Camera->GetPosition(), Planet->GetPosition()) - Planet->Radius;
     float t = (dist - Planet->Radius * 0.5f) / (Planet->Radius * 3.0f);

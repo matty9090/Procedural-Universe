@@ -203,7 +203,7 @@ void CTerrainNode<HeightFunc>::Update(float dt)
 
     Visible = distance - Diameter / 2.0f < horizon;
 
-    if (Visible)
+    //if (Visible)
     {
         Quadtree::Update(dt);
     }
@@ -243,7 +243,7 @@ template <class HeightFunc>
 Vector3 CTerrainNode<HeightFunc>::GetCenterWorld()
 {
     Vector3 midpoint = Vertices[(CTerrainComponent<HeightFunc>::GridSize * CTerrainComponent<HeightFunc>::GridSize) / 2].Position;
-    return Vector3::Transform(midpoint, Planet->World * World);
+    return Vector3::Transform(midpoint, World * Planet->World);
 }
 
 template <class HeightFunc>
@@ -287,6 +287,5 @@ bool CTerrainNode<HeightFunc>::DistanceFunction()
 {
     Vector3 cam = Planet->Camera.GetPosition();
     float distance = Vector3::Distance(cam, GetCenterWorld());
-
     return Depth < 8 && distance < Bounds.size * Planet->SplitDistance;
 }

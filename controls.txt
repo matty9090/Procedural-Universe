@@ -1,0 +1,12 @@
+Controls
+
+Master
+  x  - Switch between Sandbox and NBody Sim
+
+Sandbox
+  F1 - Toggle show closest object
+  F2 - Toggle post processing
+  F3 - Toggle wireframe
+  F4 - Toggle star system orbits
+  F5 - Freeze transitions
+  F6 - Toggle UI
