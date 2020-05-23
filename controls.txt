@@ -1,9 +1,12 @@
 Controls
 
 Master
+  Mouse - Pan around the simulation
   x  - Switch between Sandbox and NBody Sim
 
 Sandbox
+  Mouse - Change direction
+  WASD - Move around
   F1 - Toggle show closest object
   F2 - Toggle post processing
   F3 - Toggle wireframe
