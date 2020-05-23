@@ -76,6 +76,7 @@ public:
     SandboxTarget* Parent = nullptr;
     std::unique_ptr<SandboxTarget> Child = nullptr;
 
+    bool Enable = true;
     float BeginTransitionDist = 1000.0f;
     float EndTransitionDist = 400.0f;
     

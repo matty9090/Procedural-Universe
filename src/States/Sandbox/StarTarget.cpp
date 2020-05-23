@@ -37,7 +37,7 @@ StarTarget::StarTarget(ID3D11DeviceContext* context, DX::DeviceResources* resour
 void StarTarget::Render()
 {
     RenderParentSkybox();
-    Parent->RenderInChildSpace(*Camera, 100.0f / Scale);
+    Parent->RenderInChildSpace(*Camera, 1.0f / (Parent->Scale * Scale));
     RenderLerp();
 
     for (auto& planet : Planets)
@@ -55,8 +55,8 @@ void StarTarget::RenderObjectUI()
 void StarTarget::RenderInChildSpace(const ICamera& cam, float scale)
 {
     RenderParentSkybox();
-    Parent->RenderInChildSpace(cam, scale);
-    RenderLerp(Child->Scale, 0.0f, true);
+    //Star->SetPosition();
+    RenderLerp(scale, 0.0f, true);
 }
 
 void StarTarget::RenderTransitionChild(float t)

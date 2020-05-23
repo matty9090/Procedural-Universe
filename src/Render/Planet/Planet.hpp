@@ -114,7 +114,7 @@ public:
     uint64_t Seed;
     ICamera& Camera;
     float Radius = 50.0f;
-    float SplitDistance = 200.0f;
+    float SplitDistance = 2000.0f;
     std::string Name = "Planet";
 
     DirectX::SimpleMath::Vector3 LightSource;

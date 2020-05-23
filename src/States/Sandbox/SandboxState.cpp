@@ -124,6 +124,9 @@ void SandboxState::Update(float dt)
     if (Tracker.IsKeyReleased(DirectX::Keyboard::F5))
         FreezeTransitions = !FreezeTransitions;
 
+    if (Tracker.IsKeyReleased(DirectX::Keyboard::F6))
+        ShowUI = !ShowUI;
+
     FloatingOrigin();
 
     if (!FreezeTransitions)
@@ -186,7 +189,10 @@ void SandboxState::Render()
     Context->OMSetDepthStencilState(CommonStates->DepthDefault(), 0);
     Context->PSSetSamplers(0, 1, &sampler);
 
-    RenderUI();
+    if (ShowUI)
+    {
+        RenderUI();
+    }
 
     if (bShowClosestObject)
     {
@@ -384,7 +390,7 @@ void SandboxState::TransitionLogic()
                 LOGM("Ending up transition from " + CurrentTarget->Child->Name + " to " + CurrentTarget->Name)
             }
             // End transition down
-            else if (scaledDistToObject < 0.0f)
+            else if (scaledDistToObject < 0.0f && CurrentTarget->Child->Enable)
             {
                 // Parent stops rendering
                 // Current target becomes child and starts rendering normally
@@ -405,7 +411,7 @@ void SandboxState::TransitionLogic()
             // In transition
             else
             {
-                CurrentTransitionT = Maths::Lerp(CurrentTarget->Child->Scale, 1.0f, scaledDistToObject);
+                CurrentTransitionT = Maths::Clamp(Maths::Lerp(CurrentTarget->Child->Scale, 1.0f, scaledDistToObject), CurrentTarget->Child->Scale, 1.0f);
                 Camera->VelocityScale = CurrentTransitionT;
             }
         }

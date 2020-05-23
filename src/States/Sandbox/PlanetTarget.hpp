@@ -29,20 +29,6 @@ private:
     void OnEndTransitionDownChild() override { /*Planet->SetScale(1.0f / Scale);*/ }
     void StateIdle(float dt) override;
 
-    struct PlanetConstantBuffer
-    {
-        Vector3 LightDir;
-        float Lerp;
-    };
-
     size_t CurrentClosestObjectID;
     std::unique_ptr<CPlanet> Planet;
-
-    RenderView ParticleRenderTarget;
-    RenderPipeline StarPipeline;
-
-    std::vector<Particle> Particles;
-    std::unique_ptr<CPostProcess> PostProcess;
-    std::unique_ptr<DirectX::CommonStates> CommonStates;
-    std::unique_ptr<ConstantBuffer<PlanetConstantBuffer>> PlanetBuffer;
 };

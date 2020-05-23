@@ -75,6 +75,7 @@ private:
     Vector3 TravelStartPos, TravelTarget;
     Quaternion TravelRotStart, TravelRotEnd;
 
+    bool ShowUI = false;
     bool FreezeTransitions = false;
     float CamOriginSnapThreshold = 5000.0f;
     float CurrentTransitionT = 0.0f;

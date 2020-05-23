@@ -15,6 +15,8 @@ public:
     void SetPosition(DirectX::SimpleMath::Vector3 position) { Sphere->SetPosition(position); }
     void Move(DirectX::SimpleMath::Vector3 v) { Sphere->Move(v); }
 
+    DirectX::SimpleMath::Vector3 GetPosition() const { return Sphere->GetPosition(); }
+
 private:
     struct Vertex
     {

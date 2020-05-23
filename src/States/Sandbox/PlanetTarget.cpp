@@ -13,16 +13,14 @@ PlanetTarget::PlanetTarget(ID3D11DeviceContext* context, DX::DeviceResources* re
     ObjectScale = 0.0f;
     BeginTransitionDist = 12.0f;
     EndTransitionDist = 0.6f;
+    Enable = false;
     RenderParentInChildSpace = true;
 
     auto vp = Resources->GetScreenViewport();
     unsigned int width = static_cast<size_t>(vp.Width);
     unsigned int height = static_cast<size_t>(vp.Height);
 
-    PostProcess = std::make_unique<CPostProcess>(Device, Context, width, height);
-    CommonStates = std::make_unique<DirectX::CommonStates>(Device);
     Planet = std::make_unique<CPlanet>(Context, *Camera);
-    PlanetBuffer = std::make_unique<ConstantBuffer<PlanetConstantBuffer>>(Device);
 }
 
 void PlanetTarget::Render()
@@ -30,7 +28,7 @@ void PlanetTarget::Render()
     auto dsv = Resources->GetDepthStencilView();
     Context->OMSetRenderTargets(1, &RenderTarget, dsv);
 
-    Parent->RenderInChildSpace(*Camera, 200.0f / Scale);
+    Parent->RenderInChildSpace(*Camera, 1.0f / (Parent->Scale * Scale));
     Planet->Render();
 }
 
